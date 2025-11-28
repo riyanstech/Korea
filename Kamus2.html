@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPS-TOPIK Study Hub - Modern Design</title>
+    <!-- Load Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Deep Purple Gradient */
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #1f2937;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Container Full Screen */
+        #app {
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0 !important; 
+            overflow: hidden;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: #818cf8;
+        }
+
+        /* Navigation Styles */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #4b5563;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+        }
+
+        .nav-link.active {
+            background-color: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Mobile Menu Transition */
+        #mobile-menu {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        #mobile-menu.open {
+            max-height: 400px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Chat Bubbles */
+        .user-message {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border-radius: 20px 20px 4px 20px;
+        }
+        .ai-message {
+            background: white;
+            color: #374151;
+            border-radius: 20px 20px 20px 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* Phone Call Animations */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(99, 102, 241, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        
+        .avatar-pulse {
+            animation: pulse-ring 2s infinite;
+        }
+
+        .avatar-speaking {
+             animation: pulse-ring 1s infinite;
+             box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7) !important;
+        }
+
+        .avatar-error {
+            border-color: #ef4444 !important; /* Red border */
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+
+    <!-- Main App Container -->
+    <div id="app" class="glass-panel flex flex-col">
+        
+        <!-- Header & Navigation -->
+        <header class="p-4 md:p-6 border-b border-white/50 bg-white/40 sticky top-0 z-50 backdrop-blur-md">
+            <div class="flex justify-between items-center max-w-7xl mx-auto">
+                <!-- Logo / Title -->
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-lg">
+                        <i data-lucide="book-open" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-800 tracking-tight leading-none">EPS-TOPIK</h1>
+                        <p class="text-xs text-gray-600 font-medium">Study Hub</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation (Visible on MD+) -->
+                <nav class="hidden md:flex gap-2">
+                    <button class="nav-link active" onclick="showTab('vocab-textbook', this)">
+                        <i data-lucide="book-open-text" class="w-4 h-4 mr-2"></i>Kosakata
+                    </button>
+                    <button class="nav-link" onclick="showTab('hangeul', this)">
+                        <i data-lucide="scan" class="w-4 h-4 mr-2"></i>Hangeul
+                    </button>
+                    <button class="nav-link" onclick="showTab('grammar', this)">
+                        <i data-lucide="book-open-check" class="w-4 h-4 mr-2"></i>Tata Bahasa
+                    </button>
+                    <button class="nav-link" onclick="showTab('chat-ai', this)">
+                        <i data-lucide="message-square-heart" class="w-4 h-4 mr-2"></i>Chat AI
+                    </button>
+                </nav>
+
+                <!-- Mobile Burger Button (Visible on small screens) -->
+                <button id="burger-btn" onclick="toggleMenu()" class="md:hidden p-2 text-gray-700 hover:bg-white/50 rounded-lg transition">
+                    <i data-lucide="menu" class="w-7 h-7"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Navigation Menu (Dropdown) -->
+            <div id="mobile-menu" class="flex flex-col gap-2 md:hidden px-1 max-w-7xl mx-auto">
+                <button class="nav-link w-full active" onclick="showTab('vocab-textbook', this)">
+                    <i data-lucide="book-open-text" class="w-5 h-5 mr-3"></i>Kosakata Textbook
+                </button>
+                <button class="nav-link w-full" onclick="showTab('hangeul', this)">
+                    <i data-lucide="scan" class="w-5 h-5 mr-3"></i>Hangeul & Pelafalan
+                </button>
+                <button class="nav-link w-full" onclick="showTab('grammar', this)">
+                    <i data-lucide="book-open-check" class="w-5 h-5 mr-3"></i>Tata Bahasa
+                </button>
+                <button class="nav-link w-full" onclick="showTab('chat-ai', this)">
+                    <i data-lucide="message-square-heart" class="w-5 h-5 mr-3"></i>Chat AI Praktik
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow overflow-y-auto custom-scroll p-4 md:p-8 bg-white/30 relative">
+            
+            <div class="max-w-7xl mx-auto">
+            <!-- 1. Kosakata Textbook -->
+            <div id="vocab-textbook" class="tab-content animate-fade-in space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Kosakata Textbook 2024</h2>
+                        <p class="text-gray-500 text-sm">Persiapan ujian EPS-TOPIK per bab.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <select id="vocab-chapter-filter" onchange="filterVocabTextbook()" class="p-2.5 rounded-xl border-0 ring-1 ring-gray-200 bg-white/80 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
+                            <option value="">Semua Bab</option>
+                            <option value="Bab 1">Bab 1: Perkenalan</option>
+                            <option value="Bab 2">Bab 2: Barang</option>
+                        </select>
+                        <div class="relative w-full sm:w-64">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                            <input type="text" id="vocab-textbook-search" oninput="filterVocabTextbook()" placeholder="Cari kata..." class="w-full pl-9 p-2.5 rounded-xl border-0 ring-1 ring-gray-200 bg-white/80 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4">
+                    <!-- Vocab rendered here -->
+                </div>
+            </div>
+
+            <!-- 2. Hangeul -->
+            <div id="hangeul" class="tab-content hidden animate-fade-in space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Belajar Hangeul</h2>
+                    <p class="text-gray-500 text-sm">Klik kartu untuk mendengarkan. Perhatikan bunyi <b>Awal</b> (depan) dan <b>Akhir</b> (Batchim).</p>
+                </div>
+                <div id="hangeul-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 pb-8">
+                    <!-- Hangeul rendered here -->
+                </div>
+            </div>
+
+            <!-- 3. Grammar -->
+            <div id="grammar" class="tab-content hidden animate-fade-in space-y-6">
+                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Tata Bahasa</h2>
+                        <p class="text-gray-500 text-sm">Struktur kalimat dasar hingga menengah.</p>
+                    </div>
+                    <div class="relative w-full md:w-64">
+                         <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                        <input type="text" id="grammar-search" oninput="filterGrammar()" placeholder="Cari grammar..." class="w-full pl-9 p-2.5 rounded-xl border-0 ring-1 ring-gray-200 bg-white/80 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
+                    </div>
+                </div>
+                <div id="grammar-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Grammar rendered here -->
+                </div>
+            </div>
+
+            <!-- 4. Chat AI -->
+            <div id="chat-ai" class="tab-content hidden animate-fade-in h-full flex flex-col">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-2xl font-bold text-gray-800">Tutor AI Korea</h2>
+                    <div class="flex gap-2 items-center">
+                         
+                        <!-- Call Mode Button -->
+                        <button onclick="startCallMode()" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm flex items-center shadow-md hover:bg-indigo-700 transition">
+                            <i data-lucide="phone-call" class="w-4 h-4 mr-2"></i> Call Mode
+                        </button>
+
+                        <button onclick="resetChat()" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition" title="Reset Chat">
+                            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings Bar -->
+                 <div class="flex flex-wrap gap-2 mb-2 bg-white/50 p-2 rounded-lg border border-gray-100">
+                    <select id="ai-mode" class="p-1.5 rounded-md text-sm bg-white border border-gray-200 focus:outline-none focus:border-pink-500 font-medium text-pink-700" onchange="resetChat()">
+                        <option value="conversation">Mode: Percakapan Santai</option>
+                        <option value="tutor">Mode: Tutor (Koreksi)</option>
+                    </select>
+
+                    <select id="ai-level" class="p-1.5 rounded-md text-sm bg-white border border-gray-200 focus:outline-none focus:border-indigo-500" onchange="resetChat()">
+                        <option value="Pemula">Level: Pemula</option>
+                        <option value="Dasar">Level: Dasar</option>
+                        <option value="Menengah">Level: Menengah</option>
+                    </select>
+                </div>
+
+                <div id="chat-box" class="flex-grow bg-white/60 rounded-2xl p-4 overflow-y-auto custom-scroll space-y-4 shadow-inner border border-gray-100 mb-4 h-[50vh]">
+                     <!-- Initial Message is set by resetChat() -->
+                </div>
+
+                <!-- Chat Input Area -->
+                <div class="relative">
+                    <div id="loading-indicator" class="hidden absolute -top-8 left-0 text-xs text-indigo-600 font-semibold flex items-center">
+                        <i data-lucide="loader-2" class="w-3 h-3 animate-spin mr-1"></i> Mengetik...
+                    </div>
+                    <div id="error-message" class="hidden absolute -top-10 left-0 right-0 bg-red-100 text-red-600 text-xs p-2 rounded-lg text-center border border-red-200"></div>
+
+                    <div class="flex gap-2">
+                        <input type="text" id="user-input" class="flex-grow p-4 rounded-xl border-0 ring-1 ring-gray-200 focus:ring-2 focus:ring-indigo-500 shadow-lg outline-none transition" placeholder="Tulis pesan..." onkeydown="handleChatEnter(event)">
+                        <button onclick="sendMessage()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- CALL MODE OVERLAY -->
+    <div id="call-modal" class="fixed inset-0 bg-gray-900/95 z-[60] hidden flex flex-col items-center justify-center text-white backdrop-blur-xl transition-all duration-300">
+        <div class="absolute top-6 right-6">
+            <button onclick="endCallMode()" class="bg-gray-800 p-3 rounded-full hover:bg-gray-700 transition" title="Tutup">
+                <i data-lucide="x" class="w-6 h-6 text-white"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-col items-center space-y-8 w-full max-w-md px-6">
+            <!-- Avatar & Animation -->
+            <div class="relative">
+                <div id="avatar-ring" class="absolute inset-0 rounded-full bg-indigo-500 opacity-20 transform scale-150"></div>
+                <div id="avatar-circle" class="w-32 h-32 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl relative z-10 border-4 border-white/20 transition-colors">
+                    <i data-lucide="bot" class="w-16 h-16 text-white"></i>
+                </div>
+            </div>
+
+            <!-- Status Text -->
+            <div class="text-center space-y-2">
+                <h2 id="call-status" class="text-2xl font-bold tracking-wide">Menghubungkan...</h2>
+                <div id="live-transcript" class="min-h-[64px] flex items-center justify-center text-center text-indigo-200 text-lg font-['Noto_Sans_KR'] px-4 mt-2 w-full leading-relaxed">
+                    ...
+                </div>
+            </div>
+
+            <!-- Controls (Single Big Button) -->
+            <div class="flex flex-col items-center gap-6 mt-4 w-full">
+                <!-- Main Talk Button -->
+                <button id="main-talk-btn" onclick="toggleMic()" class="group relative flex items-center justify-center gap-3 px-8 py-5 rounded-full transition-all duration-300 transform active:scale-95 shadow-2xl w-full max-w-[280px] bg-red-500 hover:bg-red-600 text-white">
+                    <i id="btn-icon" data-lucide="mic-off" class="w-6 h-6"></i>
+                    <span id="btn-text" class="font-bold text-lg tracking-wide">Mic Mati</span>
+                </button>
+                
+                <!-- Helper Text / Exit -->
+                <button onclick="endCallMode()" class="text-white/40 text-sm hover:text-white transition">
+                    Akhiri Panggilan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // ==========================================
+        // UI LOGIC (Responsive Menu)
+        // ==========================================
+        
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const btn = document.getElementById('burger-btn');
+            
+            if (menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                // Change back to menu icon
+                btn.innerHTML = '<i data-lucide="menu" class="w-7 h-7"></i>';
+            } else {
+                menu.classList.add('open');
+                // Change to X icon
+                btn.innerHTML = '<i data-lucide="x" class="w-7 h-7"></i>';
+            }
+            // Re-render icons for the new element
+            lucide.createIcons();
+        }
+
+        function showTab(tabId, element) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Handle Active State for Buttons (Desktop & Mobile)
+            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+            
+            // Since we have duplicate buttons (mobile & desktop), activate both corresponding buttons
+            // In a real app we might bind by ID, but simple class matching works here
+            const textContent = element.textContent.trim();
+            document.querySelectorAll('.nav-link').forEach(btn => {
+                if(btn.textContent.trim() === textContent) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Close mobile menu if open
+            const menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('open')) {
+                toggleMenu();
+            }
+
+            if (tabId === 'vocab-textbook') filterVocabTextbook();
+        }
+
+        // ==========================================
+        // DATA
+        // ==========================================
+        const hangeulData = [
+            // --- KONSONAN DASAR ---
+            { hangeul: "ㄱ", rom: "g/k", type: "Konsonan Dasar", awal: "G", akhir: "K" },
+            { hangeul: "ㄴ", rom: "n", type: "Konsonan Dasar", awal: "N", akhir: "N" },
+            { hangeul: "ㄷ", rom: "d/t", type: "Konsonan Dasar", awal: "D", akhir: "T" },
+            { hangeul: "ㄹ", rom: "r/l", type: "Konsonan Dasar", awal: "R/L", akhir: "L" },
+            { hangeul: "ㅁ", rom: "m", type: "Konsonan Dasar", awal: "M", akhir: "M" },
+            { hangeul: "ㅂ", rom: "b/p", type: "Konsonan Dasar", awal: "B", akhir: "P" },
+            { hangeul: "ㅅ", rom: "s", type: "Konsonan Dasar", awal: "S", akhir: "T" },
+            { hangeul: "ㅇ", rom: "-/ng", type: "Konsonan Dasar", awal: "-", akhir: "NG" },
+            { hangeul: "ㅈ", rom: "j", type: "Konsonan Dasar", awal: "J", akhir: "T" },
+            { hangeul: "ㅊ", rom: "ch", type: "Konsonan Dasar", awal: "CH", akhir: "T" },
+            { hangeul: "ㅋ", rom: "k", type: "Konsonan Dasar", awal: "K", akhir: "K" },
+            { hangeul: "ㅌ", rom: "t", type: "Konsonan Dasar", awal: "T", akhir: "T" },
+            { hangeul: "ㅍ", rom: "p", type: "Konsonan Dasar", awal: "P", akhir: "P" },
+            { hangeul: "ㅎ", rom: "h", type: "Konsonan Dasar", awal: "H", akhir: "T" },
+
+            // --- KONSONAN RANGKAP ---
+            { hangeul: "ㄲ", rom: "kk", type: "Konsonan Rangkap", awal: "K (Kuat)", akhir: "K" },
+            { hangeul: "ㄸ", rom: "tt", type: "Konsonan Rangkap", awal: "T (Kuat)", akhir: "-" },
+            { hangeul: "ㅃ", rom: "pp", type: "Konsonan Rangkap", awal: "P (Kuat)", akhir: "-" },
+            { hangeul: "ㅆ", rom: "ss", type: "Konsonan Rangkap", awal: "S (Kuat)", akhir: "T" },
+            { hangeul: "ㅉ", rom: "jj", type: "Konsonan Rangkap", awal: "J (Kuat)", akhir: "-" },
+
+            // --- VOKAL DASAR ---
+            { hangeul: "ㅏ", rom: "a", type: "Vokal Dasar" },
+            { hangeul: "ㅑ", rom: "ya", type: "Vokal Dasar" },
+            { hangeul: "ㅓ", rom: "eo", type: "Vokal Dasar" },
+            { hangeul: "ㅕ", rom: "yeo", type: "Vokal Dasar" },
+            { hangeul: "ㅗ", rom: "o", type: "Vokal Dasar" },
+            { hangeul: "ㅛ", rom: "yo", type: "Vokal Dasar" },
+            { hangeul: "ㅜ", rom: "u", type: "Vokal Dasar" },
+            { hangeul: "ㅠ", rom: "yu", type: "Vokal Dasar" },
+            { hangeul: "ㅡ", rom: "eu", type: "Vokal Dasar" },
+            { hangeul: "ㅣ", rom: "i", type: "Vokal Dasar" },
+
+            // --- VOKAL RANGKAP / GABUNGAN ---
+            { hangeul: "ㅐ", rom: "ae", type: "Vokal Rangkap" },
+            { hangeul: "ㅒ", rom: "yae", type: "Vokal Rangkap" },
+            { hangeul: "ㅔ", rom: "e", type: "Vokal Rangkap" },
+            { hangeul: "ㅖ", rom: "ye", type: "Vokal Rangkap" },
+            { hangeul: "ㅘ", rom: "wa", type: "Vokal Rangkap" },
+            { hangeul: "ㅙ", rom: "wae", type: "Vokal Rangkap" },
+            { hangeul: "ㅚ", rom: "oe", type: "Vokal Rangkap" },
+            { hangeul: "ㅝ", rom: "wo", type: "Vokal Rangkap" },
+            { hangeul: "ㅞ", rom: "we", type: "Vokal Rangkap" },
+            { hangeul: "ㅟ", rom: "wi", type: "Vokal Rangkap" },
+            { hangeul: "ㅢ", rom: "ui", type: "Vokal Rangkap" }
+        ];
+
+        const vocabTextbookData = [
+            { bab: "Bab 1", hangeul: "한국", rom: "hanguk", arti: "Korea Selatan" },
+            { bab: "Bab 1", hangeul: "인도네시아", rom: "indonesi-a", arti: "Indonesia" },
+            { bab: "Bab 1", hangeul: "학생", rom: "haksaeng", arti: "Pelajar" },
+            { bab: "Bab 1", hangeul: "선생님", rom: "seonsaengnim", arti: "Guru" },
+            { bab: "Bab 1", hangeul: "회사원", rom: "hoesawon", arti: "Karyawan" },
+            { bab: "Bab 1", hangeul: "이름", rom: "ireum", arti: "Nama" },
+            { bab: "Bab 1", hangeul: "직업", rom: "jigeop", arti: "Pekerjaan" },
+            { bab: "Bab 2", hangeul: "시계", rom: "sigye", arti: "Jam" },
+            { bab: "Bab 2", hangeul: "가방", rom: "gabang", arti: "Tas" },
+            { bab: "Bab 2", hangeul: "책상", rom: "chaeksang", arti: "Meja" },
+            { bab: "Bab 2", hangeul: "침대", rom: "chimdae", arti: "Kasur" },
+            { bab: "Bab 2", hangeul: "우산", rom: "usan", arti: "Payung" },
+            { bab: "Bab 2", hangeul: "열쇠", rom: "yeolsoe", arti: "Kunci" },
+            { bab: "Bab 2", hangeul: "지갑", rom: "jigap", arti: "Dompet" }
+        ];
+
+        const grammarData = [
+            {
+                struktur: "~입니다 / ~입니까?",
+                arti: "Adalah / Apakah (Formal)",
+                fungsi: "Menyatakan identitas/status (Sopan Formal).",
+                contoh: "저는 학생입니다.",
+                arti_contoh: "Saya adalah pelajar."
+            },
+            {
+                struktur: "이/가 (Partikel Subjek)",
+                arti: "Penanda Subjek",
+                fungsi: "Menunjukkan subjek kalimat.",
+                contoh: "날씨가 좋습니다.",
+                arti_contoh: "Cuacanya bagus."
+            },
+            {
+                struktur: "~(으)세요",
+                arti: "Silakan / Tolong",
+                fungsi: "Perintah sopan.",
+                contoh: "앉으세요.",
+                arti_contoh: "Silakan duduk."
+            },
+            {
+                struktur: "~고 싶어요",
+                arti: "Ingin...",
+                fungsi: "Menyatakan keinginan.",
+                contoh: "가고 싶어요.",
+                arti_contoh: "Saya ingin pergi."
+            }
+        ];
+
+        // ==========================================
+        // RENDER FUNCTIONS
+        // ==========================================
+
+        function speak(text, lang = 'ko-KR', onEndCallback = null) {
+            if (!'speechSynthesis' in window) return;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            // Increased rate slightly for faster feeling
+            utterance.rate = 1.1; 
+            
+            if (onEndCallback) {
+                utterance.onend = onEndCallback;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function renderHangeul() {
+            const container = document.getElementById('hangeul-grid');
+            
+            // Group data by Type
+            const grouped = hangeulData.reduce((acc, item) => {
+                if (!acc[item.type]) acc[item.type] = [];
+                acc[item.type].push(item);
+                return acc;
+            }, {});
+
+            let html = '';
+            
+            // Define order for display
+            const order = ['Konsonan Dasar', 'Konsonan Rangkap', 'Vokal Dasar', 'Vokal Rangkap'];
+            
+            order.forEach(type => {
+                if (grouped[type]) {
+                    // Start a new row for the header
+                    html += `<div class="col-span-full mt-4 mb-2"><h3 class="text-lg font-bold text-indigo-700 border-b border-indigo-100 pb-1">${type}</h3></div>`;
+                    
+                    grouped[type].forEach(item => {
+                        // Check if it has Awal/Akhir details
+                        const details = item.awal ? 
+                            `<div class="grid grid-cols-2 gap-1 w-full text-[10px] sm:text-xs text-gray-500 mt-2 bg-gray-50 rounded p-1">
+                                <div class="text-center border-r border-gray-200">
+                                    <span class="block text-[9px] text-gray-400">Awal</span>
+                                    <span class="font-bold text-indigo-600">${item.awal}</span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="block text-[9px] text-gray-400">Akhir</span>
+                                    <span class="font-bold text-pink-600">${item.akhir}</span>
+                                </div>
+                            </div>` : 
+                            `<div class="mt-2 text-xs font-medium text-gray-500">${item.rom}</div>`;
+
+                        html += `
+                        <div class="glass-card p-3 flex flex-col items-center justify-between cursor-pointer hover:bg-white text-center group h-full transition-all duration-200" onclick="speak('${item.hangeul}')">
+                            <div class="flex-grow flex items-center justify-center">
+                                <span class="text-3xl sm:text-4xl font-black text-gray-800 font-['Noto_Sans_KR'] group-hover:text-indigo-600 transition-colors">${item.hangeul}</span>
+                            </div>
+                            ${details}
+                        </div>
+                        `;
+                    });
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderVocab(data) {
+            const container = document.getElementById('vocab-textbook-list');
+            if (data.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-gray-400 bg-white/50 rounded-2xl border border-dashed border-gray-300">Tidak ada data.</div>`;
+                return;
+            }
+
+            // Group by Chapter
+            const grouped = data.reduce((acc, item) => {
+                if (!acc[item.bab]) acc[item.bab] = [];
+                acc[item.bab].push(item);
+                return acc;
+            }, {});
+
+            let html = '';
+            for (const [bab, items] of Object.entries(grouped)) {
+                html += `
+                    <div class="bg-indigo-50/50 p-2 rounded-lg mb-2">
+                        <h3 class="font-bold text-indigo-700 ml-2 mb-2 flex items-center"><i data-lucide="bookmark" class="w-4 h-4 mr-2"></i>${bab}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${items.map(item => `
+                                <div class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center hover:shadow-md transition">
+                                    <div>
+                                        <div class="text-lg font-bold text-gray-800 font-['Noto_Sans_KR']">${item.hangeul}</div>
+                                        <div class="text-xs text-gray-400">${item.rom}</div>
+                                        <div class="text-sm font-medium text-gray-600 mt-1">${item.arti}</div>
+                                    </div>
+                                    <button class="p-2 bg-indigo-100 text-indigo-600 rounded-full hover:bg-indigo-600 hover:text-white transition" onclick="speak('${item.hangeul}')">
+                                        <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function filterVocabTextbook() {
+            const chapter = document.getElementById('vocab-chapter-filter').value;
+            const search = document.getElementById('vocab-textbook-search').value.toLowerCase();
+            const filtered = vocabTextbookData.filter(item => {
+                const matchBab = chapter === '' || item.bab === chapter;
+                const matchText = item.hangeul.includes(search) || item.rom.includes(search) || item.arti.toLowerCase().includes(search);
+                return matchBab && matchText;
+            });
+            renderVocab(filtered);
+        }
+
+        function renderGrammar(data) {
+            const container = document.getElementById('grammar-list');
+            container.innerHTML = data.map(item => `
+                <div class="glass-card p-5 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-indigo-100 to-transparent rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:opacity-100 transition"></div>
+                    <div class="relative z-10">
+                        <h3 class="text-xl font-bold text-indigo-600 font-['Noto_Sans_KR'] mb-1">${item.struktur}</h3>
+                        <p class="text-sm font-bold text-gray-700 mb-2">${item.arti}</p>
+                        <p class="text-sm text-gray-500 mb-4 leading-relaxed">${item.fungsi}</p>
+                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <div class="flex justify-between items-start">
+                                <p class="text-indigo-800 font-medium font-['Noto_Sans_KR']">${item.contoh}</p>
+                                <button onclick="speak('${item.contoh}')" class="text-gray-400 hover:text-indigo-600"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
+                            </div>
+                            <p class="text-xs text-gray-500 italic mt-1">${item.arti_contoh}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function filterGrammar() {
+            const query = document.getElementById('grammar-search').value.toLowerCase();
+            const filtered = grammarData.filter(item => 
+                item.struktur.toLowerCase().includes(query) || 
+                item.arti.toLowerCase().includes(query)
+            );
+            renderGrammar(filtered);
+        }
+
+        // ==========================================
+        // CHAT AI LOGIC
+        // ==========================================
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=";
+        const API_KEY = "AIzaSyCbQplcfyTVBQdiTLFiYOc_V9xEUhuXxI4"; 
+        let chatHistory = [];
+        let isTyping = false;
+
+        // Function untuk membuat pesan awal berdasarkan mode
+        function getInitialMessage(mode, level) {
+            if (mode === 'tutor') {
+                return `Annyeonghaseyo! 👋<br>Saya adalah tutor Korea Anda (Level ${level}). Mari kita berlatih. Saya akan mengoreksi dan memberi penjelasan.`;
+            } else {
+                return `Annyeong! 😊<br>Aku adalah teman bicara Koreamu (Level ${level}). Mari kita ngobrol santai tentang apa saja! Aku akan berusaha membalas seperti teman biasa.`;
+            }
+        }
+
+        function addMessage(text, sender) {
+            const chatBox = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = sender === 'user' 
+                ? 'user-message self-end p-3 max-w-[85%] shadow-md text-sm md:text-base animate-fade-in ml-auto' 
+                : "ai-message self-start p-3 max-w-[85%] shadow-sm text-sm md:text-base font-['Noto_Sans_KR'] animate-fade-in mr-auto";
+            div.innerHTML = text.replace(/\n/g, '<br>');
+            chatBox.appendChild(div);
+            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+        }
+
+        function handleChatEnter(e) { if(e.key === 'Enter') sendMessage(); }
+
+        function resetChat() {
+            chatHistory = [];
+            const mode = document.getElementById('ai-mode').value;
+            const level = document.getElementById('ai-level').value;
+            const initialMessage = getInitialMessage(mode, level);
+
+            document.getElementById('chat-box').innerHTML = `<div class="ai-message self-start p-3 max-w-[85%] shadow-sm font-['Noto_Sans_KR']">${initialMessage}</div>`;
+            document.getElementById('error-message').classList.add('hidden');
+        }
+
+        function getSystemPrompt() {
+            const mode = document.getElementById('ai-mode').value;
+            const level = document.getElementById('ai-level').value;
+
+            let prompt = "";
+            if (mode === 'tutor') {
+                prompt = `Anda adalah Tutor Bahasa Korea formal (Level: ${level}). Balas pesan pengguna dalam bahasa Korea sesuai level yang diminta. Setelah membalas, jika ditemukan kesalahan dalam input pengguna, berikan koreksi dan penjelasan singkat dalam bahasa Indonesia. Jika input pengguna benar, cukup balas. Jangan gunakan emoji berlebihan.`;
+            } else {
+                // Mode Conversation: Menyenangkan, emosional, seperti teman biasa
+                prompt = `Anda adalah teman bicara (native speaker) Korea yang sangat ramah, suportif, dan menyenangkan (Level: ${level}). Balas pesan pengguna dalam bahasa Korea informal (반말 atau bentuk sopan tergantung konteks dan level) dan gunakan emoji yang sering dipakai dalam chat santai. Jangan terlalu fokus pada koreksi tata bahasa, utamakan kelancaran dan respon yang terasa alami dan emosional seperti manusia pada umumnya. Tanggapi topik apa pun yang dibawa pengguna.`;
+            }
+
+            // Tambahkan instruksi khusus jika dalam mode panggilan suara
+            if (isInCallMode) {
+                prompt += " PENTING: Anda sedang dalam mode 'Telepon Suara'. Berikan respons yang singkat (maksimal 2 kalimat), natural untuk diucapkan, dan mudah dipahami saat didengar. Hindari penggunaan emoji atau formatting (bold/italic) karena teks akan dibacakan oleh mesin Text-to-Speech.";
+            }
+
+            return prompt;
+        }
+
+        async function sendMessage(manualText = null, isVoice = false) {
+            if (isTyping) return;
+            const input = document.getElementById('user-input');
+            const text = manualText || input.value.trim();
+            if (!text) return;
+
+            isTyping = true;
+            if(!manualText) input.value = '';
+            input.disabled = true;
+            document.getElementById('loading-indicator').classList.remove('hidden');
+            
+            addMessage(text, 'user');
+            chatHistory.push({ role: "user", parts: [{ text: text }] });
+
+            const systemPrompt = getSystemPrompt();
+
+            try {
+                const response = await fetch(GEMINI_API_URL + API_KEY, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: chatHistory,
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
+
+                if (!response.ok) throw new Error("API Error");
+                const data = await response.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, terjadi kesalahan pada AI. Mohon coba lagi.";
+                
+                addMessage(reply, 'ai');
+                chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                document.getElementById('error-message').classList.add('hidden');
+
+                // Jika mode suara, bacakan teks
+                if (isVoice) {
+                    updateCallStatus("Berbicara...", "AI sedang merespon");
+                    document.getElementById('avatar-ring').classList.add('avatar-speaking');
+                    document.getElementById('avatar-ring').classList.remove('avatar-pulse');
+                    
+                    isAiSpeaking = true; // Set flag
+                    speak(reply, 'ko-KR', () => {
+                        // Setelah AI selesai bicara, mulai dengarkan lagi
+                        document.getElementById('avatar-ring').classList.remove('avatar-speaking');
+                        isAiSpeaking = false;
+                        if (isInCallMode) {
+                            startListening();
+                        }
+                    });
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('error-message').textContent = "Gagal terhubung ke AI. Coba lagi.";
+                document.getElementById('error-message').classList.remove('hidden');
+            } finally {
+                isTyping = false;
+                input.disabled = false;
+                document.getElementById('loading-indicator').classList.add('hidden');
+                if(!isInCallMode) input.focus();
+            }
+        }
+
+        // ==========================================
+        // VOICE CALL FEATURE
+        // ==========================================
+        let isInCallMode = false;
+        let recognition = null;
+        let isMicOn = true;
+        let isAiSpeaking = false; // Add flag to prevent listening while AI speaks
+
+        async function checkAudioAvailability() {
+            try {
+                // Check if browser supports mediaDevices
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    return false;
+                }
+                // Try to open stream briefly to trigger permission/check hardware
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop()); // Close stream immediately
+                return true;
+            } catch (err) {
+                console.warn("Audio check failed:", err);
+                return false;
+            }
+        }
+
+        async function startCallMode() {
+            // Check browser support
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Maaf, browser Anda tidak mendukung fitur Voice Call. Gunakan Google Chrome.");
+                return;
+            }
+
+            document.getElementById('call-modal').classList.remove('hidden');
+            updateCallStatus("Memeriksa Audio...", "Harap tunggu...");
+            document.getElementById('avatar-ring').classList.remove('avatar-pulse');
+
+            // Pre-check microphone availability
+            const hasAudio = await checkAudioAvailability();
+            
+            if (!hasAudio) {
+                 updateCallStatus("Mikrofon Error", "Tidak ada akses mikrofon");
+                 document.getElementById('live-transcript').innerText = "Gagal mendeteksi mikrofon. Pastikan mic terpasang & diizinkan.";
+                 document.getElementById('avatar-circle').classList.add('avatar-error');
+                 isMicOn = false;
+                 updateMicButtonUI();
+                 return; // Stop here, don't start recognition loop
+            }
+
+            isInCallMode = true;
+            isAiSpeaking = false;
+            // Default to ON when starting
+            isMicOn = true;
+            
+            resetChat(); // Start new context
+            
+            // Initialize Recognition
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ko-KR'; // Listen for Korean
+            recognition.continuous = false; // Stop after one sentence
+            recognition.interimResults = true;
+
+            recognition.onstart = () => {
+                updateCallStatus("Mendengarkan...", "Silakan bicara bahasa Korea");
+                document.getElementById('avatar-ring').classList.add('avatar-pulse');
+                document.getElementById('avatar-circle').classList.remove('avatar-error');
+                document.getElementById('live-transcript').innerText = "...";
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0])
+                    .map(result => result.transcript)
+                    .join('');
+
+                document.getElementById('live-transcript').innerText = transcript;
+                
+                if (event.results[0].isFinal) {
+                    // Send to AI immediately
+                    recognition.stop(); // Stop listening immediately to prevent duplicate/echo
+                    updateCallStatus("Memproses...", "AI sedang berpikir");
+                    document.getElementById('avatar-ring').classList.remove('avatar-pulse');
+                    sendMessage(transcript, true);
+                }
+            };
+
+            recognition.onend = () => {
+                // IMPORTANT: Restart logic to fix "sometimes not listening"
+                // Only restart if call is active, mic is user-enabled, AI is NOT processing/typing, and AI is NOT speaking
+                document.getElementById('avatar-ring').classList.remove('avatar-pulse');
+                
+                if (isInCallMode && isMicOn && !isTyping && !isAiSpeaking) {
+                    // Restart gently
+                    setTimeout(() => {
+                        try { recognition.start(); } catch(e){}
+                    }, 500);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.warn("Speech recognition warning:", event.error);
+                document.getElementById('avatar-ring').classList.remove('avatar-pulse');
+
+                if (event.error === 'no-speech') {
+                    // Silence handling: Restart is handled by onend usually, but good to have here
+                } else if (event.error === 'audio-capture') {
+                    updateCallStatus("Mikrofon Error", "Cek koneksi mic");
+                    isMicOn = false;
+                    updateMicButtonUI();
+                } else if (event.error === 'not-allowed') {
+                    updateCallStatus("Izin Ditolak", "Izinkan akses mikrofon");
+                    isMicOn = false;
+                    updateMicButtonUI();
+                }
+            };
+            
+            // Start listening initially
+            setTimeout(() => {
+                updateMicButtonUI(); // Ensure UI matches state
+                startListening();
+            }, 500);
+        }
+
+        function startListening() {
+            if (isInCallMode && recognition && isMicOn && !isAiSpeaking) {
+                try {
+                    recognition.start();
+                } catch (e) {
+                    // Ignore error if already started
+                    // console.log("Recognition already started or error");
+                }
+            }
+        }
+
+        function endCallMode() {
+            isInCallMode = false;
+            document.getElementById('call-modal').classList.add('hidden');
+            if (recognition) recognition.stop();
+            window.speechSynthesis.cancel();
+        }
+
+        function toggleMic() {
+            // Check if mic was disabled due to error, reset error state if user clicks
+            const wasError = document.getElementById('avatar-circle').classList.contains('avatar-error');
+            
+            isMicOn = !isMicOn;
+            
+            if (wasError && isMicOn) {
+                // Try to restart fresh if recovering from error
+                 document.getElementById('avatar-circle').classList.remove('avatar-error');
+                 checkAudioAvailability().then(hasAudio => {
+                     if(hasAudio) {
+                         startListening();
+                         updateMicButtonUI();
+                     } else {
+                         // Failed again
+                         isMicOn = false;
+                         updateMicButtonUI();
+                         alert("Mikrofon masih tidak terdeteksi.");
+                     }
+                 });
+                 return;
+            }
+
+            updateMicButtonUI();
+
+            if (isMicOn) {
+                startListening();
+            } else {
+                if(recognition) recognition.stop();
+                updateCallStatus("Mic Mati", "Aktifkan mic untuk bicara");
+                document.getElementById('avatar-ring').classList.remove('avatar-pulse');
+            }
+        }
+
+        function updateMicButtonUI() {
+            const btn = document.getElementById('main-talk-btn');
+            const icon = document.getElementById('btn-icon');
+            const text = document.getElementById('btn-text');
+
+            if (isMicOn) {
+                // GREEN STATE (Listening)
+                btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                btn.classList.add('bg-green-500', 'hover:bg-green-600');
+                icon.setAttribute('data-lucide', 'mic');
+                text.innerText = "Mendengarkan...";
+            } else {
+                // RED STATE (Muted)
+                btn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                btn.classList.add('bg-red-500', 'hover:bg-red-600');
+                icon.setAttribute('data-lucide', 'mic-off');
+                text.innerText = "Mic Mati / Bicara";
+            }
+            lucide.createIcons();
+        }
+
+        function updateCallStatus(status, substatus) {
+            document.getElementById('call-status').innerText = status;
+            // document.getElementById('call-substatus').innerText = substatus; // Substatus removed for cleaner UI
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderHangeul();
+            renderGrammar(grammarData);
+            filterVocabTextbook();
+            resetChat(); // Panggil resetChat untuk pesan awal yang benar
+        });
+    </script>
+</body>
+</html>
