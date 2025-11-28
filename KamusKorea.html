@@ -148,6 +148,49 @@
             border-color: #ef4444 !important; /* Red border */
             box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
         }
+
+        /* Quiz Button Styles */
+        .quiz-option {
+            transition: all 0.2s;
+            cursor: pointer;
+            user-select: none;
+        }
+        .quiz-option:not(.disabled):hover {
+            transform: translateY(-2px);
+            background-color: #f0fdf4; /* green-50 */
+            border-color: #4ade80; /* green-400 */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .quiz-option.correct {
+            background-color: #dcfce7; /* green-100 */
+            border-color: #22c55e; /* green-500 */
+            color: #15803d;
+            font-weight: 700;
+            pointer-events: none;
+            box-shadow: 0 0 0 2px #22c55e;
+        }
+        .quiz-option.incorrect {
+            background-color: #fee2e2; /* red-100 */
+            border-color: #ef4444; /* red-500 */
+            color: #b91c1c;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .quiz-option.disabled {
+            cursor: default;
+        }
+        
+        /* Progress Bar Animation */
+        .progress-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Modal Backdrop */
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen">
@@ -171,7 +214,7 @@
 
                 <!-- Desktop Navigation (Visible on MD+) -->
                 <nav class="hidden md:flex gap-2">
-                    <button class="nav-link active" onclick="showTab('vocab-textbook', this)">
+                    <button class="nav-link active" onclick="showTab('vocab-container', this)">
                         <i data-lucide="book-open-text" class="w-4 h-4 mr-2"></i>Kosakata
                     </button>
                     <button class="nav-link" onclick="showTab('hangeul', this)">
@@ -193,7 +236,7 @@
 
             <!-- Mobile Navigation Menu (Dropdown) -->
             <div id="mobile-menu" class="flex flex-col gap-2 md:hidden px-1 max-w-7xl mx-auto">
-                <button class="nav-link w-full active" onclick="showTab('vocab-textbook', this)">
+                <button class="nav-link w-full active" onclick="showTab('vocab-container', this)">
                     <i data-lucide="book-open-text" class="w-5 h-5 mr-3"></i>Kosakata Textbook
                 </button>
                 <button class="nav-link w-full" onclick="showTab('hangeul', this)">
@@ -212,47 +255,168 @@
         <main class="flex-grow overflow-y-auto custom-scroll p-4 md:p-8 bg-white/30 relative">
             
             <div class="max-w-7xl mx-auto">
-            <!-- 1. Kosakata Textbook -->
-            <div id="vocab-textbook" class="tab-content animate-fade-in space-y-6">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Kosakata Textbook 2024</h2>
-                        <p class="text-gray-500 text-sm">Persiapan ujian EPS-TOPIK per bab.</p>
-                    </div>
-                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                        <select id="vocab-chapter-filter" onchange="filterVocabTextbook()" class="p-2.5 rounded-xl border-0 ring-1 ring-gray-200 bg-white/80 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
-                            <option value="">Semua</option>
-                            <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
-                            <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
-                            <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
-                            <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
-                            <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
-                            <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
-                            <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
-                            <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
-                            <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
-                            <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
-                            <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
-                            <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
-                            <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
-                            <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
-                            <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
-                            <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
-                            <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
-                            <option value="BAB 18">BAB 18 취미 (Hobi)</option>
-                            <option value="BAB 19">BAB 19 요리 (Memasak)</option>
-                            <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
-                        </select>
-                        <div class="relative w-full sm:w-64">
-                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
-                            <input type="text" id="vocab-textbook-search" oninput="filterVocabTextbook()" placeholder="Cari kata..." class="w-full pl-9 p-2.5 rounded-xl border-0 ring-1 ring-gray-200 bg-white/80 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
+            <!-- 1. Kosakata (Container for Sub-Tabs) -->
+            <div id="vocab-container" class="tab-content animate-fade-in space-y-6">
+
+                <!-- 1.1. Kosakata Textbook (Default View) -->
+                <div id="vocab-textbook" class="vocab-sub-tab space-y-6">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Kosakata Textbook 2024</h2>
+                            <p class="text-gray-500 text-sm">Persiapan ujian EPS-TOPIK per bab.</p>
                         </div>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                            <button onclick="showVocabSubTab('vocab-selection')" class="bg-pink-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center hover:bg-pink-700 transition shadow-md">
+                                <i data-lucide="graduation-cap" class="w-4 h-4 mr-2"></i>Mulai Latihan Hafalan
+                            </button>
+                            <select id="vocab-chapter-filter" onchange="filterVocabTextbook()" class="p-2.5 rounded-xl border-0 ring-1 ring-gray-200 bg-white/80 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
+                                <option value="">Semua</option>
+                                <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
+                                <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
+                                <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
+                                <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
+                                <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
+                                <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
+                                <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
+                                <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
+                                <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
+                                <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
+                                <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
+                                <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
+                                <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
+                                <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
+                                <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
+                                <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
+                                <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
+                                <option value="BAB 18">BAB 18 취미 (Hobi)</option>
+                                <option value="BAB 19">BAB 19 요리 (Memasak)</option>
+                                <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
+                            </select>
+                            <div class="relative w-full sm:w-64">
+                                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                                <input type="text" id="vocab-textbook-search" oninput="filterVocabTextbook()" placeholder="Cari kata..." class="w-full pl-9 p-2.5 rounded-xl border-0 ring-1 ring-gray-200 bg-white/80 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4">
+                        <!-- Vocab rendered here -->
                     </div>
                 </div>
 
-                <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4">
-                    <!-- Vocab rendered here -->
+                <!-- 1.2. Kosakata Selection (New View) -->
+                <div id="vocab-selection" class="vocab-sub-tab hidden space-y-6">
+                    <div class="flex justify-between items-center mb-4">
+                         <h2 class="text-2xl font-bold text-gray-800">Pilih Kosakata untuk Latihan</h2>
+                         <button onclick="showVocabSubTab('vocab-textbook')" class="text-indigo-600 hover:text-indigo-800 flex items-center transition">
+                             <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Kembali ke Daftar
+                         </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="glass-card p-5">
+                            <h3 class="text-xl font-semibold text-indigo-700 mb-4 flex items-center"><i data-lucide="layers-3" class="w-5 h-5 mr-2"></i> Filter Berdasarkan BAB</h3>
+                            <select id="quiz-chapter-filter" onchange="renderQuizSelection()" class="p-3 rounded-xl border-0 ring-1 ring-gray-200 bg-white/80 focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm w-full mb-4">
+                                <option value="">Pilih Bab...</option>
+                                <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
+                                <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
+                                <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
+                                <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
+                                <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
+                                <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
+                                <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
+                                <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
+                                <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
+                                <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
+                                <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
+                                <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
+                                <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
+                                <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
+                                <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
+                                <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
+                                <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
+                                <option value="BAB 18">BAB 18 취미 (Hobi)</option>
+                                <option value="BAB 19">BAB 19 요리 (Memasak)</option>
+                                <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
+                            </select>
+                             <div class="flex justify-between items-center mt-3">
+                                <span id="selection-count" class="text-sm text-gray-500 font-medium">0 kata terpilih</span>
+                                <!-- UPDATED: Better Bulk Selection Buttons -->
+                                <div class="flex gap-2">
+                                    <button onclick="bulkSelectVocab(true)" class="text-xs bg-indigo-50 text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition font-bold shadow-sm">
+                                        Pilih Semua
+                                    </button>
+                                    <button onclick="bulkSelectVocab(false)" class="text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-100 transition font-bold shadow-sm">
+                                        Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="glass-card p-5">
+                            <h3 class="text-xl font-semibold text-pink-700 mb-4 flex items-center"><i data-lucide="list-check" class="w-5 h-5 mr-2"></i> Ringkasan Pilihan</h3>
+                            <div id="selected-vocab-summary" class="text-sm text-gray-600 h-24 overflow-y-auto custom-scroll p-2 border rounded-lg bg-gray-50/70">
+                                Belum ada kata yang dipilih.
+                            </div>
+                            <button onclick="startQuiz()" id="start-quiz-btn" disabled class="mt-4 bg-gray-400 text-white px-6 py-3 rounded-xl text-lg font-bold flex items-center justify-center hover:bg-pink-700 transition shadow-lg w-full">
+                                Mulai Latihan (0 Soal)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Checkbox List -->
+                    <div id="vocab-selection-list" class="space-y-2 max-h-[50vh] overflow-y-auto custom-scroll p-3 rounded-xl border border-gray-200 bg-white/70">
+                        <!-- Checkboxes rendered here -->
+                    </div>
                 </div>
+
+                <!-- 1.3. Quiz Mode (New View) -->
+                 <div id="quiz-mode" class="vocab-sub-tab hidden h-full flex flex-col relative">
+                     
+                     <!-- New Progress Bar Header -->
+                     <div class="w-full bg-gray-200 h-2 rounded-full mb-6 overflow-hidden mt-2">
+                         <div id="quiz-progress-bar" class="progress-bar-fill bg-indigo-600 h-full rounded-full" style="width: 0%"></div>
+                     </div>
+
+                     <div class="flex justify-between items-center mb-4 px-1">
+                         <div class="text-sm font-bold text-gray-500 tracking-wide">
+                              SOAL <span id="current-question-index" class="text-indigo-600 text-lg">1</span> / <span id="total-questions-count">10</span>
+                         </div>
+                         <button onclick="showVocabSubTab('vocab-selection')" class="text-gray-400 hover:text-red-500 transition p-2 rounded-full hover:bg-red-50">
+                             <i data-lucide="x" class="w-5 h-5"></i>
+                         </button>
+                     </div>
+
+                     <!-- Question Container (Centered) -->
+                     <!-- UPDATED: Increased bottom padding from pb-20 to pb-48 to prevent button overlap -->
+                     <div class="flex-grow flex flex-col items-center justify-start overflow-y-auto custom-scroll pb-48 w-full">
+                        
+                        <!-- Question Card -->
+                        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 mb-8 border border-indigo-50 text-center relative overflow-hidden group shrink-0">
+                            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+                            
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block">Terjemahkan</span>
+                            <div id="quiz-question" class="text-5xl font-black text-gray-800 font-['Noto_Sans_KR'] mb-4 transition transform group-hover:scale-105 duration-300">...</div>
+                            
+                            <button id="quiz-speaker-btn" onclick="speak(document.getElementById('quiz-question').innerText)" class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition shadow-sm">
+                                <i data-lucide="volume-2" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+
+                        <!-- Answer Options -->
+                        <div id="quiz-options" class="grid grid-cols-1 gap-3 w-full max-w-md">
+                            <!-- Options will be rendered here -->
+                        </div>
+                     </div>
+                     
+                     <!-- Bottom Area (Feedback & Next) -->
+                     <!-- UPDATED: Adjusted z-index and padding -->
+                     <div class="absolute bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-200 flex flex-col items-center z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+                         <div id="quiz-feedback" class="h-6 text-sm font-bold text-center mb-2 transition-opacity opacity-0"></div>
+                         <button onclick="nextQuestion()" id="next-question-btn" disabled class="w-full max-w-md bg-gray-300 text-gray-500 px-6 py-3.5 rounded-xl text-lg font-bold transition shadow-sm flex items-center justify-center">
+                             Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                         </button>
+                     </div>
+                 </div>
             </div>
 
             <!-- 2. Hangeul -->
@@ -338,6 +502,44 @@
         </main>
     </div>
 
+    <!-- MODAL POPUP (Quiz Finish) -->
+    <div id="quiz-finish-modal" class="fixed inset-0 modal-backdrop z-[70] hidden flex items-center justify-center p-4 transition-all duration-300">
+        <div class="glass-card p-8 w-full max-w-sm text-center transform transition-all duration-300 scale-100 relative overflow-hidden">
+            <!-- Confetti Decoration -->
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#F472B6 2px, transparent 2px); background-size: 20px 20px;"></div>
+
+            <div class="mb-6 relative">
+                <div class="w-24 h-24 bg-yellow-100 rounded-full mx-auto flex items-center justify-center mb-2 shadow-inner">
+                    <i data-lucide="trophy" class="w-12 h-12 text-yellow-500"></i>
+                </div>
+                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                    SELESAI
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-800 mb-1">Hasil Latihan</h3>
+            
+            <!-- Score Display -->
+            <div class="my-6 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+                <div class="text-sm text-gray-500 font-medium uppercase tracking-wide mb-1">Skor Kamu</div>
+                <div class="text-5xl font-black text-indigo-600" id="final-score-number">0</div>
+                <div class="text-sm text-gray-600 mt-2 font-medium" id="final-score-detail">0 dari 0 Benar</div>
+            </div>
+            
+            <p id="final-score-message" class="text-gray-600 mb-6 text-sm italic">"Teruslah berlatih!"</p>
+            
+            <div class="flex flex-col gap-3">
+                <button onclick="restartQuiz()" class="bg-pink-600 text-white px-4 py-3.5 rounded-xl font-bold hover:bg-pink-700 transition flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5 mr-2"></i> Ulangi Latihan
+                </button>
+                <button onclick="hideQuizFinishModal(); showVocabSubTab('vocab-selection')" class="bg-white text-gray-600 border border-gray-200 px-4 py-3.5 rounded-xl font-semibold hover:bg-gray-50 transition flex items-center justify-center">
+                    <i data-lucide="list-check" class="w-5 h-5 mr-2"></i> Menu Pilihan
+                </button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- CALL MODE OVERLAY -->
     <div id="call-modal" class="fixed inset-0 bg-gray-900/95 z-[60] hidden flex flex-col items-center justify-center text-white backdrop-blur-xl transition-all duration-300">
         <div class="absolute top-6 right-6">
@@ -382,7 +584,7 @@
     <!-- Scripts -->
     <script>
         // ==========================================
-        // UI LOGIC (Responsive Menu)
+        // UI LOGIC (Responsive Menu & Tabs)
         // ==========================================
         
         function toggleMenu() {
@@ -391,29 +593,19 @@
             
             if (menu.classList.contains('open')) {
                 menu.classList.remove('open');
-                // Change back to menu icon
                 btn.innerHTML = '<i data-lucide="menu" class="w-7 h-7"></i>';
             } else {
                 menu.classList.add('open');
-                // Change to X icon
                 btn.innerHTML = '<i data-lucide="x" class="w-7 h-7"></i>';
             }
-            // Re-render icons for the new element
             lucide.createIcons();
         }
 
         function showTab(tabId, element) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            
-            // Show selected tab
             document.getElementById(tabId).classList.remove('hidden');
 
-            // Handle Active State for Buttons (Desktop & Mobile)
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-            
-            // Since we have duplicate buttons (mobile & desktop), activate both corresponding buttons
-            // In a real app we might bind by ID, but simple class matching works here
             const textContent = element.textContent.trim();
             document.querySelectorAll('.nav-link').forEach(btn => {
                 if(btn.textContent.trim() === textContent) {
@@ -421,13 +613,28 @@
                 }
             });
 
-            // Close mobile menu if open
             const menu = document.getElementById('mobile-menu');
             if (menu.classList.contains('open')) {
                 toggleMenu();
             }
 
-            if (tabId === 'vocab-textbook') filterVocabTextbook();
+            if (tabId === 'vocab-container') {
+                // Pastikan tampilan default Kosakata yang muncul (Textbook)
+                showVocabSubTab('vocab-textbook');
+                filterVocabTextbook();
+            }
+            lucide.createIcons();
+        }
+
+        function showVocabSubTab(subTabId) {
+             document.querySelectorAll('.vocab-sub-tab').forEach(el => el.classList.add('hidden'));
+             document.getElementById(subTabId).classList.remove('hidden');
+
+             if (subTabId === 'vocab-selection') {
+                 // Reset dan render ulang halaman seleksi setiap kali masuk
+                 document.getElementById('quiz-chapter-filter').value = '';
+                 renderQuizSelection();
+             }
         }
 
         // ==========================================
@@ -449,14 +656,12 @@
             { hangeul: "ㅌ", rom: "t", type: "Konsonan Dasar", awal: "T", akhir: "T" },
             { hangeul: "ㅍ", rom: "p", type: "Konsonan Dasar", awal: "P", akhir: "P" },
             { hangeul: "ㅎ", rom: "h", type: "Konsonan Dasar", awal: "H", akhir: "T" },
-
             // --- KONSONAN RANGKAP ---
             { hangeul: "ㄲ", rom: "kk", type: "Konsonan Rangkap", awal: "K (Kuat)", akhir: "K" },
             { hangeul: "ㄸ", rom: "tt", type: "Konsonan Rangkap", awal: "T (Kuat)", akhir: "-" },
             { hangeul: "ㅃ", rom: "pp", type: "Konsonan Rangkap", awal: "P (Kuat)", akhir: "-" },
             { hangeul: "ㅆ", rom: "ss", type: "Konsonan Rangkap", awal: "S (Kuat)", akhir: "T" },
             { hangeul: "ㅉ", rom: "jj", type: "Konsonan Rangkap", awal: "J (Kuat)", akhir: "-" },
-
             // --- VOKAL DASAR ---
             { hangeul: "ㅏ", rom: "a", type: "Vokal Dasar" },
             { hangeul: "ㅑ", rom: "ya", type: "Vokal Dasar" },
@@ -468,7 +673,6 @@
             { hangeul: "ㅠ", rom: "yu", type: "Vokal Dasar" },
             { hangeul: "ㅡ", rom: "eu", type: "Vokal Dasar" },
             { hangeul: "ㅣ", rom: "i", type: "Vokal Dasar" },
-
             // --- VOKAL RANGKAP / GABUNGAN ---
             { hangeul: "ㅐ", rom: "ae", type: "Vokal Rangkap" },
             { hangeul: "ㅒ", rom: "yae", type: "Vokal Rangkap" },
@@ -484,285 +688,242 @@
         ];
 
         const vocabTextbookData = [
-            { bab: "BAB 1", hangeul: "한국", rom: "hanguk", arti: "Korea Selatan" },
-            { bab: "BAB 1", hangeul: "네팔", rom: "nepal", arti: "Nepal" },
-            { bab: "BAB 1", hangeul: "동티모르", rom: "dongtimor", arti: "Timor Leste" },
-            { bab: "BAB 1", hangeul: "라오스", rom: "raoseu", arti: "Laos" },
-            { bab: "BAB 1", hangeul: "몽골", rom: "monggol", arti: "Mongolia" },
-            { bab: "BAB 1", hangeul: "미얀마", rom: "miyanma", arti: "Myanmar" },
-            { bab: "BAB 1", hangeul: "방글라데시", rom: "banggeulladesi", arti: "Bangladesh" },
-            { bab: "BAB 1", hangeul: "베트남", rom: "beteunam", arti: "Vietnam" },
-            { bab: "BAB 1", hangeul: "스리랑카", rom: "seurirangka", arti: "Sri Lanka" },
-            { bab: "BAB 1", hangeul: "우즈베키스탄", rom: "ujeubekiseutan", arti: "Uzbekistan" },
-            { bab: "BAB 1", hangeul: "인도네시아", rom: "indonesia", arti: "Indonesia" },
-            { bab: "BAB 1", hangeul: "중국", rom: "jungguk", arti: "China" },
-            { bab: "BAB 1", hangeul: "캄보디아", rom: "kambodia", arti: "Kamboja" },
-            { bab: "BAB 1", hangeul: "키르기스스탄", rom: "kireugiseutan", arti: "Kyrgyzstan" },
-            { bab: "BAB 1", hangeul: "타지키스탄", rom: "tajikiseutan", arti: "Tajikistan" },
-            { bab: "BAB 1", hangeul: "태국", rom: "taeguk", arti: "Thailand" },
-            { bab: "BAB 1", hangeul: "파키스탄", rom: "pakiseutan", arti: "Pakistan" },
-            { bab: "BAB 1", hangeul: "필리핀", rom: "pillipin", arti: "Philipina" },
-            { bab: "BAB 1", hangeul: "학생", rom: "hakssaeng", arti: "pelajar/murid" },
-            { bab: "BAB 1", hangeul: "선생님", rom: "seonsaengnim", arti: "guru" },
-            { bab: "BAB 1", hangeul: "회사원", rom: "hoesawon", arti: "karyawan perusahaan" },
-            { bab: "BAB 1", hangeul: "근로자", rom: "geunroja", arti: "pekerja" },
-            { bab: "BAB 1", hangeul: "경찰관", rom: "gyeongchalgwan", arti: "polisi" },
-            { bab: "BAB 1", hangeul: "소방관", rom: "sobanggwan", arti: "pemadam kebakaran" },
-            { bab: "BAB 1", hangeul: "공무원", rom: "gongmuwon", arti: "PNS" },
-            { bab: "BAB 1", hangeul: "점원", rom: "jeomwon", arti: "pelayan toko" },
-            { bab: "BAB 1", hangeul: "의사", rom: "uisa", arti: "dokter" },
-            { bab: "BAB 1", hangeul: "간호사", rom: "ganhosa", arti: "perawat" },
-            { bab: "BAB 1", hangeul: "요리사", rom: "yorisa", arti: "koki" },
-            { bab: "BAB 1", hangeul: "운전기사", rom: "unjeongisa", arti: "supir" },
-            { bab: "BAB 1", hangeul: "기술자", rom: "gisulja", arti: "teknisi" },
-            { bab: "BAB 1", hangeul: "목수", rom: "moksu", arti: "tukang kayu" },
-            { bab: "BAB 1", hangeul: "농부", rom: "nongbu", arti: "petani" },
-            { bab: "BAB 1", hangeul: "어부", rom: "eobu", arti: "nelayan" },
-            { bab: "BAB 1", hangeul: "어느", rom: "eoneu", arti: "mana" },
-            { bab: "BAB 1", hangeul: "사람", rom: "saram", arti: "orang" },
-            { bab: "BAB 1", hangeul: "이름", rom: "ireum", arti: "nama" },
-            { bab: "BAB 1", hangeul: "국적", rom: "gukjeok", arti: "kebangsaan" },
-            { bab: "BAB 1", hangeul: "누구", rom: "nugu", arti: "siapa" },
-            { bab: "BAB 1", hangeul: "아니요", rom: "aniyo", arti: "tidak" },
-            { bab: "BAB 1", hangeul: "직업", rom: "jigeop", arti: "pekerjaan" },
-            { bab: "BAB 1", hangeul: "나라", rom: "nara", arti: "negara" },
-            { bab: "BAB 1", hangeul: "거실", rom: "geosil", arti: "ruang tamu" },
-            { bab: "BAB 1", hangeul: "전자레인지", rom: "jeonjareinji", arti: "microwave" },
-            { bab: "BAB 1", hangeul: "화장실", rom: "hwajangsil", arti: "toilet" },
-            { bab: "BAB 1", hangeul: "전자제품", rom: "jeonjajepeum", arti: "produk elektronik" },
-            { bab: "BAB 1", hangeul: "미용실", rom: "miyongsil", arti: "salon kecantikan" },
-            { bab: "BAB 1", hangeul: "회사", rom: "hoesa", arti: "perusahaan" },
-            { bab: "BAB 1", hangeul: "약국", rom: "yakguk", arti: "apotek" },
-            { bab: "BAB 1", hangeul: "방", rom: "bang", arti: "kamar" },
-            { bab: "BAB 1", hangeul: "어디", rom: "eodi", arti: "di mana" },
-            { bab: "BAB 1", hangeul: "기숙사", rom: "gisuksa", arti: "asrama" },
-            { bab: "BAB 1", hangeul: "에어컨", rom: "eeokeon", arti: "AC" },
-            { bab: "BAB 1", hangeul: "여기", rom: "yeogi", arti: "di sini" },
-            { bab: "BAB 1", hangeul: "병원", rom: "byeongwon", arti: "rumah sakit" },
-            { bab: "BAB 1", hangeul: "집", rom: "jip", arti: "rumah" },
-            { bab: "BAB 1", hangeul: "부엌", rom: "bueok", arti: "dapur" },
-            { bab: "BAB 1", hangeul: "냉장고", rom: "naengjanggo", arti: "kulkas" },
-            { bab: "BAB 1", hangeul: "책상", rom: "chaeksang", arti: "meja belajar" },
-            { bab: "BAB 1", hangeul: "청소기", rom: "cheongsogi", arti: "vacuum cleaner" },
-            { bab: "BAB 1", hangeul: "옷장", rom: "otjang", arti: "lemari pakaian" },
-            { bab: "BAB 1", hangeul: "우체국", rom: "ucheguk", arti: "kantor pos" },
-            { bab: "BAB 1", hangeul: "침대", rom: "chimdae", arti: "tempat tidur" },
-            { bab: "BAB 1", hangeul: "커피숍", rom: "keopisyop", arti: "kedai kopi" },
-            { bab: "BAB 1", hangeul: "은행", rom: "eunhaeng", arti: "bank" },
-            { bab: "BAB 1", hangeul: "상대", rom: "sangdae", arti: "lawan bicara/pihak lain" },
-            { bab: "BAB 1", hangeul: "인사하다", rom: "insahada", arti: "memberi salam" },
-            { bab: "BAB 1", hangeul: "방식", rom: "bangsik", arti: "cara/metode" },
+            { id: 1, bab: "BAB 1", hangeul: "한국", rom: "hanguk", arti: "Korea Selatan" },
+            { id: 2, bab: "BAB 1", hangeul: "한국어", rom: "hangugeo", arti: "Bahasa Korea" },
+            { id: 3, bab: "BAB 1", hangeul: "이름", rom: "ireum", arti: "nama" },
+            { id: 4, bab: "BAB 1", hangeul: "저", rom: "jeo", arti: "saya (formal)" },
+            { id: 5, bab: "BAB 1", hangeul: "나", rom: "na", arti: "saya (informal)" },
+            { id: 6, bab: "BAB 1", hangeul: "사람", rom: "saram", arti: "orang" },
+            { id: 7, bab: "BAB 1", hangeul: "학생", rom: "haksaeng", arti: "pelajar" },
+            { id: 8, bab: "BAB 1", hangeul: "회사원", rom: "hoesawon", arti: "karyawan" },
+            { id: 9, bab: "BAB 1", hangeul: "선생님", rom: "seonsaengnim", arti: "guru" },
+            { id: 10, bab: "BAB 1", hangeul: "직업", rom: "jigeop", arti: "pekerjaan" },
+            { id: 11, bab: "BAB 1", hangeul: "나라", rom: "nara", arti: "negara" },
+            { id: 12, bab: "BAB 1", hangeul: "한국인", rom: "hangugin", arti: "orang Korea" },
+            { id: 13, bab: "BAB 1", hangeul: "인도네시아", rom: "indonesia", arti: "Indonesia" },
+            { id: 14, bab: "BAB 1", hangeul: "인도네시아인", rom: "indonesia-in", arti: "orang Indonesia" },
+            { id: 15, bab: "BAB 1", hangeul: "일본", rom: "ilbon", arti: "Jepang" },
+            { id: 16, bab: "BAB 1", hangeul: "중국", rom: "jungguk", arti: "China" },
+            { id: 17, bab: "BAB 1", hangeul: "미국", rom: "miguk", arti: "Amerika" },
+            { id: 18, bab: "BAB 1", hangeul: "태국", rom: "taeguk", arti: "Thailand" },
+            { id: 19, bab: "BAB 1", hangeul: "필리핀", rom: "pillipin", arti: "Filipina" },
+            { id: 20, bab: "BAB 1", hangeul: "베트남", rom: "beteunam", arti: "Vietnam" },
+            { id: 21, bab: "BAB 1", hangeul: "아침", rom: "achim", arti: "pagi" },
+            { id: 22, bab: "BAB 1", hangeul: "점심", rom: "jeomsim", arti: "siang" },
+            { id: 23, bab: "BAB 1", hangeul: "저녁", rom: "jeonyeok", arti: "malam" },
+            { id: 24, bab: "BAB 1", hangeul: "만나다", rom: "mannada", arti: "bertemu" },
+            { id: 25, bab: "BAB 1", hangeul: "반갑다", rom: "bangapda", arti: "senang bertemu" },
+            { id: 26, bab: "BAB 1", hangeul: "처음", rom: "cheoeum", arti: "pertama kali" },
+            { id: 27, bab: "BAB 1", hangeul: "안녕하세요", rom: "annyeonghaseyo", arti: "halo (formal)" },
+            { id: 28, bab: "BAB 1", hangeul: "안녕", rom: "annyeong", arti: "hai / bye (informal)" },
+            { id: 29, bab: "BAB 1", hangeul: "감사합니다", rom: "gamsahamnida", arti: "terima kasih" },
+            { id: 30, bab: "BAB 1", hangeul: "미안합니다", rom: "mianhamnida", arti: "maaf" },
+            { id: 31, bab: "BAB 1", hangeul: "주세요", rom: "juseyo", arti: "tolong berikan" },
+            { id: 32, bab: "BAB 1", hangeul: "맞아요", rom: "majayo", arti: "benar" },
+            { id: 33, bab: "BAB 1", hangeul: "아니요", rom: "aniyo", arti: "tidak" },
+            { id: 34, bab: "BAB 1", hangeul: "저는 ...입니다", rom: "jeoneun ... imnida", arti: "saya adalah ..." },
+            { id: 35, bab: "BAB 1", hangeul: "어디", rom: "eodi", arti: "di mana" },
+            { id: 36, bab: "BAB 1", hangeul: "누구", rom: "nugu", arti: "siapa" },
+            { id: 37, bab: "BAB 1", hangeul: "무엇", rom: "mueot", arti: "apa" },
+            { id: 38, bab: "BAB 1", hangeul: "언제", rom: "eonje", arti: "kapan" },
+            { id: 39, bab: "BAB 1", hangeul: "왜", rom: "wae", arti: "kenapa" },
+            { id: 40, bab: "BAB 1", hangeul: "어떻게", rom: "eotteoke", arti: "bagaimana" },
+            { id: 41, bab: "BAB 1", hangeul: "소개하다", rom: "sogaehada", arti: "memperkenalkan" },
+            { id: 42, bab: "BAB 1", hangeul: "출신", rom: "chulshin", arti: "asal" },
+            { id: 43, bab: "BAB 1", hangeul: "지역", rom: "jiyeok", arti: "daerah" },
+            { id: 44, bab: "BAB 1", hangeul: "주소", rom: "juso", arti: "alamat" },
+            { id: 45, bab: "BAB 1", hangeul: "전화번호", rom: "jeonhwabeonho", arti: "nomor telepon" },
+            { id: 46, bab: "BAB 1", hangeul: "이메일", rom: "imeil", arti: "email" },
+            { id: 47, bab: "BAB 1", hangeul: "생활", rom: "saenghwal", arti: "kehidupan" },
+            { id: 48, bab: "BAB 1", hangeul: "문화", rom: "munhwa", arti: "budaya" },
+            { id: 49, bab: "BAB 1", hangeul: "전통", rom: "jeontong", arti: "tradisi" },
+            { id: 50, bab: "BAB 1", hangeul: "인사", rom: "insa", arti: "salam" },
+            { id: 51, bab: "BAB 1", hangeul: "예절", rom: "yejeol", arti: "etika" },
+            { id: 52, bab: "BAB 1", hangeul: "규칙", rom: "gyuchik", arti: "aturan" },
+            { id: 53, bab: "BAB 1", hangeul: "중요하다", rom: "jungyohada", arti: "penting" },
 
-            { bab: "BAB 2", hangeul: "이것", rom: "igeot", arti: "ini (barang dekat)" },
-            { bab: "BAB 2", hangeul: "저것", rom: "jeogeot", arti: "itu (barang jauh terlihat)" },
-            { bab: "BAB 2", hangeul: "그것", rom: "geugeot", arti: "itu (barang dekat lawan bicara)" },
-            { bab: "BAB 2", hangeul: "무엇/뭐", rom: "mueot/mwo", arti: "apa" },
-            { bab: "BAB 2", hangeul: "연필", rom: "yeonpil", arti: "pensil" },
-            { bab: "BAB 2", hangeul: "볼펜", rom: "bolpen", arti: "pulpen" },
-            { bab: "BAB 2", hangeul: "가위", rom: "gawi", arti: "gunting" },
-            { bab: "BAB 2", hangeul: "칼", rom: "kal", arti: "pisau cutter" },
-            { bab: "BAB 2", hangeul: "시계", rom: "sigye", arti: "jam" },
-            { bab: "BAB 2", hangeul: "달력", rom: "dallyeok", arti: "kalender" },
-            { bab: "BAB 2", hangeul: "컴퓨터", rom: "keompyuteo", arti: "komputer" },
-            { bab: "BAB 2", hangeul: "안경", rom: "angyeong", arti: "kacamata" },
-            { bab: "BAB 2", hangeul: "휴대폰/휴대전화", rom: "hyudaepon/hyudaejeonhwa", arti: "HP/telepon" },
-            { bab: "BAB 2", hangeul: "계산기", rom: "gyesangi", arti: "kalkulator" },
-            { bab: "BAB 2", hangeul: "컵", rom: "keop", arti: "gelas" },
-            { bab: "BAB 2", hangeul: "휴지", rom: "hyuji", arti: "tisu" },
-            { bab: "BAB 2", hangeul: "가족사진", rom: "gajoksajin", arti: "foto keluarga" },
-            { bab: "BAB 2", hangeul: "여권", rom: "yeogwon", arti: "paspor" },
-            { bab: "BAB 2", hangeul: "지갑", rom: "jigap", arti: "dompet" },
-            { bab: "BAB 2", hangeul: "열쇠", rom: "yeolsoe", arti: "kunci" },
-            { bab: "BAB 2", hangeul: "가방", rom: "gabang", arti: "tas" },
-            { bab: "BAB 2", hangeul: "우산", rom: "usan", arti: "payung" },
-            { bab: "BAB 2", hangeul: "화장품", rom: "hwajangpum", arti: "kosmetik" },
-            { bab: "BAB 2", hangeul: "거울", rom: "geoul", arti: "cermin" },
-            { bab: "BAB 2", hangeul: "빗", rom: "bit", arti: "sisir" },
-            { bab: "BAB 2", hangeul: "베개", rom: "bege", arti: "bantal" },
-            { bab: "BAB 2", hangeul: "이불", rom: "ibul", arti: "selimut" },
-            { bab: "BAB 2", hangeul: "사무실", rom: "samusil", arti: "kantor" },
-            { bab: "BAB 2", hangeul: "물건", rom: "mulgeon", arti: "barang" },
-            { bab: "BAB 2", hangeul: "생활용품", rom: "saenghwalyongpum", arti: "barang kebutuhan sehari-hari" },
-            { bab: "BAB 2", hangeul: "알뜰하다", rom: "altteulhada", arti: "hemat" },
-            { bab: "BAB 2", hangeul: "구입하다/구하다/사다", rom: "guip-hada/gu-hada/sada", arti: "membeli" },
-            { bab: "BAB 2", hangeul: "다양하다", rom: "dayanghada", arti: "bermacam-macam" },
-            { bab: "BAB 2", hangeul: "상품", rom: "sangpum", arti: "produk" },
-            { bab: "BAB 2", hangeul: "판매하다/팔다", rom: "panmaehada/palda", arti: "menjual" },
-            { bab: "BAB 2", hangeul: "통해", rom: "tonghae", arti: "melalui" },
-            { bab: "BAB 2", hangeul: "전단지", rom: "jeondanji", arti: "brosur" },
-            { bab: "BAB 2", hangeul: "할인 금액", rom: "halin geumaek", arti: "jumlah diskon" },
-            { bab: "BAB 2", hangeul: "추천 상품", rom: "chucheon sangpum", arti: "produk rekomendasi" },
-            { bab: "BAB 2", hangeul: "행사", rom: "haengsa", arti: "acara" },
-            { bab: "BAB 2", hangeul: "정기", rom: "jeonggi", arti: "rutin/teratur" },
-            { bab: "BAB 2", hangeul: "제공하다", rom: "jegonghada", arti: "menyediakan" },
-            { bab: "BAB 2", hangeul: "활용하다", rom: "hwalyonghada", arti: "memanfaatkan" },
-            { bab: "BAB 2", hangeul: "추가 할인", rom: "chuga halin", arti: "diskon tambahan" },
-            { bab: "BAB 2", hangeul: "중고", rom: "junggo", arti: "barang bekas" },
-            { bab: "BAB 2", hangeul: "거래", rom: "georae", arti: "transaksi" },
-            { bab: "BAB 2", hangeul: "가전제품", rom: "gajeonjepeum", arti: "peralatan elektronik" },
-            { bab: "BAB 2", hangeul: "가구", rom: "gagu", arti: "mebel/furnitur" },
-            { bab: "BAB 2", hangeul: "플랫폼", rom: "peullaepom", arti: "platform" },
-            { bab: "BAB 2", hangeul: "대부분", rom: "daebubun", arti: "sebagian besar" },
-            { bab: "BAB 2", hangeul: "지역", rom: "jiyeok", arti: "daerah" },
-            { bab: "BAB 2", hangeul: "직거래", rom: "jikkeorae", arti: "transaksi langsung" },
+            { id: 54, bab: "BAB 2", hangeul: "이것", rom: "igeot", arti: "ini (barang dekat)" },
+            { id: 55, bab: "BAB 2", hangeul: "저것", rom: "jeogeot", arti: "itu (barang di sana)" },
+            { id: 56, bab: "BAB 2", hangeul: "그것", rom: "geugeot", arti: "itu (barang dekat lawan bicara)" },
+            { id: 57, bab: "BAB 2", hangeul: "무엇/뭐", rom: "mueot/mwo", arti: "apa" },
+            { id: 58, bab: "BAB 2", hangeul: "연필", rom: "yeonpil", arti: "pensil" },
+            { id: 59, bab: "BAB 2", hangeul: "볼펜", rom: "bolpen", arti: "pulpen" },
+            { id: 60, bab: "BAB 2", hangeul: "가위", rom: "gawi", arti: "gunting" },
+            { id: 61, bab: "BAB 2", hangeul: "칼", rom: "kal", arti: "pisau cutter" },
+            { id: 62, bab: "BAB 2", hangeul: "시계", rom: "sigye", arti: "jam" },
+            { id: 63, bab: "BAB 2", hangeul: "달력", rom: "dallyeok", arti: "kalender" },
+            { id: 64, bab: "BAB 2", hangeul: "컴퓨터", rom: "keompyuteo", arti: "komputer" },
+            { id: 65, bab: "BAB 2", hangeul: "안경", rom: "angyeong", arti: "kacamata" },
+            { id: 66, bab: "BAB 2", hangeul: "휴대폰/휴대전화", rom: "hyudaepon/hyudaejeonhwa", arti: "HP/telepon" },
+            { id: 67, bab: "BAB 2", hangeul: "계산기", rom: "gyesangi", arti: "kalkulator" },
+            { id: 68, bab: "BAB 2", hangeul: "컵", rom: "keop", arti: "gelas" },
+            { id: 69, bab: "BAB 2", hangeul: "휴지", rom: "hyuji", arti: "tisu" },
+            { id: 70, bab: "BAB 2", hangeul: "가족사진", rom: "gajoksajin", arti: "foto keluarga" },
+            { id: 71, bab: "BAB 2", hangeul: "여권", rom: "yeogwon", arti: "paspor" },
+            { id: 72, bab: "BAB 2", hangeul: "지갑", rom: "jigap", arti: "dompet" },
+            { id: 73, bab: "BAB 2", hangeul: "열쇠", rom: "yeolsoe", arti: "kunci" },
+            { id: 74, bab: "BAB 2", hangeul: "가방", rom: "gabang", arti: "tas" },
+            { id: 75, bab: "BAB 2", hangeul: "우산", rom: "usan", arti: "payung" },
+            { id: 76, bab: "BAB 2", hangeul: "화장품", rom: "hwajangpum", arti: "kosmetik" },
+            { id: 77, bab: "BAB 2", hangeul: "거울", rom: "geoul", arti: "cermin" },
+            { id: 78, bab: "BAB 2", hangeul: "빗", rom: "bit", arti: "sisir" },
+            { id: 79, bab: "BAB 2", hangeul: "베개", rom: "begae", arti: "bantal" },
+            { id: 80, bab: "BAB 2", hangeul: "이불", rom: "ibul", arti: "selimut" },
+            { id: 81, bab: "BAB 2", hangeul: "사무실", rom: "samusil", arti: "kantor" },
+            { id: 82, bab: "BAB 2", hangeul: "물건", rom: "mulgeon", arti: "barang" },
+            { id: 83, bab: "BAB 2", hangeul: "생활용품", rom: "saenghwal-yongpum", arti: "barang kebutuhan sehari-hari" },
+            { id: 84, bab: "BAB 2", hangeul: "알뜰하다", rom: "altteulhada", arti: "hemat" },
+            { id: 85, bab: "BAB 2", hangeul: "구입하다/구하다/사다", rom: "guiphada/guhada/sada", arti: "membeli" },
+            { id: 86, bab: "BAB 2", hangeul: "다양하다", rom: "dayanghada", arti: "bermacam-macam" },
+            { id: 87, bab: "BAB 2", hangeul: "상품", rom: "sangpum", arti: "produk" },
+            { id: 88, bab: "BAB 2", hangeul: "판매하다/팔다", rom: "panmaehada/palda", arti: "menjual" },
+            { id: 89, bab: "BAB 2", hangeul: "통해", rom: "tonghae", arti: "melalui" },
+            { id: 90, bab: "BAB 2", hangeul: "전단지", rom: "jeondanji", arti: "brosur" },
+            { id: 91, bab: "BAB 2", hangeul: "할인 금액", rom: "harin geumaek", arti: "jumlah diskon" },
+            { id: 92, bab: "BAB 2", hangeul: "추천 상품", rom: "chucheon sangpum", arti: "produk rekomendasi" },
+            { id: 93, bab: "BAB 2", hangeul: "행사", rom: "haengsa", arti: "acara" },
+            { id: 94, bab: "BAB 2", hangeul: "정기", rom: "jeonggi", arti: "rutin/berkala" },
+            { id: 95, bab: "BAB 2", hangeul: "제공하다", rom: "jegonghada", arti: "menyediakan" },
+            { id: 96, bab: "BAB 2", hangeul: "활용하다", rom: "hwaryonghada", arti: "memanfaatkan" },
+            { id: 97, bab: "BAB 2", hangeul: "추가 할인", rom: "chuga harin", arti: "diskon tambahan" },
+            { id: 98, bab: "BAB 2", hangeul: "중고", rom: "junggo", arti: "barang bekas" },
+            { id: 99, bab: "BAB 2", hangeul: "거래", rom: "georae", arti: "transaksi / jual beli" },
+            { id: 100, bab: "BAB 2", hangeul: "가전제품", rom: "gajeonjepeum", arti: "peralatan elektronik" },
+            { id: 101, bab: "BAB 2", hangeul: "가구", rom: "gagu", arti: "mebel" },
+            { id: 102, bab: "BAB 2", hangeul: "플랫폼", rom: "peulraepom", arti: "platform" },
+            { id: 103, bab: "BAB 2", hangeul: "대부분", rom: "daebubun", arti: "sebagian besar" },
+            { id: 104, bab: "BAB 2", hangeul: "지역", rom: "jiyeok", arti: "daerah" },
+            { id: 105, bab: "BAB 2", hangeul: "직거래", rom: "jikkeorae", arti: "transaksi langsung" },
 
-            { bab: "BAB 3", hangeul: "에어컨", rom: "eeokeon", arti: "AC" },
-            { bab: "BAB 3", hangeul: "침대", rom: "chimdae", arti: "kasur/tempat tidur" },
-            { bab: "BAB 3", hangeul: "의자", rom: "uija", arti: "kursi" },
-            { bab: "BAB 3", hangeul: "책상", rom: "chaeksang", arti: "meja" },
-            { bab: "BAB 3", hangeul: "옷장", rom: "otjang", arti: "lemari" },
-            { bab: "BAB 3", hangeul: "소파", rom: "sopa", arti: "sofa" },
-            { bab: "BAB 3", hangeul: "텔레비전", rom: "tellebijeon", arti: "televisi" },
-            { bab: "BAB 3", hangeul: "전자레인지", rom: "jeonjareinji", arti: "microwave" },
-            { bab: "BAB 3", hangeul: "세탁기", rom: "setakgi", arti: "mesin cuci" },
-            { bab: "BAB 3", hangeul: "냉장고", rom: "naengjanggo", arti: "kulkas" },
-            { bab: "BAB 3", hangeul: "청소기", rom: "cheongsogi", arti: "vacuum cleaner" },
-            { bab: "BAB 3", hangeul: "식탁", rom: "siktak", arti: "meja makan" },
-            { bab: "BAB 3", hangeul: "회사", rom: "hoesa", arti: "perusahaan" },
-            { bab: "BAB 3", hangeul: "식당", rom: "sikdang", arti: "restoran" },
-            { bab: "BAB 3", hangeul: "은행", rom: "eunhaeng", arti: "bank" },
-            { bab: "BAB 3", hangeul: "커피숍", rom: "keopisyop", arti: "kafe" },
-            { bab: "BAB 3", hangeul: "편의점", rom: "pyeonuijeom", arti: "minimarket" },
-            { bab: "BAB 3", hangeul: "시장", rom: "sijang", arti: "pasar" },
-            { bab: "BAB 3", hangeul: "미용실", rom: "miyongsil", arti: "salon" },
-            { bab: "BAB 3", hangeul: "슈퍼마켓", rom: "syeopeomaket", arti: "supermarket" },
-            { bab: "BAB 3", hangeul: "약국", rom: "yakguk", arti: "apotek" },
-            { bab: "BAB 3", hangeul: "병원", rom: "byeongwon", arti: "rumah sakit" },
-            { bab: "BAB 3", hangeul: "우체국", rom: "ucheguk", arti: "kantor pos" },
-            { bab: "BAB 3", hangeul: "집", rom: "jip", arti: "rumah" },
-            { bab: "BAB 3", hangeul: "방", rom: "bang", arti: "kamar" },
-            { bab: "BAB 3", hangeul: "화장실", rom: "hwajangsil", arti: "toilet" },
-            { bab: "BAB 3", hangeul: "거실", rom: "geosil", arti: "ruang tamu" },
-            { bab: "BAB 3", hangeul: "부엌", rom: "bueok", arti: "dapur" },
-            { bab: "BAB 3", hangeul: "여기", rom: "yeogi", arti: "sini" },
-            { bab: "BAB 3", hangeul: "저기", rom: "jeogi", arti: "disitu (terlihat)" },
-            { bab: "BAB 3", hangeul: "거기", rom: "geogi", arti: "sana (jauh)" },
-            { bab: "BAB 3", hangeul: "어디", rom: "eodi", arti: "mana" },
-            { bab: "BAB 3", hangeul: "기숙사", rom: "gisuksa", arti: "asrama" },
-            { bab: "BAB 3", hangeul: "빵", rom: "ppang", arti: "roti" },
-            { bab: "BAB 3", hangeul: "사과", rom: "sagwa", arti: "apel" },
-            { bab: "BAB 3", hangeul: "요리하다", rom: "yorihada", arti: "memasak" },
-            { bab: "BAB 3", hangeul: "우유", rom: "uyu", arti: "susu" },
-            { bab: "BAB 3", hangeul: "운동하다", rom: "undonghada", arti: "berolahraga" },
-            { bab: "BAB 3", hangeul: "커피", rom: "keopi", arti: "kopi" },
-            { bab: "BAB 3", hangeul: "특별시", rom: "teukbyeolsi", arti: "kota khusus" },
-            { bab: "BAB 3", hangeul: "광역시", rom: "gwangyeoksi", arti: "kota metropolitan" },
-            { bab: "BAB 3", hangeul: "가장", rom: "gajang", arti: "paling" },
-            { bab: "BAB 3", hangeul: "정치", rom: "jeongchi", arti: "politik" },
-            { bab: "BAB 3", hangeul: "문화", rom: "munhwa", arti: "budaya" },
-            { bab: "BAB 3", hangeul: "중심", rom: "jungsim", arti: "pusat" },
-            { bab: "BAB 3", hangeul: "주변", rom: "jubyeon", arti: "sekitar" },
-            { bab: "BAB 3", hangeul: "함께", rom: "hamkke", arti: "bersama" },
-            { bab: "BAB 3", hangeul: "거주하다", rom: "geoju-hada", arti: "tinggal/menetap" },
-            { bab: "BAB 3", hangeul: "대한민국", rom: "daehanminguk", arti: "Korea Selatan" },
-            { bab: "BAB 3", hangeul: "관문", rom: "gwanmun", arti: "gerbang masuk" },
-            { bab: "BAB 3", hangeul: "위치", rom: "wichi", arti: "lokasi" },
-            { bab: "BAB 3", hangeul: "행정", rom: "haengjeong", arti: "administrasi" },
-            { bab: "BAB 3", hangeul: "수행하다", rom: "suhaenghada", arti: "melaksanakan" },
-            { bab: "BAB 3", hangeul: "업무", rom: "eobmu", arti: "tugas/pekerjaan" },
-            { bab: "BAB 3", hangeul: "세계적인", rom: "segyejeogin", arti: "berskala dunia" },
-            { bab: "BAB 3", hangeul: "부산항", rom: "busanhang", arti: "pelabuhan Busan" },
-            { bab: "BAB 3", hangeul: "해변", rom: "haebyeon", arti: "pantai" },
-            { bab: "BAB 3", hangeul: "아름답다", rom: "areumdapda", arti: "indah" },
-            { bab: "BAB 3", hangeul: "관광객", rom: "gwangwanggaek", arti: "wisatawan" },
-            { bab: "BAB 3", hangeul: "방문하다", rom: "bangmunhada", arti: "berkunjung" },
-            { bab: "BAB 3", hangeul: "발달하다", rom: "baldalhada", arti: "berkembang" },
-            { bab: "BAB 3", hangeul: "섬유 산업", rom: "seomyu saneop", arti: "industri tekstil" },
-            { bab: "BAB 3", hangeul: "예술", rom: "yesul", arti: "seni" },
+            { id: 106, bab: "BAB 3", hangeul: "에어컨", rom: "eeokeon", arti: "AC" },
+            { id: 107, bab: "BAB 3", hangeul: "침대", rom: "chimdae", arti: "kasur" },
+            { id: 108, bab: "BAB 3", hangeul: "의자", rom: "uija", arti: "kursi" },
+            { id: 109, bab: "BAB 3", hangeul: "책상", rom: "chaeksang", arti: "meja" },
+            { id: 110, bab: "BAB 3", hangeul: "옷장", rom: "otjang", arti: "lemari" },
+            { id: 111, bab: "BAB 3", hangeul: "소파", rom: "sopa", arti: "sofa" },
+            { id: 112, bab: "BAB 3", hangeul: "텔레비전", rom: "tellebijeon", arti: "televisi" },
+            { id: 113, bab: "BAB 3", hangeul: "전자레인지", rom: "jeonjareinji", arti: "microwave" },
+            { id: 114, bab: "BAB 3", hangeul: "세탁기", rom: "setakgi", arti: "mesin cuci" },
+            { id: 115, bab: "BAB 3", hangeul: "냉장고", rom: "naengjanggo", arti: "kulkas" },
+            { id: 116, bab: "BAB 3", hangeul: "청소기", rom: "cheongsogi", arti: "vacuum cleaner" },
+            { id: 117, bab: "BAB 3", hangeul: "식탁", rom: "siktak", arti: "meja makan" },
+            { id: 118, bab: "BAB 3", hangeul: "회사", rom: "hoesa", arti: "perusahaan" },
+            { id: 119, bab: "BAB 3", hangeul: "식당", rom: "sikdang", arti: "restoran" },
+            { id: 120, bab: "BAB 3", hangeul: "은행", rom: "eunhaeng", arti: "bank" },
+            { id: 121, bab: "BAB 3", hangeul: "커피숍", rom: "keopisyop", arti: "kafe" },
+            { id: 122, bab: "BAB 3", hangeul: "편의점", rom: "pyeonuijeom", arti: "minimarket" },
+            { id: 123, bab: "BAB 3", hangeul: "시장", rom: "sijang", arti: "pasar" },
+            { id: 124, bab: "BAB 3", hangeul: "미용실", rom: "miyongsil", arti: "salon" },
+            { id: 125, bab: "BAB 3", hangeul: "슈퍼마켓", rom: "shupeomaket", arti: "supermarket" },
+            { id: 126, bab: "BAB 3", hangeul: "약국", rom: "yakkuk", arti: "apotek" },
+            { id: 127, bab: "BAB 3", hangeul: "병원", rom: "byeongwon", arti: "rumah sakit" },
+            { id: 128, bab: "BAB 3", hangeul: "우체국", rom: "ucheguk", arti: "kantor pos" },
+            { id: 129, bab: "BAB 3", hangeul: "집", rom: "jip", arti: "rumah" },
+            { id: 130, bab: "BAB 3", hangeul: "방", rom: "bang", arti: "kamar" },
+            { id: 131, bab: "BAB 3", hangeul: "화장실", rom: "hwajangsil", arti: "toilet" },
+            { id: 132, bab: "BAB 3", hangeul: "거실", rom: "geosil", arti: "ruang tamu" },
+            { id: 133, bab: "BAB 3", hangeul: "부엌", rom: "bueok", arti: "dapur" },
+            { id: 134, bab: "BAB 3", hangeul: "여기", rom: "yeogi", arti: "sini" },
+            { id: 135, bab: "BAB 3", hangeul: "저기", rom: "jeogi", arti: "di situ (terlihat)" },
+            { id: 136, bab: "BAB 3", hangeul: "거기", rom: "geogi", arti: "sana (jauh)" },
+            { id: 137, bab: "BAB 3", hangeul: "어디", rom: "eodi", arti: "mana" },
+            { id: 138, bab: "BAB 3", hangeul: "기숙사", rom: "gisuksa", arti: "asrama" },
+            { id: 139, bab: "BAB 3", hangeul: "빵", rom: "ppang", arti: "roti" },
+            { id: 140, bab: "BAB 3", hangeul: "사과", rom: "sagwa", arti: "apel" },
+            { id: 141, bab: "BAB 3", hangeul: "요리하다", rom: "yorihada", arti: "memasak" },
+            { id: 142, bab: "BAB 3", hangeul: "우유", rom: "uyu", arti: "susu" },
+            { id: 143, bab: "BAB 3", hangeul: "운동하다", rom: "undonghada", arti: "berolahraga" },
+            { id: 144, bab: "BAB 3", hangeul: "커피", rom: "keopi", arti: "kopi" },
+            { id: 145, bab: "BAB 3", hangeul: "특별시", rom: "teukbyeolsi", arti: "kota khusus" },
+            { id: 146, bab: "BAB 3", hangeul: "광역시", rom: "gwangyeoksi", arti: "kota metropolitan" },
+            { id: 147, bab: "BAB 3", hangeul: "가장", rom: "gajang", arti: "paling" },
+            { id: 148, bab: "BAB 3", hangeul: "정치", rom: "jeongchi", arti: "politik" },
+            { id: 149, bab: "BAB 3", hangeul: "문화", rom: "munhwa", arti: "budaya" },
+            { id: 150, bab: "BAB 3", hangeul: "중심", rom: "jungsim", arti: "pusat" },
+            { id: 151, bab: "BAB 3", hangeul: "주변", rom: "jubyeon", arti: "sekitar" },
+            { id: 152, bab: "BAB 3", hangeul: "함께", rom: "hamkke", arti: "bersama" },
+            { id: 153, bab: "BAB 3", hangeul: "거주하다", rom: "geojuhada", arti: "tinggal/menetap" },
+            { id: 154, bab: "BAB 3", hangeul: "대한민국", rom: "daehanminguk", arti: "Korea Selatan" },
+            { id: 155, bab: "BAB 3", hangeul: "관문", rom: "gwanmun", arti: "gerbang masuk" },
+            { id: 156, bab: "BAB 3", hangeul: "위치", rom: "wichi", arti: "lokasi" },
+            { id: 157, bab: "BAB 3", hangeul: "행정", rom: "haengjeong", arti: "administrasi" },
+            { id: 158, bab: "BAB 3", hangeul: "수행하다", rom: "suhaenghada", arti: "melaksanakan" },
+            { id: 159, bab: "BAB 3", hangeul: "업무", rom: "eopmu", arti: "tugas/pekerjaan" },
+            { id: 160, bab: "BAB 3", hangeul: "세계적인", rom: "segyejeogin", arti: "berskala dunia" },
+            { id: 161, bab: "BAB 3", hangeul: "부산항", rom: "busanhang", arti: "Pelabuhan Busan" },
+            { id: 162, bab: "BAB 3", hangeul: "해변", rom: "haebyeon", arti: "pantai" },
+            { id: 163, bab: "BAB 3", hangeul: "아름답다", rom: "areumdapda", arti: "indah" },
+            { id: 164, bab: "BAB 3", hangeul: "관광객", rom: "gwangwanggaek", arti: "wisatawan" },
+            { id: 165, bab: "BAB 3", hangeul: "방문하다", rom: "bangmunhada", arti: "berkunjung" },
+            { id: 166, bab: "BAB 3", hangeul: "발달하다", rom: "baldalhada", arti: "berkembang" },
+            { id: 167, bab: "BAB 3", hangeul: "섬유 산업", rom: "seomyu saneop", arti: "industri tekstil" },
+            { id: 168, bab: "BAB 3", hangeul: "예술", rom: "yesul", arti: "seni" },
 
-            { bab: "BAB 4", hangeul: "일하다", rom: "ilhada", arti: "bekerja" },
-            { bab: "BAB 4", hangeul: "공부하다", rom: "gongbuhada", arti: "belajar" },
-            { bab: "BAB 4", hangeul: "운동하다", rom: "undonghada", arti: "olahraga" },
-            { bab: "BAB 4", hangeul: "전화하다", rom: "jeonhwahada", arti: "menelpon" },
-            { bab: "BAB 4", hangeul: "요리하다", rom: "yorihada", arti: "memasak" },
-            { bab: "BAB 4", hangeul: "쇼핑하다", rom: "syopinghada", arti: "belanja" },
-            { bab: "BAB 4", hangeul: "쉬다", rom: "swida", arti: "istirahat" },
-            { bab: "BAB 4", hangeul: "자다", rom: "jada", arti: "tidur" },
-            { bab: "BAB 4", hangeul: "가다", rom: "gada", arti: "pergi" },
-            { bab: "BAB 4", hangeul: "오다", rom: "oda", arti: "datang" },
-            { bab: "BAB 4", hangeul: "밥", rom: "bap", arti: "nasi" },
-            { bab: "BAB 4", hangeul: "빵", rom: "ppang", arti: "roti" },
-            { bab: "BAB 4", hangeul: "사과", rom: "sagwa", arti: "apel" },
-            { bab: "BAB 4", hangeul: "과자", rom: "gwaja", arti: "cemilan" },
-            { bab: "BAB 4", hangeul: "물", rom: "mul", arti: "air" },
-            { bab: "BAB 4", hangeul: "주스", rom: "juseu", arti: "jus" },
-            { bab: "BAB 4", hangeul: "우유", rom: "uyu", arti: "susu" },
-            { bab: "BAB 4", hangeul: "커피", rom: "keopi", arti: "kopi" },
-            { bab: "BAB 4", hangeul: "텔레비전", rom: "tellebijeon", arti: "televisi" },
-            { bab: "BAB 4", hangeul: "영화", rom: "yeonghwa", arti: "film" },
-            { bab: "BAB 4", hangeul: "책", rom: "chaek", arti: "buku" },
-            { bab: "BAB 4", hangeul: "신문", rom: "sinmun", arti: "koran" },
-            { bab: "BAB 4", hangeul: "하다", rom: "hada", arti: "melakukan" },
-            { bab: "BAB 4", hangeul: "먹다", rom: "meokda", arti: "makan" },
-            { bab: "BAB 4", hangeul: "마시다", rom: "masida", arti: "minum" },
-            { bab: "BAB 4", hangeul: "보다", rom: "boda", arti: "menonton" },
-            { bab: "BAB 4", hangeul: "읽다", rom: "ikda", arti: "membaca" },
-            { bab: "BAB 4", hangeul: "지금", rom: "jigeum", arti: "sekarang" },
-            { bab: "BAB 4", hangeul: "오늘", rom: "oneul", arti: "hari ini" },
-            { bab: "BAB 4", hangeul: "일상", rom: "ilsang", arti: "kehidupan sehari-hari" },
-            { bab: "BAB 4", hangeul: "생일", rom: "saengil", arti: "ulang tahun" },
-            { bab: "BAB 4", hangeul: "케이크", rom: "keikeu", arti: "kue" },
-            { bab: "BAB 4", hangeul: "마루", rom: "maru", arti: "lantai kayu" },
-            { bab: "BAB 4", hangeul: "바닥", rom: "badak", arti: "lantai" },
-            { bab: "BAB 4", hangeul: "좌식 문화", rom: "jwasi munhwa", arti: "budaya duduk di lantai" },
-            { bab: "BAB 4", hangeul: "가깝다", rom: "gakkapda", arti: "dekat" },
-            { bab: "BAB 4", hangeul: "소통하다", rom: "sotonghada", arti: "berkomunikasi" },
-            { bab: "BAB 4", hangeul: "유대감", rom: "yudaegam", arti: "ikatan emosional" },
-            { bab: "BAB 4", hangeul: "형성하다", rom: "hyeongseonghada", arti: "membangun" },
-            { bab: "BAB 4", hangeul: "돕다", rom: "dopda", arti: "membantu" },
-            { bab: "BAB 4", hangeul: "생활하다", rom: "saenghwalhada", arti: "menjalani kehidupan" },
-            { bab: "BAB 4", hangeul: "쉽다", rom: "swipda", arti: "mudah" },
-            { bab: "BAB 4", hangeul: "이유", rom: "iyu", arti: "alasan" },
-            { bab: "BAB 4", hangeul: "현대", rom: "hyeondae", arti: "modern" },
-            { bab: "BAB 4", hangeul: "전통", rom: "jeontong", arti: "tradisional" },
-            { bab: "BAB 4", hangeul: "난방", rom: "nanbang", arti: "pemanas" },
-            { bab: "BAB 4", hangeul: "방식", rom: "bangsik", arti: "metode" },
-            { bab: "BAB 4", hangeul: "영향", rom: "yeonghyang", arti: "pengaruh" },
-            { bab: "BAB 4", hangeul: "따뜻하다", rom: "ttatteuthada", arti: "hangat" },
-            { bab: "BAB 4", hangeul: "뜨겁다", rom: "tteugeopda", arti: "panas" },
-            { bab: "BAB 4", hangeul: "순환", rom: "sunhwan", arti: "sirkulasi" },
-            { bab: "BAB 4", hangeul: "밖", rom: "bak", arti: "luar" },
-            { bab: "BAB 4", hangeul: "주로", rom: "juro", arti: "biasanya" },
-            { bab: "BAB 4", hangeul: "자주", rom: "jaju", arti: "sering" }
-
-
-
-
+            { id: 169, bab: "BAB 4", hangeul: "일하다", rom: "ilhada", arti: "bekerja" },
+            { id: 170, bab: "BAB 4", hangeul: "공부하다", rom: "gongbuhada", arti: "belajar" },
+            { id: 171, bab: "BAB 4", hangeul: "운동하다", rom: "undonghada", arti: "olahraga" },
+            { id: 172, bab: "BAB 4", hangeul: "전화하다", rom: "jeonhwahada", arti: "menelepon" },
+            { id: 173, bab: "BAB 4", hangeul: "요리하다", rom: "yorihada", arti: "memasak" },
+            { id: 174, bab: "BAB 4", hangeul: "쇼핑하다", rom: "syopinghada", arti: "belanja" },
+            { id: 175, bab: "BAB 4", hangeul: "쉬다", rom: "swida", arti: "istirahat" },
+            { id: 176, bab: "BAB 4", hangeul: "자다", rom: "jada", arti: "tidur" },
+            { id: 177, bab: "BAB 4", hangeul: "가다", rom: "gada", arti: "pergi" },
+            { id: 178, bab: "BAB 4", hangeul: "오다", rom: "oda", arti: "datang" },
+            { id: 179, bab: "BAB 4", hangeul: "밥", rom: "bap", arti: "nasi" },
+            { id: 180, bab: "BAB 4", hangeul: "빵", rom: "ppang", arti: "roti" },
+            { id: 181, bab: "BAB 4", hangeul: "사과", rom: "sagwa", arti: "apel" },
+            { id: 182, bab: "BAB 4", hangeul: "과자", rom: "gwaja", arti: "cemilan" },
+            { id: 183, bab: "BAB 4", hangeul: "물", rom: "mul", arti: "air" },
+            { id: 184, bab: "BAB 4", hangeul: "주스", rom: "juseu", arti: "jus" },
+            { id: 185, bab: "BAB 4", hangeul: "우유", rom: "uyu", arti: "susu" },
+            { id: 186, bab: "BAB 4", hangeul: "커피", rom: "keopi", arti: "kopi" },
+            { id: 187, bab: "BAB 4", hangeul: "텔레비전", rom: "tellebijeon", arti: "televisi" },
+            { id: 188, bab: "BAB 4", hangeul: "영화", rom: "yeonghwa", arti: "film" },
+            { id: 189, bab: "BAB 4", hangeul: "책", rom: "chaek", arti: "buku" },
+            { id: 190, bab: "BAB 4", hangeul: "신문", rom: "sinmun", arti: "koran" },
+            { id: 191, bab: "BAB 4", hangeul: "하다", rom: "hada", arti: "melakukan" },
+            { id: 192, bab: "BAB 4", hangeul: "먹다", rom: "meokda", arti: "makan" },
+            { id: 193, bab: "BAB 4", hangeul: "마시다", rom: "masida", arti: "minum" },
+            { id: 194, bab: "BAB 4", hangeul: "보다", rom: "boda", arti: "menonton" },
+            { id: 195, bab: "BAB 4", hangeul: "읽다", rom: "ikda", arti: "membaca" },
+            { id: 196, bab: "BAB 4", hangeul: "지금", rom: "jigeum", arti: "sekarang" },
+            { id: 197, bab: "BAB 4", hangeul: "오늘", rom: "oneul", arti: "hari ini" },
+            { id: 198, bab: "BAB 4", hangeul: "일상", rom: "ilsang", arti: "kehidupan sehari-hari" },
+            { id: 199, bab: "BAB 4", hangeul: "생일", rom: "saengil", arti: "ulang tahun" },
+            { id: 200, bab: "BAB 4", hangeul: "케이크", rom: "keikeu", arti: "kue" },
+            { id: 201, bab: "BAB 4", hangeul: "마루", rom: "maru", arti: "lantai kayu" },
+            { id: 202, bab: "BAB 4", hangeul: "바닥", rom: "badak", arti: "lantai" },
+            { id: 203, bab: "BAB 4", hangeul: "좌식 문화", rom: "jwasik munhwa", arti: "budaya duduk di lantai" },
+            { id: 204, bab: "BAB 4", hangeul: "가깝다", rom: "gakkapda", arti: "dekat" },
+            { id: 205, bab: "BAB 4", hangeul: "소통하다", rom: "sotonghada", arti: "berkomunikasi" },
+            { id: 206, bab: "BAB 4", hangeul: "유대감", rom: "yudaegam", arti: "ikatan" },
+            { id: 207, bab: "BAB 4", hangeul: "형성하다", rom: "hyeongseonghada", arti: "membangun" },
+            { id: 208, bab: "BAB 4", hangeul: "돕다", rom: "dopda", arti: "membantu" },
+            { id: 209, bab: "BAB 4", hangeul: "생활하다", rom: "saenghwalhada", arti: "menjalani kehidupan" },
+            { id: 210, bab: "BAB 4", hangeul: "쉽다", rom: "swipda", arti: "mudah" },
+            { id: 211, bab: "BAB 4", hangeul: "이유", rom: "iyu", arti: "alasan" },
+            { id: 212, bab: "BAB 4", hangeul: "현대", rom: "hyeondae", arti: "modern" },
+            { id: 213, bab: "BAB 4", hangeul: "전통", rom: "jeontong", arti: "tradisional" },
+            { id: 214, bab: "BAB 4", hangeul: "난방", rom: "nanbang", arti: "pemanas" },
+            { id: 215, bab: "BAB 4", hangeul: "방식", rom: "bangsik", arti: "metode" },
+            { id: 216, bab: "BAB 4", hangeul: "영향", rom: "yeonghyang", arti: "pengaruh" },
+            { id: 217, bab: "BAB 4", hangeul: "따뜻하다", rom: "ttatteuthada", arti: "hangat" },
+            { id: 218, bab: "BAB 4", hangeul: "뜨겁다", rom: "tteugeopda", arti: "panas" },
+            { id: 219, bab: "BAB 4", hangeul: "순환", rom: "sunhwan", arti: "sirkulasi" },
+            { id: 220, bab: "BAB 4", hangeul: "밖", rom: "bak", arti: "luar" },
+            { id: 221, bab: "BAB 4", hangeul: "주로", rom: "juro", arti: "biasanya" },
+            { id: 222, bab: "BAB 4", hangeul: "자주", rom: "jaju", arti: "sering" }
         ];
 
         const grammarData = [
-            {
-                struktur: "~입니다 / ~입니까?",
-                arti: "Adalah / Apakah (Formal)",
-                fungsi: "Menyatakan identitas/status (Sopan Formal).",
-                contoh: "저는 학생입니다.",
-                arti_contoh: "Saya adalah pelajar."
-            },
-            {
-                struktur: "이/가 (Partikel Subjek)",
-                arti: "Penanda Subjek",
-                fungsi: "Menunjukkan subjek kalimat.",
-                contoh: "날씨가 좋습니다.",
-                arti_contoh: "Cuacanya bagus."
-            },
-            {
-                struktur: "~(으)세요",
-                arti: "Silakan / Tolong",
-                fungsi: "Perintah sopan.",
-                contoh: "앉으세요.",
-                arti_contoh: "Silakan duduk."
-            },
-            {
-                struktur: "~고 싶어요",
-                arti: "Ingin...",
-                fungsi: "Menyatakan keinginan.",
-                contoh: "가고 싶어요.",
-                arti_contoh: "Saya ingin pergi."
-            }
+            { struktur: "~입니다 / ~입니까?", arti: "Adalah / Apakah (Formal)", fungsi: "Menyatakan identitas/status (Sopan Formal).", contoh: "저는 학생입니다.", arti_contoh: "Saya adalah pelajar." },
+            { struktur: "이/가 (Partikel Subjek)", arti: "Penanda Subjek", fungsi: "Menunjukkan subjek kalimat.", contoh: "날씨가 좋습니다.", arti_contoh: "Cuacanya bagus." },
+            { struktur: "~(으)세요", arti: "Silakan / Tolong", fungsi: "Perintah sopan.", contoh: "앉으세요.", arti_contoh: "Silakan duduk." },
+            { struktur: "~고 싶어요", arti: "Ingin...", fungsi: "Menyatakan keinginan.", contoh: "가고 싶어요.", arti_contoh: "Saya ingin pergi." }
         ];
 
         // ==========================================
-        // RENDER FUNCTIONS
+        // RENDER FUNCTIONS (Textbook, Hangeul, Grammar)
         // ==========================================
 
         function speak(text, lang = 'ko-KR', onEndCallback = null) {
@@ -770,7 +931,6 @@
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = lang;
-            // Increased rate slightly for faster feeling
             utterance.rate = 1.1; 
             
             if (onEndCallback) {
@@ -782,8 +942,6 @@
 
         function renderHangeul() {
             const container = document.getElementById('hangeul-grid');
-            
-            // Group data by Type
             const grouped = hangeulData.reduce((acc, item) => {
                 if (!acc[item.type]) acc[item.type] = [];
                 acc[item.type].push(item);
@@ -791,17 +949,13 @@
             }, {});
 
             let html = '';
-            
-            // Define order for display
             const order = ['Konsonan Dasar', 'Konsonan Rangkap', 'Vokal Dasar', 'Vokal Rangkap'];
             
             order.forEach(type => {
                 if (grouped[type]) {
-                    // Start a new row for the header
                     html += `<div class="col-span-full mt-4 mb-2"><h3 class="text-lg font-bold text-indigo-700 border-b border-indigo-100 pb-1">${type}</h3></div>`;
                     
                     grouped[type].forEach(item => {
-                        // Check if it has Awal/Akhir details
                         const details = item.awal ? 
                             `<div class="grid grid-cols-2 gap-1 w-full text-[10px] sm:text-xs text-gray-500 mt-2 bg-gray-50 rounded p-1">
                                 <div class="text-center border-r border-gray-200">
@@ -826,7 +980,6 @@
                     });
                 }
             });
-
             container.innerHTML = html;
         }
 
@@ -837,7 +990,6 @@
                 return;
             }
 
-            // Group by Chapter
             const grouped = data.reduce((acc, item) => {
                 if (!acc[item.bab]) acc[item.bab] = [];
                 acc[item.bab].push(item);
@@ -911,14 +1063,317 @@
             );
             renderGrammar(filtered);
         }
+        
+        // ==========================================
+        // QUIZ/LATIHAN LOGIC
+        // ==========================================
+        let selectedVocabForQuiz = [];
+        let quizQuestions = [];
+        let currentQuestionIndex = 0;
+        let currentScore = 0; // Added variable for score
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]
+                ];
+            }
+            return array;
+        }
+
+        // --- Selection View Functions ---
+
+        function renderQuizSelection() {
+            const chapter = document.getElementById('quiz-chapter-filter').value;
+            const container = document.getElementById('vocab-selection-list');
+            
+            // Filter data based on chapter
+            const filteredData = chapter 
+                ? vocabTextbookData.filter(item => item.bab === chapter)
+                : vocabTextbookData;
+
+            if (filteredData.length === 0) {
+                 container.innerHTML = `<div class="p-4 text-center text-gray-500">Tidak ada kosakata di bab ini.</div>`;
+                 updateQuizSelectionSummary();
+                 return;
+            }
+
+            // Get selected IDs from the global array
+            const selectedIds = selectedVocabForQuiz.map(v => v.id);
+
+            container.innerHTML = filteredData.map(item => `
+                <label class="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:bg-indigo-50 transition cursor-pointer">
+                    <span class="flex-grow font-medium text-gray-800">${item.hangeul} <span class="text-sm text-gray-500">(${item.arti})</span></span>
+                    <input type="checkbox" data-id="${item.id}" onchange="toggleVocabSelection(this, ${item.id})" class="form-checkbox h-5 w-5 text-pink-600 rounded focus:ring-pink-500" ${selectedIds.includes(item.id) ? 'checked' : ''}>
+                </label>
+            `).join('');
+
+            updateQuizSelectionSummary();
+        }
+
+        function toggleVocabSelection(checkbox, id) {
+            const vocab = vocabTextbookData.find(v => v.id === id);
+            if (checkbox.checked) {
+                if (!selectedVocabForQuiz.some(v => v.id === id)) {
+                    selectedVocabForQuiz.push(vocab);
+                }
+            } else {
+                selectedVocabForQuiz = selectedVocabForQuiz.filter(v => v.id !== id);
+            }
+            updateQuizSelectionSummary();
+        }
+
+        // NEW: Optimized Bulk Select Function
+        function bulkSelectVocab(shouldSelect) {
+            const container = document.getElementById('vocab-selection-list');
+            const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+            const visibleIds = checkboxes.map(cb => parseInt(cb.getAttribute('data-id')));
+            
+            if (shouldSelect) {
+                // Add visible items that aren't already selected
+                visibleIds.forEach(id => {
+                    if (!selectedVocabForQuiz.some(v => v.id === id)) {
+                         const vocab = vocabTextbookData.find(v => v.id === id);
+                         selectedVocabForQuiz.push(vocab);
+                    }
+                });
+            } else {
+                // Remove visible items from selection
+                selectedVocabForQuiz = selectedVocabForQuiz.filter(v => !visibleIds.includes(v.id));
+            }
+
+            // Update UI Checkboxes visually
+            checkboxes.forEach(cb => cb.checked = shouldSelect);
+            
+            updateQuizSelectionSummary();
+        }
+
+
+        function updateQuizSelectionSummary() {
+            const count = selectedVocabForQuiz.length;
+            document.getElementById('selection-count').innerText = `${count} kata terpilih`;
+            
+            const summaryContainer = document.getElementById('selected-vocab-summary');
+            const startBtn = document.getElementById('start-quiz-btn');
+
+            if (count > 0) {
+                summaryContainer.innerHTML = selectedVocabForQuiz.map(v => `<span class="inline-block bg-pink-100 text-pink-700 text-xs font-medium mr-1 mb-1 px-2 py-0.5 rounded-full">${v.hangeul}</span>`).join('');
+                startBtn.disabled = false;
+                startBtn.classList.remove('bg-gray-400', 'hover:bg-pink-700');
+                startBtn.classList.add('bg-pink-600', 'hover:bg-pink-700');
+                startBtn.innerText = `Mulai Latihan (${count} Soal)`;
+            } else {
+                summaryContainer.innerHTML = 'Belum ada kata yang dipilih.';
+                startBtn.disabled = true;
+                startBtn.classList.add('bg-gray-400');
+                startBtn.classList.remove('bg-pink-600', 'hover:bg-pink-700');
+                startBtn.innerText = `Mulai Latihan (0 Soal)`;
+            }
+        }
+
+        // --- Quiz Mode Functions ---
+        
+        function createQuestion(vocabItem) {
+            const correctAnswer = vocabItem.arti;
+            
+            // Get all other possible answers
+            const allPossibleAnswers = vocabTextbookData
+                .filter(item => item.arti !== correctAnswer)
+                .map(item => item.arti);
+
+            // Shuffle and pick 3 wrong answers
+            const wrongAnswers = shuffle(allPossibleAnswers).slice(0, 3);
+            
+            // Combine and shuffle all 4 options
+            let options = shuffle([...wrongAnswers, correctAnswer]);
+
+            return {
+                hangeul: vocabItem.hangeul,
+                correctAnswer: correctAnswer,
+                options: options
+            };
+        }
+
+        function startQuiz() {
+            if (selectedVocabForQuiz.length < 1) {
+                alert("Pilih minimal 1 kosakata untuk memulai latihan.");
+                return;
+            }
+
+            // 1. Generate questions
+            quizQuestions = selectedVocabForQuiz.map(createQuestion);
+            // 2. Shuffle the order of the questions themselves
+            quizQuestions = shuffle(quizQuestions);
+
+            currentQuestionIndex = 0;
+            currentScore = 0; // Reset Score
+            
+            // 3. Update global UI counts
+            document.getElementById('total-questions-count').innerText = quizQuestions.length;
+
+            // 4. Go to quiz view and render the first question
+            showVocabSubTab('quiz-mode');
+            renderQuestion(currentQuestionIndex);
+        }
+
+        function renderQuestion(index) {
+            if (index >= quizQuestions.length) {
+                showQuizFinishModal();
+                return;
+            }
+
+            // Update Progress Bar
+            const progressPercent = ((index) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${progressPercent}%`;
+
+            const question = quizQuestions[index];
+            
+            // Reset UI State
+            document.getElementById('current-question-index').innerText = index + 1;
+            document.getElementById('quiz-question').innerText = question.hangeul;
+            document.getElementById('quiz-feedback').innerHTML = '';
+            document.getElementById('quiz-feedback').classList.remove('opacity-100');
+            
+            const nextBtn = document.getElementById('next-question-btn');
+            nextBtn.disabled = true;
+            nextBtn.classList.add('bg-gray-300', 'text-gray-500');
+            nextBtn.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-700', 'shadow-lg');
+            
+            // Render Options
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = question.options.map((option, i) => `
+                <button 
+                    class="quiz-option w-full bg-white p-4 rounded-xl border border-gray-200 text-lg font-medium text-gray-700 text-left shadow-sm flex items-center group"
+                    data-answer="${option}"
+                    onclick="checkAnswer(this, '${question.correctAnswer}')"
+                >
+                    <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm mr-3 group-hover:bg-indigo-100 transition-colors border border-indigo-100">${i + 1}</div>
+                    <span>${option}</span>
+                </button>
+            `).join('');
+
+            // Speak the Korean word
+            speak(question.hangeul);
+        }
+
+        function checkAnswer(selectedElement, correctAnswer) {
+            const selectedAnswer = selectedElement.getAttribute('data-answer');
+            const isCorrect = selectedAnswer === correctAnswer;
+
+            const allOptions = document.querySelectorAll('#quiz-options .quiz-option');
+            allOptions.forEach(btn => {
+                btn.classList.add('disabled');
+                btn.onclick = null; // Remove onclick to prevent multiple clicks
+            });
+            
+            const feedbackEl = document.getElementById('quiz-feedback');
+            const nextBtn = document.getElementById('next-question-btn');
+
+            if (isCorrect) {
+                currentScore++; // Increment Score
+                selectedElement.classList.add('correct');
+                // Update icon inside button
+                const iconDiv = selectedElement.querySelector('div');
+                iconDiv.classList.remove('bg-indigo-50', 'text-indigo-600');
+                iconDiv.classList.add('bg-green-500', 'text-white', 'border-transparent');
+                iconDiv.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i>';
+
+                feedbackEl.innerHTML = '<span class="text-green-600 flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-5 h-5"></i> Jawaban Benar!</span>';
+            } else {
+                selectedElement.classList.add('incorrect');
+                 // Update icon inside button
+                const iconDiv = selectedElement.querySelector('div');
+                iconDiv.classList.remove('bg-indigo-50', 'text-indigo-600');
+                iconDiv.classList.add('bg-red-500', 'text-white', 'border-transparent');
+                iconDiv.innerHTML = '<i data-lucide="x" class="w-5 h-5"></i>';
+
+                feedbackEl.innerHTML = `<span class="text-red-600 flex items-center justify-center gap-2"><i data-lucide="x-circle" class="w-5 h-5"></i> Salah. Jawaban: ${correctAnswer}</span>`;
+                
+                // Highlight the correct answer
+                allOptions.forEach(btn => {
+                    if (btn.getAttribute('data-answer') === correctAnswer) {
+                        btn.classList.add('correct');
+                        const correctIconDiv = btn.querySelector('div');
+                        correctIconDiv.classList.remove('bg-indigo-50', 'text-indigo-600');
+                        correctIconDiv.classList.add('bg-green-500', 'text-white', 'border-transparent');
+                        correctIconDiv.innerHTML = '<i data-lucide="check" class="w-5 h-5"></i>';
+                    }
+                });
+            }
+            
+            // Enable Next Button with Style
+            nextBtn.disabled = false;
+            nextBtn.classList.remove('bg-gray-300', 'text-gray-500');
+            nextBtn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-700', 'shadow-lg');
+            
+            feedbackEl.classList.add('opacity-100');
+            lucide.createIcons();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            renderQuestion(currentQuestionIndex);
+        }
+
+        function showQuizFinishModal() {
+            // Update Progress Bar to 100%
+            document.getElementById('quiz-progress-bar').style.width = `100%`;
+
+            // Calculate Score
+            const total = quizQuestions.length;
+            const score = Math.round((currentScore / total) * 100);
+
+            // Update UI
+            document.getElementById('final-score-number').innerText = score;
+            document.getElementById('final-score-detail').innerText = `${currentScore} dari ${total} Benar`;
+            
+            // Set Message based on Score
+            let message = "";
+            let colorClass = "";
+            if (score === 100) {
+                message = "Sempurna! Kamu hebat sekali! 🎉";
+                colorClass = "text-indigo-600";
+            } else if (score >= 80) {
+                message = "Kerja bagus! Sedikit lagi sempurna! 💪";
+                colorClass = "text-green-600";
+            } else if (score >= 50) {
+                message = "Lumayan, tapi jangan menyerah latihan ya! 📚";
+                colorClass = "text-yellow-600";
+            } else {
+                message = "Jangan sedih, ayo belajar lagi! 🔥";
+                colorClass = "text-red-500";
+            }
+            const msgEl = document.getElementById('final-score-message');
+            msgEl.innerText = message;
+            msgEl.className = `text-sm font-bold italic mb-6 ${colorClass}`;
+
+            document.getElementById('quiz-finish-modal').classList.remove('hidden');
+        }
+
+        function hideQuizFinishModal() {
+            document.getElementById('quiz-finish-modal').classList.add('hidden');
+        }
+
+        function restartQuiz() {
+            hideQuizFinishModal();
+            startQuiz(); // Simply restart with the same selected vocab/questions
+        }
+
 
         // ==========================================
-        // CHAT AI LOGIC
+        // CHAT AI LOGIC (Unchanged but included for completeness)
         // ==========================================
         const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=";
-        const API_KEY = "AIzaSyCbQplcfyTVBQdiTLFiYOc_V9xEUhuXxI4"; 
+        const API_KEY = ""; 
         let chatHistory = [];
         let isTyping = false;
+        let isInCallMode = false;
+        let recognition = null;
+        let isMicOn = true;
+        let isAiSpeaking = false; 
 
         // Function untuk membuat pesan awal berdasarkan mode
         function getInitialMessage(mode, level) {
@@ -960,11 +1415,9 @@
             if (mode === 'tutor') {
                 prompt = `Anda adalah Tutor Bahasa Korea formal (Level: ${level}). Balas pesan pengguna dalam bahasa Korea sesuai level yang diminta. Setelah membalas, jika ditemukan kesalahan dalam input pengguna, berikan koreksi dan penjelasan singkat dalam bahasa Indonesia. Jika input pengguna benar, cukup balas. Jangan gunakan emoji berlebihan.`;
             } else {
-                // Mode Conversation: Menyenangkan, emosional, seperti teman biasa
                 prompt = `Anda adalah teman bicara (native speaker) Korea yang sangat ramah, suportif, dan menyenangkan (Level: ${level}). Balas pesan pengguna dalam bahasa Korea informal (반말 atau bentuk sopan tergantung konteks dan level) dan gunakan emoji yang sering dipakai dalam chat santai. Jangan terlalu fokus pada koreksi tata bahasa, utamakan kelancaran dan respon yang terasa alami dan emosional seperti manusia pada umumnya. Tanggapi topik apa pun yang dibawa pengguna.`;
             }
 
-            // Tambahkan instruksi khusus jika dalam mode panggilan suara
             if (isInCallMode) {
                 prompt += " PENTING: Anda sedang dalam mode 'Telepon Suara'. Berikan respons yang singkat (maksimal 2 kalimat), natural untuk diucapkan, dan mudah dipahami saat didengar. Hindari penggunaan emoji atau formatting (bold/italic) karena teks akan dibacakan oleh mesin Text-to-Speech.";
             }
@@ -1006,15 +1459,13 @@
                 chatHistory.push({ role: "model", parts: [{ text: reply }] });
                 document.getElementById('error-message').classList.add('hidden');
 
-                // Jika mode suara, bacakan teks
                 if (isVoice) {
                     updateCallStatus("Berbicara...", "AI sedang merespon");
                     document.getElementById('avatar-ring').classList.add('avatar-speaking');
                     document.getElementById('avatar-ring').classList.remove('avatar-pulse');
                     
-                    isAiSpeaking = true; // Set flag
+                    isAiSpeaking = true; 
                     speak(reply, 'ko-KR', () => {
-                        // Setelah AI selesai bicara, mulai dengarkan lagi
                         document.getElementById('avatar-ring').classList.remove('avatar-speaking');
                         isAiSpeaking = false;
                         if (isInCallMode) {
@@ -1038,20 +1489,13 @@
         // ==========================================
         // VOICE CALL FEATURE
         // ==========================================
-        let isInCallMode = false;
-        let recognition = null;
-        let isMicOn = true;
-        let isAiSpeaking = false; // Add flag to prevent listening while AI speaks
-
         async function checkAudioAvailability() {
             try {
-                // Check if browser supports mediaDevices
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                     return false;
                 }
-                // Try to open stream briefly to trigger permission/check hardware
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop()); // Close stream immediately
+                stream.getTracks().forEach(track => track.stop());
                 return true;
             } catch (err) {
                 console.warn("Audio check failed:", err);
@@ -1060,7 +1504,6 @@
         }
 
         async function startCallMode() {
-            // Check browser support
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 alert("Maaf, browser Anda tidak mendukung fitur Voice Call. Gunakan Google Chrome.");
@@ -1071,7 +1514,6 @@
             updateCallStatus("Memeriksa Audio...", "Harap tunggu...");
             document.getElementById('avatar-ring').classList.remove('avatar-pulse');
 
-            // Pre-check microphone availability
             const hasAudio = await checkAudioAvailability();
             
             if (!hasAudio) {
@@ -1080,20 +1522,18 @@
                  document.getElementById('avatar-circle').classList.add('avatar-error');
                  isMicOn = false;
                  updateMicButtonUI();
-                 return; // Stop here, don't start recognition loop
+                 return; 
             }
 
             isInCallMode = true;
             isAiSpeaking = false;
-            // Default to ON when starting
             isMicOn = true;
             
-            resetChat(); // Start new context
+            resetChat(); 
             
-            // Initialize Recognition
             recognition = new SpeechRecognition();
-            recognition.lang = 'ko-KR'; // Listen for Korean
-            recognition.continuous = false; // Stop after one sentence
+            recognition.lang = 'ko-KR'; 
+            recognition.continuous = false; 
             recognition.interimResults = true;
 
             recognition.onstart = () => {
@@ -1112,8 +1552,7 @@
                 document.getElementById('live-transcript').innerText = transcript;
                 
                 if (event.results[0].isFinal) {
-                    // Send to AI immediately
-                    recognition.stop(); // Stop listening immediately to prevent duplicate/echo
+                    recognition.stop(); 
                     updateCallStatus("Memproses...", "AI sedang berpikir");
                     document.getElementById('avatar-ring').classList.remove('avatar-pulse');
                     sendMessage(transcript, true);
@@ -1121,12 +1560,9 @@
             };
 
             recognition.onend = () => {
-                // IMPORTANT: Restart logic to fix "sometimes not listening"
-                // Only restart if call is active, mic is user-enabled, AI is NOT processing/typing, and AI is NOT speaking
                 document.getElementById('avatar-ring').classList.remove('avatar-pulse');
                 
                 if (isInCallMode && isMicOn && !isTyping && !isAiSpeaking) {
-                    // Restart gently
                     setTimeout(() => {
                         try { recognition.start(); } catch(e){}
                     }, 500);
@@ -1137,9 +1573,7 @@
                 console.warn("Speech recognition warning:", event.error);
                 document.getElementById('avatar-ring').classList.remove('avatar-pulse');
 
-                if (event.error === 'no-speech') {
-                    // Silence handling: Restart is handled by onend usually, but good to have here
-                } else if (event.error === 'audio-capture') {
+                if (event.error === 'audio-capture') {
                     updateCallStatus("Mikrofon Error", "Cek koneksi mic");
                     isMicOn = false;
                     updateMicButtonUI();
@@ -1150,9 +1584,8 @@
                 }
             };
             
-            // Start listening initially
             setTimeout(() => {
-                updateMicButtonUI(); // Ensure UI matches state
+                updateMicButtonUI(); 
                 startListening();
             }, 500);
         }
@@ -1163,7 +1596,6 @@
                     recognition.start();
                 } catch (e) {
                     // Ignore error if already started
-                    // console.log("Recognition already started or error");
                 }
             }
         }
@@ -1176,20 +1608,17 @@
         }
 
         function toggleMic() {
-            // Check if mic was disabled due to error, reset error state if user clicks
             const wasError = document.getElementById('avatar-circle').classList.contains('avatar-error');
             
             isMicOn = !isMicOn;
             
             if (wasError && isMicOn) {
-                // Try to restart fresh if recovering from error
                  document.getElementById('avatar-circle').classList.remove('avatar-error');
                  checkAudioAvailability().then(hasAudio => {
                      if(hasAudio) {
                          startListening();
                          updateMicButtonUI();
                      } else {
-                         // Failed again
                          isMicOn = false;
                          updateMicButtonUI();
                          alert("Mikrofon masih tidak terdeteksi.");
@@ -1225,14 +1654,13 @@
                 btn.classList.remove('bg-green-500', 'hover:bg-green-600');
                 btn.classList.add('bg-red-500', 'hover:bg-red-600');
                 icon.setAttribute('data-lucide', 'mic-off');
-                text.innerText = "Mic Mati";
+                text.innerText = "Mic Mati / Bicara";
             }
             lucide.createIcons();
         }
 
         function updateCallStatus(status, substatus) {
             document.getElementById('call-status').innerText = status;
-            // document.getElementById('call-substatus').innerText = substatus; // Substatus removed for cleaner UI
         }
 
         // Initialize
@@ -1240,8 +1668,9 @@
             lucide.createIcons();
             renderHangeul();
             renderGrammar(grammarData);
-            filterVocabTextbook();
-            resetChat(); // Panggil resetChat untuk pesan awal yang benar
+            // Default tab: Kosakata (vocab-container)
+            showTab('vocab-container', document.querySelector('.nav-link.active'));
+            resetChat(); 
         });
     </script>
 </body>
