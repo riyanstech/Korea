@@ -204,6 +204,23 @@
             background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
             transform: scale(1.05);
         }
+        
+        /* New Styles for Conversation Feature */
+        .chapter-grid-btn {
+            background: #1f2937; /* Dark gray similar to reference */
+            color: #fb923c; /* Orange text similar to reference */
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .chapter-grid-btn:hover {
+            background: #374151;
+            transform: translateY(-2px);
+            border-color: #fb923c;
+            box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);
+        }
+        .script-card {
+            border-left: 4px solid #4f46e5;
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen">
@@ -230,6 +247,9 @@
                     <button class="nav-link active" onclick="showTab('vocab-container', this)">
                         <i data-lucide="book-open-text" class="w-4 h-4 mr-2"></i>Kosakata
                     </button>
+                    <button class="nav-link" onclick="showTab('conversation-container', this)">
+                        <i data-lucide="message-circle" class="w-4 h-4 mr-2"></i>Percakapan
+                    </button>
                     <button class="nav-link" onclick="showTab('hangeul', this)">
                         <i data-lucide="scan" class="w-4 h-4 mr-2"></i>Hangeul
                     </button>
@@ -254,6 +274,10 @@
             <div id="mobile-menu" class="flex flex-col gap-2 md:hidden px-1 max-w-7xl mx-auto">
                 <button class="nav-link w-full active" onclick="showTab('vocab-container', this)">
                     <i data-lucide="book-open-text" class="w-5 h-5 mr-3"></i>Kosakata Textbook
+                </button>
+                <!-- NEW: Percakapan Mobile -->
+                <button class="nav-link w-full" onclick="showTab('conversation-container', this)">
+                    <i data-lucide="message-circle" class="w-5 h-5 mr-3"></i>Percakapan
                 </button>
                 <button class="nav-link w-full" onclick="showTab('hangeul', this)">
                     <i data-lucide="scan" class="w-5 h-5 mr-3"></i>Hangeul & Pelafalan
@@ -436,6 +460,62 @@
                          </button>
                      </div>
                  </div>
+            </div>
+            <!-- NEW SECTION: PERCAKAPAN (CONVERSATION) -->
+            <div id="conversation-container" class="tab-content hidden animate-fade-in space-y-6">
+                <!-- Chapter Grid View -->
+                <div id="conv-chapter-view">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Menu Bab Percakapan</h2>
+                        <p class="text-gray-500 text-sm">Pilih bab untuk menonton video dan membaca skrip.</p>
+                    </div>
+                    <div id="conv-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+                        <!-- Buttons rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- Video Player & Script View -->
+                <div id="conv-player-view" class="hidden flex flex-col gap-4">
+                    <!-- Nav Bar in Player -->
+                    <div class="flex items-center justify-between">
+                         <button onclick="showConversationGrid()" class="text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg flex items-center font-bold text-sm transition">
+                             <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Kembali
+                         </button>
+                         <h3 id="conv-title" class="text-lg font-bold text-gray-800 truncate px-2">Bab 1</h3>
+                    </div>
+
+                    <!-- YouTube Video Container -->
+                    <div class="w-full bg-black rounded-2xl overflow-hidden shadow-lg aspect-video relative">
+                        <iframe id="youtube-iframe" class="w-full h-full" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    </div>
+
+                    <!-- Video Controls / Switcher if multiple videos -->
+                    <div class="flex justify-between items-center bg-white/70 p-3 rounded-xl border border-white">
+                        <div class="text-sm font-bold text-gray-600">Video <span id="current-video-idx">1</span> dari <span id="total-videos">2</span></div>
+                        <div class="flex gap-2">
+                            <button onclick="prevVideo()" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition text-gray-700">
+                                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                            </button>
+                             <button onclick="nextVideo()" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition text-gray-700">
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Script Section -->
+                    <div class="glass-card flex flex-col overflow-hidden">
+                        <div class="p-4 bg-indigo-50/50 border-b border-gray-100 flex justify-between items-center">
+                            <h4 class="font-bold text-indigo-800 flex items-center gap-2">
+                                <i data-lucide="file-text" class="w-5 h-5"></i> Skrip Percakapan
+                            </h4>
+                            <button onclick="toggleScript()" class="text-xs text-indigo-600 font-semibold underline">Sembunyikan/Tampil</button>
+                        </div>
+                        
+                        <div id="script-container" class="p-4 space-y-4 max-h-[400px] overflow-y-auto custom-scroll bg-white/50">
+                            <!-- Script cards rendered here -->
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- 2. Hangeul -->
@@ -683,7 +763,59 @@
         // ==========================================
         // DATA
         // ==========================================
+        // --- CONVERSATION DATA (Placeholder for 60 Chapters) ---
+        // Generating 60 Chapters programmatically
+        const conversationData = [];
         
+        // Manual Data for Bab 1
+        conversationData.push({
+            id: 1,
+            title: "Bab 1: Perkenalan Diri",
+            videos: [
+                { id: "eI0kYj08-qY", label: "Percakapan 1" }, // Example Youtube ID
+                { id: "M7h1Tj2e-xQ", label: "Percakapan 2" }
+            ],
+            scripts: [
+                 // Script for Video 1
+                [
+                    { speaker: "Minsoo", text: "안녕하세요? 저는 이민수입니다.", meaning: "Halo, saya Lee Min-soo." },
+                    { speaker: "Rihan", text: "안녕하세요? 저는 리한입니다.", meaning: "Halo, saya Rihan." },
+                    { speaker: "Minsoo", text: "어느 나라 사람입니까?", meaning: "Anda orang negara mana?" },
+                    { speaker: "Rihan", text: "저는 파키스탄 사람입니다.", meaning: "Saya orang Pakistan." }
+                ],
+                // Script for Video 2
+                 [
+                    { speaker: "Tuahn", text: "안녕하세요? 투안입니다.", meaning: "Halo, saya Tuan." },
+                    { speaker: "Jungu", text: "반갑습니다.", meaning: "Senang bertemu dengan Anda." }
+                ]
+            ]
+        });
+
+        // Manual Data for Bab 2
+        conversationData.push({
+            id: 2,
+            title: "Bab 2: Sekolah",
+            videos: [
+                { id: "dQw4w9WgXcQ", label: "Percakapan 1" } // Placeholder
+            ],
+            scripts: [
+                [
+                     { speaker: "Guru", text: "여기가 교실입니다.", meaning: "Ini adalah ruang kelas." },
+                     { speaker: "Murid", text: "네, 알겠습니다.", meaning: "Baik, saya mengerti." }
+                ]
+            ]
+        });
+
+        // Fill the rest (Bab 3 to 60) with placeholders
+        for (let i = 3; i <= 60; i++) {
+            conversationData.push({
+                id: i,
+                title: `Bab ${i}: Topik Latihan`,
+                videos: [{ id: "jNQXAC9IVRw", label: "Video Materi" }],
+                scripts: [[{ speaker: "System", text: "아직 데이터가 없습니다.", meaning: "Data belum tersedia untuk bab ini." }]]
+            });
+        }
+
         // --- DOWNLOADS DATA ---
         const downloadsData = [
             { 
@@ -1505,6 +1637,121 @@
 
             window.speechSynthesis.speak(utterance);
         }
+        // --- CONVERSATION LOGIC ---
+        let currentConvBab = null;
+        let currentVideoIndex = 0;
+
+        function renderConversationChapters() {
+            const container = document.getElementById('conv-grid');
+            container.innerHTML = conversationData.map(chap => `
+                <button onclick="openConversation(${chap.id})" class="chapter-grid-btn p-4 rounded-xl flex flex-col items-center justify-center h-20 shadow-md">
+                    <span class="text-xs font-semibold text-gray-400 mb-1">BAB</span>
+                    <span class="text-xl font-bold font-['Noto_Sans_KR']">${chap.id}</span>
+                </button>
+            `).join('');
+            
+            // Ensure View Switch is correct
+            document.getElementById('conv-chapter-view').classList.remove('hidden');
+            document.getElementById('conv-player-view').classList.add('hidden');
+        }
+
+        function openConversation(babId) {
+            currentConvBab = conversationData.find(c => c.id === babId);
+            if (!currentConvBab) return;
+
+            // Reset video index
+            currentVideoIndex = 0;
+            updateConversationPlayer();
+            
+            // Switch View
+            document.getElementById('conv-chapter-view').classList.add('hidden');
+            document.getElementById('conv-player-view').classList.remove('hidden');
+        }
+
+        function showConversationGrid() {
+            // Stop video
+            document.getElementById('youtube-iframe').src = "";
+            
+            document.getElementById('conv-player-view').classList.add('hidden');
+            document.getElementById('conv-chapter-view').classList.remove('hidden');
+        }
+
+        function updateConversationPlayer() {
+            if(!currentConvBab) return;
+            
+            // Update Title
+            document.getElementById('conv-title').innerText = currentConvBab.title;
+            
+            // Update Video Counters
+            document.getElementById('current-video-idx').innerText = currentVideoIndex + 1;
+            document.getElementById('total-videos').innerText = currentConvBab.videos.length;
+
+            // Load Video
+            const videoId = currentConvBab.videos[currentVideoIndex].id;
+            document.getElementById('youtube-iframe').src = `https://www.youtube.com/embed/${videoId}?rel=0`;
+
+            // Load Script
+            renderScript();
+        }
+
+        function renderScript() {
+            const scriptData = currentConvBab.scripts[currentVideoIndex] || [];
+            const container = document.getElementById('script-container');
+            
+            if (scriptData.length === 0) {
+                container.innerHTML = '<div class="text-gray-500 text-center italic">Skrip tidak tersedia.</div>';
+                return;
+            }
+
+            container.innerHTML = scriptData.map((line, idx) => `
+                <div class="script-card bg-white p-3 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </div>
+                            <span class="text-sm font-bold text-gray-700">${line.speaker}</span>
+                        </div>
+                        <span class="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded">Page ${idx + 1}</span>
+                    </div>
+                    
+                    <div class="pl-10">
+                        <p class="text-lg font-bold text-gray-800 font-['Noto_Sans_KR'] mb-1">${line.text}</p>
+                        <p class="text-sm text-gray-600 italic border-l-2 border-orange-300 pl-2">${line.meaning}</p>
+                        
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="speak('${line.text}')" class="text-xs flex items-center gap-1 bg-indigo-50 text-indigo-700 px-2 py-1 rounded hover:bg-indigo-100 transition">
+                                <i data-lucide="volume-2" class="w-3 h-3"></i> Audio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function prevVideo() {
+            if (currentVideoIndex > 0) {
+                currentVideoIndex--;
+                updateConversationPlayer();
+            }
+        }
+
+        function nextVideo() {
+            if (currentConvBab && currentVideoIndex < currentConvBab.videos.length - 1) {
+                currentVideoIndex++;
+                updateConversationPlayer();
+            }
+        }
+
+        function toggleScript() {
+            const container = document.getElementById('script-container');
+            if (container.classList.contains('hidden')) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
         // --- NEW RENDER FUNCTION FOR DOWNLOADS ---
         let currentDownloadFilter = 'all';
 
@@ -2298,6 +2545,7 @@
     </script>
 </body>
 </html>
+
 
 
 
