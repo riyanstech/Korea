@@ -204,6 +204,24 @@
             background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
             transform: scale(1.05);
         }
+        /* Default style semua tombol filter */
+        .dl-filter {
+            background-color: #e5e7eb; /* bg-gray-200 */
+            color: #374151;           /* text-gray-700 */
+            transition: 0.2s ease;
+        }
+
+        /* Hover effect */
+        .dl-filter:hover {
+            background-color: #d1d5db; /* bg-gray-300 */
+        }
+
+        /* Style tombol yang aktif */
+        .dl-filter.active {
+            background-color: #4f46e5; /* bg-indigo-600 */
+            color: white;
+        }
+
     </style>
 </head>
 <body class="flex flex-col h-screen">
@@ -493,14 +511,33 @@
                     <p class="text-gray-500 text-sm">Download materi belajar format PDF & Audio.</p>
                 </div>
 
-                <!-- Category Filters -->
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="filterDownloads('all', this)" class="dl-filter active px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold shadow-md transition">Semua</button>
-                    <button onclick="filterDownloads('textbook', this)" class="dl-filter px-4 py-2 text-white rounded-lg text-sm font-semibold shadow-md transition">Buku Paket</button>
-                    <button onclick="filterDownloads('grammar', this)" class="dl-filter px-4 py-2 text-white rounded-lg text-sm font-semibold shadow-md transition">Tata Bahasa</button>
-                    <button onclick="filterDownloads('vocab', this)" class="dl-filter px-4 py-2 text-white rounded-lg text-sm font-semibold shadow-md transition">Kosakata</button>
-                    <button onclick="filterDownloads('exam', this)" class="dl-filter px-4 py-2 text-white rounded-lg text-sm font-semibold shadow-md transition">Latihan Soal</button>
+                    <button onclick="filterDownloads('all', this)"
+                        class="dl-filter active px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
+                        Semua
+                    </button>
+
+                    <button onclick="filterDownloads('textbook', this)"
+                        class="dl-filter px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
+                        Buku Paket
+                    </button>
+
+                    <button onclick="filterDownloads('grammar', this)"
+                        class="dl-filter px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
+                        Tata Bahasa
+                    </button>
+
+                    <button onclick="filterDownloads('vocab', this)"
+                        class="dl-filter px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
+                        Kosakata
+                    </button>
+
+                    <button onclick="filterDownloads('exam', this)"
+                        class="dl-filter px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
+                        Latihan Soal
+                    </button>
                 </div>
+
 
                 <!-- Downloads Grid -->
                 <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-12">
@@ -2744,6 +2781,9 @@
 
             renderDownloads();
         }
+
+
+
         
         function renderHangeul() {
             const container = document.getElementById('hangeul-grid');
@@ -3503,10 +3543,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
