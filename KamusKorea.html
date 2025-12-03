@@ -2656,10 +2656,36 @@
         ];
 
         const grammarData = [
-            { struktur: "~입니다 / ~입니까?", arti: "Adalah / Apakah (Formal)", fungsi: "입니다 dan 입니까? adalah bentuk kata kerja kopula dalam bahasa Korea yang digunakan untuk menyatakan atau menanyakan sesuatu secara formal..", contoh: "저는 학생입니다.", arti_contoh: "Saya adalah pelajar.", contoh: "저분은 선생님입니까?", arti_contoh: "Apakah beliau guru?" },
-            { struktur: "이/가 (Partikel Subjek)", arti: "Penanda Subjek", fungsi: "Menunjukkan subjek kalimat.", contoh: "날씨가 좋습니다.", arti_contoh: "Cuacanya bagus." },
-            { struktur: "~(으)세요", arti: "Silakan / Tolong", fungsi: "Perintah sopan.", contoh: "앉으세요.", arti_contoh: "Silakan duduk." },
-            { struktur: "~고 싶어요", arti: "Ingin...", fungsi: "Menyatakan keinginan.", contoh: "가고 싶어요.", arti_contoh: "Saya ingin pergi." }
+        {
+            struktur: "~입니다 / ~입니까?",
+            arti: "Adalah / Apakah (Formal)",
+            fungsi: [ 
+                "Digunakan untuk menyatakan atau bertanya secara formal.",
+                "• 입니다 digunakan untuk menyatakan.",
+                "• 입니까? digunakan untuk bertanya."
+            ],
+            
+            contoh: [
+            { kalimat: "저는 학생입니다.", arti: "Saya adalah pelajar." },
+            { kalimat: "어느 나라 사람입니까?", arti: "Anda orang negara mana?" }
+            ]
+        },
+        {
+            struktur: "~은/는",
+            arti: "Partikel Penanda Topik",
+        
+            fungsi: [
+                "Partikel ini digunakan untuk menunjukkan subjek atau topik pembicaraan dalam sebuah kalimat.",
+                "• 은 digunakan jika kata sebelumnya berakhiran konsonan.",
+                "• 는 digunakan jika kata sebelumnya berakhiran vokal."
+            ],
+        
+            contoh: [
+                { kalimat: "투안은 목수입니다.", arti: "Tuan adalah tukang kayu." },
+                { kalimat: "리리는 중국 사람입니다", arti: "Riri adalah orang cina" }
+            ]
+        }
+
         ];
 
         // ==========================================
@@ -2830,27 +2856,50 @@
             renderVocab(filtered);
         }
 
+
         function renderGrammar(data) {
             const container = document.getElementById('grammar-list');
-            container.innerHTML = data.map(item => `
-                <div class="glass-card p-5 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-indigo-100 to-transparent rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:opacity-100 transition"></div>
-                    <div class="relative z-10">
-                        <h3 class="text-xl font-bold text-indigo-600 font-['Noto_Sans_KR'] mb-1">${item.struktur}</h3>
-                        <p class="text-sm font-bold text-gray-700 mb-2">${item.arti}</p>
-                        <p class="text-sm text-gray-500 mb-4 leading-relaxed">${item.fungsi}</p>
-                        <div class="bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <div class="flex justify-between items-start">
-                                <p class="text-indigo-800 font-medium font-['Noto_Sans_KR']">${item.contoh}</p>
-                                <button onclick="speak('${item.contoh}')" class="text-gray-400 hover:text-indigo-600"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
-                            </div>
-                            <p class="text-xs text-gray-500 italic mt-1">${item.arti_contoh}</p>
+        
+            container.innerHTML = data.map(item => {
+        
+                // Render fungsi (multiline)
+                let fungsiHTML = Array.isArray(item.fungsi)
+                    ? item.fungsi.map(f => `<p class="text-sm text-gray-500 leading-relaxed">${f}</p>`).join('')
+                    : `<p class="text-sm text-gray-500 leading-relaxed whitespace-pre-line">${item.fungsi}</p>`;
+        
+                // Render banyak contoh
+                let contohHTML = item.contoh.map(c => `
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 mb-2">
+                        <div class="flex justify-between items-start">
+                            <p class="text-indigo-800 font-medium font-['Noto_Sans_KR']">${c.kalimat}</p>
+                            <button onclick="speak('${c.kalimat}')" class="text-gray-400 hover:text-indigo-600">
+                                <i data-lucide="volume-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 italic mt-1">${c.arti}</p>
+                    </div>
+                `).join('');
+        
+                return `
+                    <div class="glass-card p-5 relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-indigo-100 to-transparent rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:opacity-100 transition"></div>
+        
+                        <div class="relative z-10">
+                            <h3 class="text-xl font-bold text-indigo-600 font-['Noto_Sans_KR'] mb-1">${item.struktur}</h3>
+                            <p class="text-sm font-bold text-gray-700 mb-2">${item.arti}</p>
+        
+                            <!-- fungsi tampil multiline -->
+                            ${fungsiHTML}
+        
+                            <div class="mt-4">${contohHTML}</div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        
             lucide.createIcons();
         }
+
 
         function filterGrammar() {
             const query = document.getElementById('grammar-search').value.toLowerCase();
@@ -3472,6 +3521,7 @@
     </script>
 </body>
 </html>
+
 
 
 
