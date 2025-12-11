@@ -14,6 +14,18 @@
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
                         korean: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    colors: {
+                        wa: {
+                            light: '#008069',
+                            dark: '#202c33',
+                            bg: '#efe7dd',
+                            bgDark: '#0b141a',
+                            user: '#d9fdd3',
+                            userDark: '#005c4b',
+                            ai: '#ffffff',
+                            aiDark: '#202c33'
+                        }
                     }
                 }
             }
@@ -49,7 +61,7 @@
             overflow: hidden;
         }
 
-        /* Glassmorphism Classes */
+        /* Glassmorphism Classes (Original) */
         .glass-panel {
             background: rgba(255, 255, 255, 0.75);
             backdrop-filter: blur(16px);
@@ -88,6 +100,7 @@
              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
+        /* Navigation Styles */
         .nav-link {
             display: flex;
             align-items: center;
@@ -99,9 +112,7 @@
             cursor: pointer;
         }
         
-        .dark .nav-link {
-            color: #cbd5e1;
-        }
+        .dark .nav-link { color: #cbd5e1; }
 
         .nav-link:hover {
             background-color: rgba(99, 102, 241, 0.1);
@@ -138,7 +149,7 @@
             margin-top: 1rem;
         }
 
-        /* Scrollbar */
+        /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar { width: 6px; }
         .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -147,35 +158,67 @@
         .dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
         .dark .custom-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-        .user-message {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: white;
-            border-radius: 20px 20px 4px 20px;
+        /* --- WA CHAT STYLES START --- */
+        .wa-bg-pattern {
+            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+            background-repeat: repeat;
+            opacity: 0.4;
         }
-        .ai-message {
-            background: white;
-            color: #374151;
-            border-radius: 20px 20px 20px 4px;
-            border: 1px solid #e5e7eb;
+        .dark .wa-bg-pattern { opacity: 0.05; }
+
+        .wa-bubble {
+            position: relative;
+            padding: 8px 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            font-size: 14.5px;
+            line-height: 19px;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
         }
-        .dark .ai-message {
-            background: #1e293b;
-            color: #e2e8f0;
-            border: 1px solid #334155;
+        
+        .wa-bubble-user {
+            background-color: #d9fdd3;
+            color: #111b21;
+            border-top-right-radius: 0;
+            margin-left: auto;
         }
+        .dark .wa-bubble-user {
+            background-color: #005c4b;
+            color: #e9edef;
+        }
+
+        .wa-bubble-ai {
+            background-color: #ffffff;
+            color: #111b21;
+            border-top-left-radius: 0;
+            margin-right: auto;
+        }
+        .dark .wa-bubble-ai {
+            background-color: #202c33;
+            color: #e9edef;
+        }
+
+        .wa-time {
+            font-size: 11px;
+            color: rgba(0,0,0,0.45);
+            float: right;
+            margin-left: 8px;
+            margin-top: 4px;
+        }
+        .dark .wa-time { color: rgba(255,255,255,0.6); }
+
+        .wa-input-container {
+            background-color: #f0f2f5;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .dark .wa-input-container { background-color: #202c33; }
+        /* --- WA CHAT STYLES END --- */
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(99, 102, 241, 0); }
-            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
-        }
-        
-        .avatar-pulse { animation: pulse-ring 2s infinite; }
-        .avatar-speaking { animation: pulse-ring 1s infinite; box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7) !important; }
-        .avatar-error { border-color: #ef4444 !important; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3); }
 
         .quiz-option { transition: all 0.2s; cursor: pointer; user-select: none; }
         .quiz-option:not(.disabled):hover { transform: translateY(-2px); background-color: #f0fdf4; border-color: #4ade80; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
@@ -208,6 +251,18 @@
         .dl-filter:hover { background-color: #d1d5db; }
         .dark .dl-filter:hover { background-color: #475569; }
         .dl-filter.active { background-color: #4f46e5; color: white; }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .recording-pulse { animation: pulse-ring 1.5s infinite; background-color: #ef4444 !important; border-color: #ef4444 !important; }
+        
+        /* Chat Settings Animation */
+        #chat-settings { transition: all 0.3s ease-in-out; max-height: 0; overflow: hidden; opacity: 0; }
+        #chat-settings.open { max-height: 200px; opacity: 1; padding-bottom: 8px; }
+
     </style>
 </head>
 <body class="flex flex-col h-screen overflow-hidden">
@@ -237,7 +292,7 @@
                         <button class="nav-link" onclick="showTab('hangeul', this)"><i data-lucide="scan" class="w-4 h-4 mr-2"></i>Hangeul</button>
                         <button class="nav-link" onclick="showTab('grammar', this)"><i data-lucide="book-open-check" class="w-4 h-4 mr-2"></i>Tata Bahasa</button>
                         <button class="nav-link" onclick="showTab('downloads', this)"><i data-lucide="folder-down" class="w-4 h-4 mr-2"></i>Materi</button>
-                        <button class="nav-link" onclick="showTab('chat-ai', this)"><i data-lucide="message-square-heart" class="w-4 h-4 mr-2"></i>Chat AI</button>
+                        <button class="nav-link" onclick="showTab('chat-ai', this)"><i data-lucide="message-circle" class="w-4 h-4 mr-2"></i>Chat AI</button>
                     </nav>
                     <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-yellow-400 hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-inner">
                          <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
@@ -250,12 +305,12 @@
                 <button class="nav-link w-full" onclick="showTab('hangeul', this)"><i data-lucide="scan" class="w-5 h-5 mr-3"></i>Hangeul & Pelafalan</button>
                 <button class="nav-link w-full" onclick="showTab('grammar', this)"><i data-lucide="book-open-check" class="w-5 h-5 mr-3"></i>Tata Bahasa</button>
                 <button class="nav-link w-full" onclick="showTab('downloads', this)"><i data-lucide="folder-down" class="w-5 h-5 mr-3"></i>Pustaka Materi</button>
-                <button class="nav-link w-full" onclick="showTab('chat-ai', this)"><i data-lucide="message-square-heart" class="w-5 h-5 mr-3"></i>Chat AI Praktik</button>
+                <button class="nav-link w-full" onclick="showTab('chat-ai', this)"><i data-lucide="message-circle" class="w-5 h-5 mr-3"></i>Chat AI Praktik</button>
             </div>
         </header>
 
         <main class="flex-grow overflow-y-auto custom-scroll p-4 md:p-8 bg-white/30 dark:bg-black/20 relative transition-colors duration-300">
-            <div class="max-w-7xl mx-auto">
+            <div class="max-w-7xl mx-auto h-full">
             <!-- 1. Kosakata -->
             <div id="vocab-container" class="tab-content animate-fade-in space-y-6">
                 <div id="vocab-textbook" class="vocab-sub-tab space-y-6">
@@ -355,6 +410,7 @@
                                 <option value="BAB 28">BAB 28 한국의 명절 (Hari raya Korea)</option>
                                 <option value="BAB 29">BAB 29 한국의 예절 (Sopan santun Korea)</option>
                                 <option value="BAB 30">BAB 30 한국의 대중문화 (Budaya popular Korea)</option>
+
                             </select>
                              <div class="flex justify-between items-center mt-3">
                                 <span id="selection-count" class="text-sm text-gray-500 dark:text-gray-400 font-medium">0 kata terpilih</span>
@@ -440,41 +496,127 @@
                 <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-12"></div>
             </div>
 
-            <!-- 5. Chat AI -->
-            <div id="chat-ai" class="tab-content hidden animate-fade-in h-full flex flex-col">
-                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Tutor AI Korea</h2>
-                    <div class="flex gap-2 items-center">
-                        <button onclick="startCallMode()" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm flex items-center shadow-md hover:bg-indigo-700 transition"><i data-lucide="phone-call" class="w-4 h-4 mr-2"></i> Call Mode</button>
-                        <button onclick="resetChat()" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition" title="Reset Chat"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+            <!-- 5. Chat AI (MODIFIED - WA STYLE) -->
+            <div id="chat-ai" class="tab-content hidden animate-fade-in h-[calc(100%+2rem)] md:h-[calc(100%+4rem)] flex flex-col -mx-4 -my-4 md:-mx-8 md:-my-8 relative overflow-hidden bg-[#efe7dd] dark:bg-[#0b141a]">
+                <!-- WA Background Pattern -->
+                <div class="absolute inset-0 wa-bg-pattern pointer-events-none z-0"></div>
+
+                <!-- WA Header -->
+                <div class="bg-wa-light dark:bg-wa-dark p-3 flex flex-col shadow-md z-10 text-white relative">
+                    <div class="flex items-center justify-between w-full">
+                        <div class="flex items-center gap-3">
+                            <button onclick="showTab('vocab-container')" class="md:hidden text-white"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+                            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border border-white/30 relative">
+                                <i id="ai-avatar-icon" data-lucide="bot" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <h1 id="ai-header-name" class="font-bold text-base leading-tight">Tutor AI Korea</h1>
+                                <span id="ai-status" class="text-xs text-white/80">Mode Tutor • Online</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 text-white">
+                            <button onclick="startCall()" class="p-2 rounded-full hover:bg-white/10 transition"><i data-lucide="phone" class="w-5 h-5 fill-current"></i></button>
+                            <button onclick="toggleChatSettings()" class="p-2 rounded-full hover:bg-white/10 transition"><i data-lucide="settings-2" class="w-5 h-5"></i></button>
+                            <button onclick="resetChat()" class="p-2 rounded-full hover:bg-white/10 transition"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Settings (Dropdowns) -->
+                    <div id="chat-settings" class="w-full mt-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20 px-3 py-2 gap-2 flex flex-col sm:flex-row text-sm">
+                        <div class="flex-1">
+                            <label class="text-[10px] uppercase text-white/70 font-bold mb-1 block">Mode Percakapan</label>
+                            <select id="chat-mode-select" onchange="updateChatMode()" class="w-full bg-black/20 text-white border border-white/30 rounded-md p-1.5 focus:outline-none focus:bg-black/40 text-sm">
+                                <option value="tutor">🎓 Tutor Formal (Koreksi & Belajar)</option>
+                                <option value="casual">👩🏻 Teman Santai (Ji-eun)</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-[10px] uppercase text-white/70 font-bold mb-1 block">Level Saya</label>
+                            <select id="chat-level-select" onchange="updateChatMode()" class="w-full bg-black/20 text-white border border-white/30 rounded-md p-1.5 focus:outline-none focus:bg-black/40 text-sm">
+                                <option value="pemula">🌱 Pemula (Beginner)</option>
+                                <option value="menengah">🌿 Menengah (Intermediate)</option>
+                                <option value="lanjut">🌳 Lanjut (Advanced)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="flex flex-wrap gap-2 mb-2 bg-white/50 dark:bg-gray-800/50 p-2 rounded-lg border border-gray-100 dark:border-gray-700">
-                    <select id="ai-mode" class="p-1.5 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-pink-500 font-medium text-pink-700 dark:text-pink-400" onchange="resetChat()">
-                        <option value="conversation">Mode: Percakapan Santai</option>
-                        <option value="tutor">Mode: Tutor (Koreksi)</option>
-                    </select>
-                    <select id="ai-level" class="p-1.5 rounded-md text-sm bg-white dark:bg-gray-700 dark:text-white border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-indigo-500" onchange="resetChat()">
-                        <option value="Pemula">Level: Pemula</option>
-                        <option value="Dasar">Level: Dasar</option>
-                        <option value="Menengah">Level: Menengah</option>
-                    </select>
+
+                <!-- Chat Area -->
+                <div id="chat-box" class="flex-grow overflow-y-auto custom-scroll p-4 space-y-2 z-10">
+                    <!-- Date Divider -->
+                    <div class="flex justify-center my-4 sticky top-0 z-10">
+                        <span class="bg-gray-200 dark:bg-[#182229] text-gray-600 dark:text-gray-300 text-xs px-3 py-1 rounded-lg shadow-sm font-medium">Hari Ini</span>
+                    </div>
                 </div>
-                <div id="chat-box" class="flex-grow bg-white/60 dark:bg-gray-900/60 rounded-2xl p-4 overflow-y-auto custom-scroll space-y-4 shadow-inner border border-gray-100 dark:border-gray-800 mb-4 h-[50vh]"></div>
-                <div class="relative">
-                    <div id="loading-indicator" class="hidden absolute -top-8 left-0 text-xs text-indigo-600 dark:text-indigo-400 font-semibold flex items-center"><i data-lucide="loader-2" class="w-3 h-3 animate-spin mr-1"></i> Mengetik...</div>
-                    <div id="error-message" class="hidden absolute -top-10 left-0 right-0 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-200 text-xs p-2 rounded-lg text-center border border-red-200 dark:border-red-800"></div>
-                    <div class="flex gap-2">
-                        <input type="text" id="user-input" class="flex-grow p-4 rounded-xl border-0 ring-1 ring-gray-200 dark:ring-gray-700 bg-white dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-lg outline-none transition" placeholder="Tulis pesan..." onkeydown="handleChatEnter(event)">
-                        <button onclick="sendMessage()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center"><i data-lucide="send" class="w-5 h-5"></i></button>
+
+                <!-- WA Input Area -->
+                <div class="bg-wa-bg dark:bg-wa-dark p-2 flex items-end gap-2 z-20 min-h-[62px] items-center">
+                    <!-- Upload Image -->
+                    <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+                    <button onclick="document.getElementById('image-upload').click()" class="p-3 text-gray-500 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition shrink-0">
+                        <i data-lucide="camera" class="w-6 h-6"></i>
+                    </button>
+
+                    <!-- Text Input -->
+                    <div class="flex-grow bg-white dark:bg-[#2a3942] rounded-2xl flex items-center px-4 py-2 shadow-sm min-h-[42px]">
+                        <button class="mr-2 text-gray-400 dark:text-gray-500 hover:text-gray-600"><i data-lucide="smile" class="w-6 h-6"></i></button>
+                        <input type="text" id="user-input" class="w-full bg-transparent border-none outline-none text-gray-800 dark:text-white text-base max-h-24 font-korean" placeholder="Ketik pesan..." onkeydown="handleChatEnter(event)" autocomplete="off">
+                    </div>
+
+                    <!-- Mic / Send Button -->
+                    <button id="action-btn" onclick="toggleVoiceRecording()" class="p-3 bg-wa-light dark:bg-wa-light text-white rounded-full shadow-md hover:opacity-90 transition transform active:scale-95 shrink-0 flex items-center justify-center w-12 h-12">
+                        <i data-lucide="mic" class="w-6 h-6 fill-current"></i>
+                    </button>
+                </div>
+
+                <!-- Image Preview Modal -->
+                <div id="image-preview-modal" class="absolute inset-0 bg-black/90 z-50 hidden flex flex-col justify-center items-center p-4">
+                    <div class="w-full max-w-sm bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-2xl">
+                        <div class="p-3 border-b dark:border-gray-700 flex justify-between items-center">
+                            <span class="font-bold dark:text-white">Kirim Foto</span>
+                            <button onclick="cancelImage()" class="text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
+                        </div>
+                        <div class="p-4 bg-gray-100 dark:bg-gray-900 flex justify-center">
+                            <img id="preview-img" class="max-h-64 rounded-md object-contain">
+                        </div>
+                        <div class="p-3 flex justify-end gap-2">
+                            <button onclick="sendImage()" class="bg-wa-light text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 flex items-center gap-2"><i data-lucide="send" class="w-4 h-4"></i> Kirim</button>
+                        </div>
                     </div>
                 </div>
             </div>
+            
             </div>
         </main>
     </div>
 
     <!-- MODALS -->
+    <!-- Audio Call Modal -->
+    <div id="call-modal" class="fixed inset-0 bg-[#0b141a]/95 z-[70] hidden flex flex-col items-center justify-between py-12 text-white backdrop-blur-sm transition-all duration-300">
+        <div class="text-center mt-10">
+            <div class="w-24 h-24 rounded-full bg-gray-600 mx-auto flex items-center justify-center mb-4 border-4 border-[#202c33] overflow-hidden">
+                <i data-lucide="bot" class="w-12 h-12 text-white/50"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-1 tracking-wide">Tutor AI Korea</h2>
+            <p id="call-timer" class="text-green-400 text-sm animate-pulse">Memanggil...</p>
+        </div>
+        
+        <!-- Waveform Simulation -->
+        <div class="flex items-center justify-center gap-1.5 h-12 w-full px-8 opacity-70">
+            <div class="w-1.5 h-4 bg-white rounded-full animate-[pulse_1s_ease-in-out_infinite]"></div>
+            <div class="w-1.5 h-8 bg-white rounded-full animate-[pulse_1.2s_ease-in-out_infinite]"></div>
+            <div class="w-1.5 h-12 bg-white rounded-full animate-[pulse_0.8s_ease-in-out_infinite]"></div>
+            <div class="w-1.5 h-8 bg-white rounded-full animate-[pulse_1.5s_ease-in-out_infinite]"></div>
+            <div class="w-1.5 h-4 bg-white rounded-full animate-[pulse_1s_ease-in-out_infinite]"></div>
+        </div>
+
+        <div class="flex gap-8 items-center pb-8">
+            <button class="p-4 rounded-full bg-gray-700/50 hover:bg-gray-700 transition backdrop-blur-md"><i data-lucide="mic-off" class="w-6 h-6"></i></button>
+            <button onclick="endCall()" class="p-5 rounded-full bg-red-500 hover:bg-red-600 shadow-lg transform active:scale-95 transition"><i data-lucide="phone-off" class="w-8 h-8 fill-current"></i></button>
+            <button class="p-4 rounded-full bg-gray-700/50 hover:bg-gray-700 transition backdrop-blur-md"><i data-lucide="volume-2" class="w-6 h-6"></i></button>
+        </div>
+    </div>
+
     <div id="quiz-finish-modal" class="fixed inset-0 modal-backdrop z-[70] hidden flex items-center justify-center p-4 transition-all duration-300">
         <div class="glass-card p-8 w-full max-w-sm text-center transform transition-all duration-300 scale-100 relative overflow-hidden dark:bg-gray-800 dark:border-gray-700">
             <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#F472B6 2px, transparent 2px); background-size: 20px 20px;"></div>
@@ -496,29 +638,6 @@
         </div>
     </div>
 
-    <div id="call-modal" class="fixed inset-0 bg-gray-900/95 z-[60] hidden flex flex-col items-center justify-center text-white backdrop-blur-xl transition-all duration-300">
-        <div class="absolute top-6 right-6">
-            <button onclick="endCallMode()" class="bg-gray-800 p-3 rounded-full hover:bg-gray-700 transition" title="Tutup"><i data-lucide="x" class="w-6 h-6 text-white"></i></button>
-        </div>
-        <div class="flex flex-col items-center space-y-8 w-full max-w-md px-6">
-            <div class="relative">
-                <div id="avatar-ring" class="absolute inset-0 rounded-full bg-indigo-500 opacity-20 transform scale-150"></div>
-                <div id="avatar-circle" class="w-32 h-32 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-2xl relative z-10 border-4 border-white/20 transition-colors"><i data-lucide="bot" class="w-16 h-16 text-white"></i></div>
-            </div>
-            <div class="text-center space-y-2">
-                <h2 id="call-status" class="text-2xl font-bold tracking-wide">Menghubungkan...</h2>
-                <div id="live-transcript" class="min-h-[64px] flex items-center justify-center text-center text-indigo-200 text-lg font-['Noto_Sans_KR'] px-4 mt-2 w-full leading-relaxed">...</div>
-            </div>
-            <div class="flex flex-col items-center gap-6 mt-4 w-full">
-                <button id="main-talk-btn" onclick="toggleMic()" class="group relative flex items-center justify-center gap-3 px-8 py-5 rounded-full transition-all duration-300 transform active:scale-95 shadow-2xl w-full max-w-[280px] bg-red-500 hover:bg-red-600 text-white">
-                    <i id="btn-icon" data-lucide="mic-off" class="w-6 h-6"></i>
-                    <span id="btn-text" class="font-bold text-lg tracking-wide">Mic Mati</span>
-                </button>
-                <button onclick="endCallMode()" class="text-white/40 text-sm hover:text-white transition">Akhiri Panggilan</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Scripts -->
     <script>
         // Init
@@ -529,88 +648,210 @@
             renderGrammar(grammarData);
             showTab('vocab-container', document.querySelector('.nav-link.active'));
             resetChat();
+            
+            // Input Listener for Mic/Send button toggle
+            const input = document.getElementById('user-input');
+            const actionBtn = document.getElementById('action-btn');
+            
+            input.addEventListener('input', () => {
+                if(input.value.trim().length > 0) {
+                    actionBtn.innerHTML = '<i data-lucide="send" class="w-5 h-5 ml-1 fill-none"></i>';
+                    actionBtn.onclick = () => sendMessage();
+                    actionBtn.classList.remove('recording-pulse');
+                } else {
+                    actionBtn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 fill-current"></i>';
+                    actionBtn.onclick = toggleVoiceRecording;
+                }
+                lucide.createIcons();
+            });
         });
 
         // ==========================================
-        // CHAT & CALL AI LOGIC (FULL IMPLEMENTATION)
+        // CHAT & CALL AI LOGIC (WA MODIFIED)
         // ==========================================
         const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=";
-        
-        // --- PENTING: ISI API KEY DI BAWAH INI ---
-        const API_KEY = "AIzaSyCSvOmPtVbDQY8Ah_90M_KejFCjPBe1-gc"; 
-        
+        const API_KEY = "AIzaSyBWU-SM3OmO2yrIQjtql9_buHmNOTGzo6k"; // ⚠️ ISI API KEY DI SINI
+
         let chatHistory = [];
         let isTyping = false;
-        let isInCallMode = false;
+        let selectedImageBase64 = null;
         let recognition = null;
-        let isMicOn = true;
-        let isAiSpeaking = false; 
+        let isRecording = false;
 
-        function getInitialMessage(mode, level) {
-            if (mode === 'tutor') {
-                return `Annyeonghaseyo! 👋<br>Saya adalah tutor Korea Anda (Level ${level}). Mari kita berlatih.`;
-            } else {
-                return `Annyeong! 😊<br>Aku adalah teman bicara Koreamu (Level ${level}). Mari kita ngobrol santai!`;
-            }
+        function getTimeString() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         }
 
-        function addMessage(text, sender) {
+        function addMessage(text, sender, isImage = false) {
             const chatBox = document.getElementById('chat-box');
             const div = document.createElement('div');
-            div.className = sender === 'user' 
-                ? 'user-message self-end p-3 max-w-[85%] shadow-md text-sm md:text-base animate-fade-in ml-auto' 
-                : "ai-message self-start p-3 max-w-[85%] shadow-sm text-sm md:text-base font-['Noto_Sans_KR'] animate-fade-in mr-auto dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700";
-            div.innerHTML = text.replace(/\n/g, '<br>');
+            const time = getTimeString();
+            
+            // WA Bubble Styles
+            const bubbleClass = sender === 'user' ? 'wa-bubble wa-bubble-user' : 'wa-bubble wa-bubble-ai';
+            const checkIcon = sender === 'user' ? '<i data-lucide="check-check" class="inline w-3 h-3 text-blue-400 ml-1"></i>' : '';
+            
+            let contentHtml = '';
+            
+            if (isImage) {
+                contentHtml = `<div class="mb-1 rounded-lg overflow-hidden"><img src="${text}" class="w-full h-auto max-h-64 object-cover"></div><div class="text-sm">Tolong koreksi gambar ini.</div>`;
+            } else if (text.includes("[VOICE NOTE]")) {
+                const cleanText = text.replace("[VOICE NOTE]", "").trim();
+                const iconColor = sender === 'user' ? 'text-gray-500' : 'text-green-500';
+                contentHtml = `
+                    <div class="flex items-center gap-3 min-w-[200px] py-1">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-300 transition">
+                            <i data-lucide="play" class="w-4 h-4 text-gray-600 dark:text-gray-300 ml-0.5 fill-current"></i>
+                        </div>
+                        <div class="flex flex-col w-full">
+                            <div class="h-1 bg-gray-300 dark:bg-gray-600 rounded-full w-full overflow-hidden">
+                                <div class="h-full bg-gray-500 w-1/3"></div>
+                            </div>
+                            <span class="text-[10px] text-gray-500 mt-1 dark:text-gray-400">Audio • ${cleanText}</span>
+                        </div>
+                    </div>`;
+            } else {
+                contentHtml = text.replace(/\n/g, '<br>');
+            }
+
+            div.className = `${bubbleClass} shadow-sm animate-fade-in`;
+            div.innerHTML = `
+                <div class="font-korean leading-relaxed">${contentHtml}</div>
+                <div class="wa-time">${time} ${checkIcon}</div>
+            `;
+            
             chatBox.appendChild(div);
             chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+            lucide.createIcons();
+        }
+
+        // --- NEW CHAT MODES LOGIC ---
+        function toggleChatSettings() {
+            const settings = document.getElementById('chat-settings');
+            settings.classList.toggle('open');
+        }
+
+        function updateChatMode() {
+            const mode = document.getElementById('chat-mode-select').value;
+            const headerName = document.getElementById('ai-header-name');
+            const status = document.getElementById('ai-status');
+            const icon = document.getElementById('ai-avatar-icon');
+            
+            if(mode === 'casual') {
+                headerName.innerText = "Ji-eun (Teman Korea)";
+                status.innerText = "Mode Santai • Online";
+                icon.setAttribute('data-lucide', 'smile-plus');
+            } else {
+                headerName.innerText = "Tutor AI Korea";
+                status.innerText = "Mode Tutor • Online";
+                icon.setAttribute('data-lucide', 'bot');
+            }
+            lucide.createIcons();
+            // Reset chat history when mode changes to keep context clean
+            resetChat();
+        }
+
+        function resetChat() {
+            chatHistory = [];
+            const mode = document.getElementById('chat-mode-select') ? document.getElementById('chat-mode-select').value : 'tutor';
+            let welcomeMsg = "";
+            
+            if(mode === 'casual') {
+                welcomeMsg = "Annyeong! Aku Ji-eun, teman ngobrolmu! 👋<br>Ayo cerita-cerita, pakai bahasa santai aja ya! 😄";
+            } else {
+                welcomeMsg = "Annyeonghaseyo! 👋<br>Saya Tutor AI Korea Anda. Mari belajar grammar, koreksi tulisan, atau latihan percakapan formal.";
+            }
+
+            document.getElementById('chat-box').innerHTML = `
+                <div class="flex justify-center my-4 sticky top-0 z-10">
+                    <span class="bg-gray-200 dark:bg-[#182229] text-gray-600 dark:text-gray-300 text-xs px-3 py-1 rounded-lg shadow-sm font-medium">Hari Ini</span>
+                </div>
+                <!-- Welcome Message -->
+                <div class="wa-bubble wa-bubble-ai shadow-sm animate-fade-in">
+                    <div class="font-korean leading-relaxed">${welcomeMsg}</div>
+                    <div class="wa-time">${getTimeString()}</div>
+                </div>
+            `;
+            const statusText = mode === 'casual' ? 'Mode Santai • Online' : 'Mode Tutor • Online';
+            if(document.getElementById('ai-status')) document.getElementById('ai-status').innerText = statusText;
         }
 
         function handleChatEnter(e) { if(e.key === 'Enter') sendMessage(); }
 
-        function resetChat() {
-            chatHistory = [];
-            const mode = document.getElementById('ai-mode').value;
-            const level = document.getElementById('ai-level').value;
-            const initialMessage = getInitialMessage(mode, level);
-            document.getElementById('chat-box').innerHTML = `<div class="ai-message self-start p-3 max-w-[85%] shadow-sm font-['Noto_Sans_KR'] dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700">${initialMessage}</div>`;
-            document.getElementById('error-message').classList.add('hidden');
-        }
-
-        function getSystemPrompt() {
-            const mode = document.getElementById('ai-mode').value;
-            const level = document.getElementById('ai-level').value;
-            let prompt = "";
-            if (mode === 'tutor') {
-                prompt = `Anda adalah Tutor Bahasa Korea formal (Level: ${level}). Balas pesan pengguna dalam bahasa Korea. Jika ada kesalahan, beri koreksi singkat dalam Bahasa Indonesia.`;
-            } else {
-                prompt = `Anda adalah teman Korea (Level: ${level}). Balas pesan dalam bahasa Korea yang natural dan ramah.`;
-            }
-            if (isInCallMode) {
-                prompt += " PENTING: Mode Suara. Berikan respons singkat (maks 2 kalimat) yang mudah didengar.";
-            }
-            return prompt;
-        }
-
-        async function sendMessage(manualText = null, isVoice = false) {
+        async function sendMessage(manualText = null) {
             if (isTyping) return;
             const input = document.getElementById('user-input');
             const text = manualText || input.value.trim();
-            if (!text) return;
-
-            if (API_KEY === "") {
-                alert("API Key belum diisi! Silakan isi API Key di dalam kode (Baris ~1109).");
-                return;
-            }
+            const btn = document.getElementById('action-btn');
+            
+            if (!text && !selectedImageBase64) return;
 
             isTyping = true;
             if(!manualText) input.value = '';
-            input.disabled = true;
-            document.getElementById('loading-indicator').classList.remove('hidden');
             
-            addMessage(text, 'user');
-            chatHistory.push({ role: "user", parts: [{ text: text }] });
+            // Reset UI Button
+            btn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 fill-current"></i>';
+            btn.onclick = toggleVoiceRecording;
+            lucide.createIcons();
+            
+            // Display User Message
+            if(selectedImageBase64) {
+                addMessage(selectedImageBase64, 'user', true);
+            } else {
+                addMessage(text, 'user');
+            }
 
-            const systemPrompt = getSystemPrompt();
+            document.getElementById('ai-status').innerText = 'Mengetik...';
+
+            // --- DYNAMIC PROMPT LOGIC ---
+            const mode = document.getElementById('chat-mode-select').value;
+            const level = document.getElementById('chat-level-select').value;
+            
+            let systemPrompt = "";
+
+            if (mode === 'casual') {
+                // Mode 2: Teman Santai (Ji-eun)
+                systemPrompt = `
+                    Anda adalah 'Ji-eun', seorang teman perempuan Korea yang ramah, asik, sedikit gaul, dan suka bercanda.
+                    Level teman bicara Anda: ${level}.
+                    
+                    ATURAN UTAMA:
+                    1. JANGAN bersikap kaku atau formal seperti guru/robot.
+                    2. JANGAN mengoreksi grammar user kecuali mereka minta. Fokus ke alur obrolan yang natural.
+                    3. JIKA user chat bahasa Indonesia -> Balas bahasa Indonesia santai/gaul (contoh: "Iya nih", "Wkwk", "Serius?").
+                    4. JIKA user chat bahasa Korea -> Balas bahasa Korea Banmal (informal/akrab) layaknya teman dekat.
+                    5. Gunakan emoji untuk ekspresi.
+                    6. Jawab singkat dan padat seperti chatting di WhatsApp.
+                    7. Jika ada voice note/gambar, komentari isinya layaknya teman melihat kiriman teman, bukan mengoreksi.
+                `;
+            } else {
+                // Mode 1: Tutor Formal
+                systemPrompt = `
+                    Anda adalah Tutor Bahasa Korea profesional dan ramah.
+                    Level murid Anda: ${level}.
+                    
+                    Tugas:
+                    1. Koreksi setiap grammar atau spelling bahasa Korea user yang salah. Jelaskan perbaikannya dengan singkat.
+                    2. Gunakan bahasa Korea sopan (Jondaemal/Formal) atau bahasa Indonesia baku untuk penjelasan.
+                    3. Jika ada gambar tulisan Hangeul, baca dan koreksi jika ada kesalahan penulisan.
+                    4. Jika ada voice note, koreksi pelafalan (pronunciation).
+                    5. Selalu bersikap suportif dan edukatif.
+                    6. Jawab singkat dan padat.
+                `;
+            }
+
+            // Build Payload for Gemini
+            let parts = [];
+            if (selectedImageBase64) {
+                 const base64Data = selectedImageBase64.split(',')[1];
+                 parts.push({ text: "Lihat gambar ini: " + (text || "") });
+                 parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Data } });
+            } else {
+                parts.push({ text: text });
+            }
+
+            chatHistory.push({ role: "user", parts: parts });
 
             try {
                 const response = await fetch(GEMINI_API_URL + API_KEY, {
@@ -622,154 +863,108 @@
                     })
                 });
 
-                if (!response.ok) throw new Error("API Error");
                 const data = await response.json();
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, terjadi kesalahan pada AI.";
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, AI sedang sibuk.";
                 
-                addMessage(reply, 'ai');
                 chatHistory.push({ role: "model", parts: [{ text: reply }] });
-                document.getElementById('error-message').classList.add('hidden');
-
-                if (isVoice) {
-                    updateCallStatus("Berbicara...", "AI sedang merespon");
-                    document.getElementById('avatar-ring').classList.add('avatar-speaking');
-                    document.getElementById('avatar-ring').classList.remove('avatar-pulse');
-                    isAiSpeaking = true; 
-                    speak(reply, 'ko-KR', () => {
-                        document.getElementById('avatar-ring').classList.remove('avatar-speaking');
-                        isAiSpeaking = false;
-                        if (isInCallMode) startListening();
-                    });
-                }
-
+                addMessage(reply, 'ai');
             } catch (err) {
                 console.error(err);
-                document.getElementById('error-message').textContent = "Gagal terhubung ke AI.";
-                document.getElementById('error-message').classList.remove('hidden');
+                addMessage("Gagal terhubung ke server.", 'ai');
             } finally {
                 isTyping = false;
-                input.disabled = false;
-                document.getElementById('loading-indicator').classList.add('hidden');
-                if(!isInCallMode) input.focus();
+                selectedImageBase64 = null;
+                const statusText = mode === 'casual' ? 'Mode Santai • Online' : 'Mode Tutor • Online';
+                document.getElementById('ai-status').innerText = statusText;
+                if(!manualText && window.innerWidth > 768) input.focus();
             }
         }
 
-        // --- CALL MODE FUNCTIONS ---
-        async function checkAudioAvailability() {
-            try {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return false;
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop());
-                return true;
-            } catch (err) { return false; }
+        // --- IMAGE HANDLING ---
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedImageBase64 = e.target.result;
+                document.getElementById('preview-img').src = selectedImageBase64;
+                document.getElementById('image-preview-modal').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+            e.target.value = ''; 
         }
 
-        async function startCallMode() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("Browser tidak mendukung Voice Call. Gunakan Chrome.");
+        function cancelImage() {
+            selectedImageBase64 = null;
+            document.getElementById('image-preview-modal').classList.add('hidden');
+        }
+
+        function sendImage() {
+            document.getElementById('image-preview-modal').classList.add('hidden');
+            sendMessage("Gambar terkirim");
+        }
+
+        // --- VOICE NOTE & CALL ---
+        function toggleVoiceRecording() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Browser tidak mendukung Voice Note. Gunakan Chrome.");
                 return;
             }
 
-            document.getElementById('call-modal').classList.remove('hidden');
-            updateCallStatus("Memeriksa Audio...", "Harap tunggu...");
-            document.getElementById('avatar-ring').classList.remove('avatar-pulse');
+            const btn = document.getElementById('action-btn');
 
-            const hasAudio = await checkAudioAvailability();
-            if (!hasAudio) {
-                 updateCallStatus("Mikrofon Error", "Tidak ada akses mikrofon");
-                 document.getElementById('live-transcript').innerText = "Gagal mendeteksi mikrofon.";
-                 document.getElementById('avatar-circle').classList.add('avatar-error');
-                 isMicOn = false;
-                 updateMicButtonUI();
-                 return; 
-            }
-
-            isInCallMode = true;
-            isAiSpeaking = false;
-            isMicOn = true;
-            resetChat(); 
-            
-            recognition = new SpeechRecognition();
-            recognition.lang = 'ko-KR'; 
-            recognition.continuous = false; 
-            recognition.interimResults = true;
-
-            recognition.onstart = () => {
-                updateCallStatus("Mendengarkan...", "Silakan bicara");
-                document.getElementById('avatar-ring').classList.add('avatar-pulse');
-                document.getElementById('avatar-circle').classList.remove('avatar-error');
-                document.getElementById('live-transcript').innerText = "...";
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = Array.from(event.results).map(result => result[0]).map(result => result.transcript).join('');
-                document.getElementById('live-transcript').innerText = transcript;
-                if (event.results[0].isFinal) {
-                    recognition.stop(); 
-                    updateCallStatus("Memproses...", "AI sedang berpikir");
-                    document.getElementById('avatar-ring').classList.remove('avatar-pulse');
-                    sendMessage(transcript, true);
-                }
-            };
-
-            recognition.onend = () => {
-                document.getElementById('avatar-ring').classList.remove('avatar-pulse');
-                if (isInCallMode && isMicOn && !isTyping && !isAiSpeaking) {
-                    setTimeout(() => { try { recognition.start(); } catch(e){} }, 500);
-                }
-            };
-            
-            setTimeout(() => { updateMicButtonUI(); startListening(); }, 500);
-        }
-
-        function startListening() {
-            if (isInCallMode && recognition && isMicOn && !isAiSpeaking) {
-                try { recognition.start(); } catch (e) {}
-            }
-        }
-
-        function endCallMode() {
-            isInCallMode = false;
-            document.getElementById('call-modal').classList.add('hidden');
-            if (recognition) recognition.stop();
-            window.speechSynthesis.cancel();
-        }
-
-        function toggleMic() {
-            isMicOn = !isMicOn;
-            updateMicButtonUI();
-            if (isMicOn) startListening();
-            else {
-                if(recognition) recognition.stop();
-                updateCallStatus("Mic Mati", "Aktifkan mic");
-                document.getElementById('avatar-ring').classList.remove('avatar-pulse');
-            }
-        }
-
-        function updateMicButtonUI() {
-            const btn = document.getElementById('main-talk-btn');
-            const icon = document.getElementById('btn-icon');
-            const text = document.getElementById('btn-text');
-
-            if (isMicOn) {
-                btn.classList.remove('bg-red-500', 'hover:bg-red-600');
-                btn.classList.add('bg-green-500', 'hover:bg-green-600');
-                icon.setAttribute('data-lucide', 'mic');
-                text.innerText = "Mendengarkan...";
+            if (isRecording) {
+                recognition.stop();
+                isRecording = false;
+                btn.classList.remove('recording-pulse');
+                btn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 fill-current"></i>';
             } else {
-                btn.classList.remove('bg-green-500', 'hover:bg-green-600');
-                btn.classList.add('bg-red-500', 'hover:bg-red-600');
-                icon.setAttribute('data-lucide', 'mic-off');
-                text.innerText = "Mic Mati / Bicara";
+                recognition = new webkitSpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    btn.classList.add('recording-pulse');
+                    btn.innerHTML = '<i data-lucide="square" class="w-5 h-5 fill-current"></i>';
+                    lucide.createIcons();
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    sendMessage(`[VOICE NOTE] ${transcript}`);
+                };
+
+                recognition.onerror = () => {
+                    isRecording = false;
+                    btn.classList.remove('recording-pulse');
+                    btn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 fill-current"></i>';
+                    lucide.createIcons();
+                };
+
+                recognition.start();
             }
             lucide.createIcons();
         }
 
-        function updateCallStatus(status, substatus) { document.getElementById('call-status').innerText = status; }
+        function startCall() {
+            document.getElementById('call-modal').classList.remove('hidden');
+            document.getElementById('call-timer').innerText = "Menghubungkan...";
+            setTimeout(() => {
+                document.getElementById('call-timer').innerText = "Berdering...";
+            }, 1000);
+            setTimeout(() => {
+                document.getElementById('call-timer').innerText = "00:01";
+            }, 3000);
+        }
+
+        function endCall() {
+            document.getElementById('call-modal').classList.add('hidden');
+        }
 
         // ==========================================
-        // OTHER LOGIC (Theme, Tabs, Data, etc.)
+        // OTHER LOGIC (UNCHANGED)
         // ==========================================
         function initTheme() {
             if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -809,8 +1004,10 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
             document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-            const textContent = element.textContent.trim();
-            document.querySelectorAll('.nav-link').forEach(btn => { if(btn.textContent.trim() === textContent) btn.classList.add('active'); });
+            if(element) {
+                const textContent = element.textContent.trim();
+                document.querySelectorAll('.nav-link').forEach(btn => { if(btn.textContent.trim() === textContent) btn.classList.add('active'); });
+            }
             const menu = document.getElementById('mobile-menu');
             if (menu.classList.contains('open')) toggleMenu();
             if (tabId === 'vocab-container') { showVocabSubTab('vocab-textbook'); filterVocabTextbook(); } 
@@ -879,7 +1076,7 @@
         ];
 
         const vocabTextbookData = [
-             { id: 1, bab: "BAB 1", hangeul: "한국", rom: "hanguk", arti: "Korea Selatan" },
+            { id: 1, bab: "BAB 1", hangeul: "한국", rom: "hanguk", arti: "Korea Selatan" },
             { id: 2, bab: "BAB 1", hangeul: "네팔", rom: "nepal", arti: "Nepal" },
             { id: 3, bab: "BAB 1", hangeul: "동티모르", rom: "dongtimoreu", arti: "Timor Leste" },
             { id: 4, bab: "BAB 1", hangeul: "라오스", rom: "raoseu", arti: "Laos" },
@@ -2685,9 +2882,6 @@
             { id: 1775, bab: "BAB 30", hangeul: "스킨케어 제품", rom: "seukinkeeo jepum", arti: "produk perawatan kulit" },
             { id: 1776, bab: "BAB 30", hangeul: "구매하다", rom: "gumaehada", arti: "membeli" },
             { id: 1777, bab: "BAB 30", hangeul: "물품", rom: "mul pum", arti: "barang/produk" }
-
-        
-        
         ];
 
         const grammarData = [
@@ -2771,7 +2965,7 @@
             renderGrammar(filtered);
         }
 
-        // QUIZ LOGIC
+        // QUIZ LOGIC (UNCHANGED)
         let selectedVocabForQuiz = []; let quizQuestions = []; let currentQuestionIndex = 0; let currentScore = 0;
         function shuffle(array) { let currentIndex = array.length, randomIndex; while (currentIndex !== 0) { randomIndex = Math.floor(Math.random() * currentIndex); currentIndex--; [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]; } return array; }
         function renderQuizSelection() {
