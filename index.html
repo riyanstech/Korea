@@ -2,9 +2,15 @@
 <html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KR-Dict - Belajar Bahasa Korea</title>
-    <!-- Load Tailwind CSS CDN with Config -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KR-Dict | Future Learning Hub</title>
+    
+    <!-- Load Fonts (Plus Jakarta Sans & Noto Sans KR) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Load Tailwind CSS (Untuk Layout Utility Saja) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -14,642 +20,923 @@
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
                         korean: ['Noto Sans KR', 'sans-serif'],
-                    },
-                    colors: {
-                        wa: {
-                            light: '#008069',
-                            dark: '#202c33',
-                            bg: '#efe7dd',
-                            bgDark: '#0b141a',
-                            user: '#d9fdd3',
-                            userDark: '#005c4b',
-                            ai: '#ffffff',
-                            aiDark: '#202c33'
-                        }
                     }
                 }
             }
         }
     </script>
+
     <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Google Fonts -->
+
+    <!-- Custom Modern CSS (Digabungkan agar tidak error load) -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
-        
+        /* =========================================
+           1. RESET & VARIABLES (2025 THEME)
+           ========================================= */
+        :root {
+            /* Main Palette - Cyber Pastel */
+            --primary: #6366f1;       /* Indigo 500 */
+            --primary-dark: #4f46e5;  /* Indigo 600 */
+            --secondary: #ec4899;     /* Pink 500 */
+            --accent: #06b6d4;        /* Cyan 500 */
+            
+            /* Backgrounds */
+            --bg-light: #f8fafc;
+            --bg-dark: #0f172a;
+            
+            /* Glass Effect Variables */
+            --glass-bg-light: rgba(255, 255, 255, 0.65);
+            --glass-border-light: rgba(255, 255, 255, 0.5);
+            --glass-bg-dark: rgba(15, 23, 42, 0.6);
+            --glass-border-dark: rgba(255, 255, 255, 0.08);
+            
+            /* Shadows */
+            --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.05);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .dark {
+            --bg-light: #0f172a; /* Override for body bg */
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-attachment: fixed;
-            min-height: 100vh;
-            color: #1f2937;
-            padding: 0;
-            margin: 0;
-            transition: background 0.5s ease;
+            color: #1e293b;
+            background-color: var(--bg-light);
+            overflow-x: hidden;
+            transition: background-color 0.5s ease;
         }
 
         .dark body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            color: #f3f4f6;
+            color: #f1f5f9;
+            background-color: var(--bg-dark);
         }
 
-        #app {
-            width: 100vw;
-            height: 100vh;
-            border-radius: 0 !important; 
-            overflow: hidden;
+        /* =========================================
+           2. AMBIENT BACKGROUND ANIMATION
+           ========================================= */
+        .ambient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 0% 0%, rgba(236, 72, 153, 0.1), transparent 40%),
+                        radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.15), transparent 40%),
+                        radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.1), transparent 40%),
+                        radial-gradient(circle at 0% 100%, rgba(168, 85, 247, 0.1), transparent 40%);
+            z-index: -2;
+            pointer-events: none;
         }
 
-        /* Glassmorphism Classes (Original) */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        }
-        
-        .dark .glass-panel {
-            background: rgba(15, 23, 42, 0.75); 
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .ambient-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: floatOrb 10s infinite alternate ease-in-out;
         }
 
+        .orb-1 {
+            width: 300px; height: 300px;
+            background: #6366f1;
+            top: -50px; left: -50px;
+        }
+
+        .orb-2 {
+            width: 400px; height: 400px;
+            background: #ec4899;
+            bottom: -100px; right: -100px;
+            animation-delay: -5s;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        /* =========================================
+           3. GLASSMORPHISM COMPONENTS
+           ========================================= */
+
+        /* Navigation */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border-light);
+            transition: all 0.3s ease;
+        }
+
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.7);
+            border-bottom: 1px solid var(--glass-border-dark);
+        }
+
+        /* Glass Card - The core building block */
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(145deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 24px;
+            box-shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .dark .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.6));
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 20px -2px rgba(0,0,0,0.3);
         }
 
-        .glass-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            border-color: #818cf8;
+        .glass-panel-solid {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
         }
-        
-        .dark .glass-card:hover {
-             border-color: #6366f1;
-             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        .dark .glass-panel-solid {
+            background: rgba(30, 41, 59, 0.95);
         }
 
-        /* Navigation Styles */
+        /* Inputs & Selects */
+        .glass-input, .glass-select, .glass-select-sm {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 16px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            color: #334155;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .dark .glass-input, .dark .glass-select, .dark .glass-select-sm {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #e2e8f0;
+        }
+
+        .glass-input:focus, .glass-select:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        .dark .glass-input:focus, .dark .glass-select:focus {
+            background: rgba(0,0,0,0.4);
+            border-color: var(--primary);
+        }
+
+        /* =========================================
+           4. BUTTONS & INTERACTIVE
+           ========================================= */
         .nav-link {
             display: flex;
             align-items: center;
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #4b5563;
-            transition: all 0.2s;
-            cursor: pointer;
+            color: #64748b;
+            transition: all 0.3s;
+            border: 1px solid transparent;
         }
-        
-        .dark .nav-link { color: #cbd5e1; }
+        .dark .nav-link { color: #94a3b8; }
 
         .nav-link:hover {
-            background-color: rgba(99, 102, 241, 0.1);
-            color: #4f46e5;
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
         }
-        
         .dark .nav-link:hover {
-            background-color: rgba(99, 102, 241, 0.2);
             color: #818cf8;
+            background: rgba(99, 102, 241, 0.2);
         }
 
         .nav-link.active {
-            background-color: #4f46e5;
-            color: white;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            background: white;
+            color: var(--primary-dark);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
-        
         .dark .nav-link.active {
-            background-color: #6366f1;
+            background: #334155;
             color: white;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            border-color: rgba(255,255,255,0.1);
         }
 
-        #mobile-menu {
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            max-height: 0;
-            opacity: 0;
-            overflow: hidden;
+        .special-ai-nav.active {
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            color: white;
         }
 
-        #mobile-menu.open {
-            max-height: 400px;
-            opacity: 1;
-            margin-top: 1rem;
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 10px 24px;
+            font-weight: 700;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        .btn-primary-gradient:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(236, 72, 153, 0.5);
         }
 
-        /* Custom Scrollbar */
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        .dark .custom-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-        .dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
-        .dark .custom-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
-        /* --- WA CHAT STYLES START --- */
-        .wa-bg-pattern {
-            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
-            background-repeat: repeat;
-            opacity: 0.4;
+        .btn-ghost {
+            background: transparent;
+            color: #64748b;
+            padding: 10px 20px;
+            border-radius: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            transition: 0.2s;
         }
-        .dark .wa-bg-pattern { opacity: 0.05; }
+        .dark .btn-ghost { color: #cbd5e1; }
+        .btn-ghost:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
 
+        .btn-icon-glass {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.5);
+            color: #475569;
+            transition: 0.2s;
+        }
+        .dark .btn-icon-glass { background: rgba(255,255,255,0.05); color: #cbd5e1; }
+        .btn-icon-glass:hover { background: rgba(255,255,255,0.8); transform: scale(1.05); }
+
+        .filter-chip {
+            padding: 8px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid transparent;
+            transition: 0.2s;
+        }
+        .dark .filter-chip { background: rgba(255,255,255,0.05); color: #cbd5e1; }
+        .filter-chip:hover { transform: translateY(-1px); }
+        .filter-chip.active {
+            background: #1e293b;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .dark .filter-chip.active { background: white; color: black; }
+
+        /* =========================================
+           5. SPECIFIC ELEMENTS (Cards, Hangeul, etc)
+           ========================================= */
+        .hover-lift:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1);
+        }
+
+        .btn-circle-soft {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            transition: 0.3s;
+        }
+        .btn-circle-soft:hover {
+            background: var(--primary);
+            color: white;
+            transform: rotate(10deg);
+        }
+
+        /* Quiz Option */
+        .quiz-option {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quiz-option.correct {
+            background: rgba(34, 197, 94, 0.1) !important;
+            border-color: #22c55e !important;
+            color: #15803d !important;
+        }
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.1) !important;
+            border-color: #ef4444 !important;
+            color: #b91c1c !important;
+        }
+
+        /* =========================================
+           6. CHAT AI MODERN (Futuristic Style)
+           ========================================= */
         .wa-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 85%;
             position: relative;
-            padding: 8px 10px;
-            border-radius: 8px;
-            max-width: 80%;
-            font-size: 14.5px;
-            line-height: 19px;
-            box-shadow: 0 1px 0.5px rgba(0,0,0,0.13);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease-out;
         }
-        
+
         .wa-bubble-user {
-            background-color: #d9fdd3;
-            color: #111b21;
-            border-top-right-radius: 0;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border-bottom-right-radius: 4px;
             margin-left: auto;
-        }
-        .dark .wa-bubble-user {
-            background-color: #005c4b;
-            color: #e9edef;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
 
         .wa-bubble-ai {
-            background-color: #ffffff;
-            color: #111b21;
-            border-top-left-radius: 0;
+            background: white;
+            color: #1e293b;
+            border-bottom-left-radius: 4px;
             margin-right: auto;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
         }
         .dark .wa-bubble-ai {
-            background-color: #202c33;
-            color: #e9edef;
+            background: #1e293b;
+            color: #e2e8f0;
+            border-color: rgba(255,255,255,0.05);
         }
 
         .wa-time {
-            font-size: 11px;
-            color: rgba(0,0,0,0.45);
-            float: right;
-            margin-left: 8px;
+            font-size: 0.7rem;
             margin-top: 4px;
+            opacity: 0.7;
+            text-align: right;
         }
-        .dark .wa-time { color: rgba(255,255,255,0.6); }
 
-        .wa-input-container {
-            background-color: #f0f2f5;
-            padding: 8px 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        #chat-settings.open {
+            transform: translateY(0);
         }
-        .dark .wa-input-container { background-color: #202c33; }
-        /* --- WA CHAT STYLES END --- */
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* =========================================
+           7. ANIMATIONS
+           ========================================= */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes wave { 0%, 100% { height: 10px; } 50% { height: 30px; } }
+
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
 
-        .quiz-option { transition: all 0.2s; cursor: pointer; user-select: none; }
-        .quiz-option:not(.disabled):hover { transform: translateY(-2px); background-color: #f0fdf4; border-color: #4ade80; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .dark .quiz-option:not(.disabled):hover { background-color: #064e3b; border-color: #10b981; }
+        .animate-wave-1 { animation: wave 1s infinite ease-in-out; }
+        .animate-wave-2 { animation: wave 1.2s infinite ease-in-out; animation-delay: 0.1s; }
+        .animate-wave-3 { animation: wave 0.8s infinite ease-in-out; animation-delay: 0.2s; }
 
-        .quiz-option.correct { background-color: #dcfce7; border-color: #22c55e; color: #15803d; font-weight: 700; pointer-events: none; box-shadow: 0 0 0 2px #22c55e; }
-        .dark .quiz-option.correct { background-color: #065f46; color: #ecfdf5; }
-
-        .quiz-option.incorrect { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; opacity: 0.7; pointer-events: none; }
-        .dark .quiz-option.incorrect { background-color: #7f1d1d; color: #fecaca; }
-        .quiz-option.disabled { cursor: default; }
-        
-        .progress-bar-fill { transition: width 0.5s ease-in-out; }
-        .modal-backdrop { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
-        
-        .file-icon-wrapper {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            display: flex; align-items: center; justify-content: center; border-radius: 16px; transition: all 0.3s;
-            box-shadow: inset 0 2px 4px rgba(255,255,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.05);
+        /* Status Animations for Call */
+        .call-listening .animate-wave-1, 
+        .call-listening .animate-wave-2, 
+        .call-listening .animate-wave-3 {
+            background-color: #22c55e !important; /* Green */
+            animation-duration: 0.6s !important;
         }
-        .dark .file-icon-wrapper {
-             background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
-             box-shadow: inset 0 2px 4px rgba(255,255,255,0.05), inset 0 -2px 4px rgba(0,0,0,0.3);
-        }
-        .download-card:hover .file-icon-wrapper { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); transform: scale(1.1) rotate(-5deg); }
-        .dark .download-card:hover .file-icon-wrapper { background: linear-gradient(135deg, #4338ca 0%, #312e81 100%); }
-
-        .dl-filter { background-color: #e5e7eb; color: #374151; transition: 0.2s ease; }
-        .dark .dl-filter { background-color: #334155; color: #cbd5e1; }
-        .dl-filter:hover { background-color: #d1d5db; }
-        .dark .dl-filter:hover { background-color: #475569; }
-        .dl-filter.active { background-color: #4f46e5; color: white; }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-        .recording-pulse { animation: pulse-ring 1.5s infinite; background-color: #ef4444 !important; border-color: #ef4444 !important; }
         
-        /* Chat Settings Animation */
-        #chat-settings { transition: all 0.3s ease-in-out; max-height: 0; overflow: hidden; opacity: 0; }
-        #chat-settings.open { max-height: 200px; opacity: 1; padding-bottom: 8px; }
+        .call-thinking .animate-wave-1, 
+        .call-thinking .animate-wave-2, 
+        .call-thinking .animate-wave-3 {
+            background-color: #fbbf24 !important; /* Yellow */
+            animation-duration: 1.5s !important;
+            height: 5px !important;
+        }
 
+        .call-speaking .animate-wave-1, 
+        .call-speaking .animate-wave-2, 
+        .call-speaking .animate-wave-3 {
+            background-color: #ec4899 !important; /* Pink */
+            animation-duration: 0.8s !important;
+        }
+
+
+        /* Scrollbar */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
+
+        /* Mobile Menu Logic (CSS based) */
+        #mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #mobile-menu.open {
+            max-height: 400px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+        .glass-mobile-menu {
+            background: rgba(255,255,255,0.9);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            backdrop-filter: blur(10px);
+        }
+        .dark .glass-mobile-menu {
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-link-mobile {
+            width: 100%; text-align: left; padding: 12px 16px;
+            border-radius: 12px; font-weight: 600; color: #64748b;
+            display: flex; items-center; gap: 12px;
+        }
+        .dark .nav-link-mobile { color: #94a3b8; }
+        .nav-link-mobile.active { background: var(--primary); color: white; }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .glass-card { border-radius: 20px; padding: 16px; }
+            h2 { font-size: 1.5rem !important; }
+        }
     </style>
 </head>
-<body class="flex flex-col h-screen overflow-hidden">
+<body class="antialiased">
 
-    <div id="app" class="glass-panel flex flex-col transition-colors duration-300">
-        <!-- Header & Navigation -->
-        <header class="p-4 md:p-6 border-b border-white/50 dark:border-white/10 bg-white/40 dark:bg-black/20 sticky top-0 z-50 backdrop-blur-md">
-            <div class="flex justify-between items-center max-w-7xl mx-auto">
-                <div class="flex items-center gap-3 md:gap-4">
-                    <button id="burger-btn" onclick="toggleMenu()" class="md:hidden p-2 text-gray-700 dark:text-gray-200 hover:bg-white/50 dark:hover:bg-white/10 rounded-lg transition">
-                        <i data-lucide="menu" class="w-7 h-7"></i>
-                    </button>
-                    <div class="flex items-center gap-3">
-                        <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-lg">
-                            <i data-lucide="book-open" class="w-6 h-6"></i>
-                        </div>
-                        <div>
-                            <h1 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white tracking-tight leading-none">KR-Dict</h1>
-                            <p class="text-xs text-gray-600 dark:text-gray-400 font-medium">Study Hub</p>
+    <!-- Background Ambient Animation -->
+    <div class="ambient-bg"></div>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+
+    <div id="app" class="main-layout transition-colors duration-500">
+        
+        <!-- Header / Navigation Bar -->
+        <header class="glass-nav sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-20">
+                    
+                    <!-- Logo Area -->
+                    <div class="flex items-center gap-4">
+                        <button id="burger-btn" onclick="toggleMenu()" class="md:hidden icon-btn-glass">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div class="flex items-center gap-3 logo-container">
+                            <div class="logo-box">
+                                <i data-lucide="book-open" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl md:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">KR-Dict</h1>
+                                <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Future Study Hub</p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="flex items-center gap-4">
-                    <nav class="hidden md:flex gap-2">
-                        <button class="nav-link active" onclick="showTab('vocab-container', this)"><i data-lucide="book-open-text" class="w-4 h-4 mr-2"></i>Kosakata</button>
-                        <button class="nav-link" onclick="showTab('hangeul', this)"><i data-lucide="scan" class="w-4 h-4 mr-2"></i>Hangeul</button>
-                        <button class="nav-link" onclick="showTab('grammar', this)"><i data-lucide="book-open-check" class="w-4 h-4 mr-2"></i>Tata Bahasa</button>
-                        <button class="nav-link" onclick="showTab('downloads', this)"><i data-lucide="folder-down" class="w-4 h-4 mr-2"></i>Materi</button>
-                        <button class="nav-link" onclick="showTab('chat-ai', this)"><i data-lucide="message-circle" class="w-4 h-4 mr-2"></i>Chat AI</button>
+                    <!-- Desktop Nav -->
+                    <nav class="hidden md:flex items-center gap-2 bg-white/10 dark:bg-black/20 p-1.5 rounded-full border border-white/20 backdrop-blur-md">
+                        <button class="nav-link active" onclick="showTab('vocab-container', this)">
+                            <i data-lucide="book-open-text" class="w-4 h-4"></i><span>Kosakata</span>
+                        </button>
+                        <button class="nav-link" onclick="showTab('hangeul', this)">
+                            <i data-lucide="scan" class="w-4 h-4"></i><span>Hangeul</span>
+                        </button>
+                        <button class="nav-link" onclick="showTab('grammar', this)">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i><span>Grammar</span>
+                        </button>
+                        <button class="nav-link" onclick="showTab('downloads', this)">
+                            <i data-lucide="cloud-download" class="w-4 h-4"></i><span>Materi</span>
+                        </button>
+                        <button class="nav-link special-ai-nav" onclick="showTab('chat-ai', this)">
+                            <i data-lucide="bot" class="w-4 h-4"></i><span>AI Tutor</span>
+                        </button>
                     </nav>
-                    <button onclick="toggleDarkMode()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-yellow-400 hover:bg-gray-300 dark:hover:bg-gray-600 transition shadow-inner">
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleDarkMode()" class="theme-toggle-btn">
                          <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
                     </button>
                 </div>
             </div>
 
-            <div id="mobile-menu" class="flex flex-col gap-2 md:hidden px-1 max-w-7xl mx-auto">
-                <button class="nav-link w-full active" onclick="showTab('vocab-container', this)"><i data-lucide="book-open-text" class="w-5 h-5 mr-3"></i>Kosakata Textbook</button>
-                <button class="nav-link w-full" onclick="showTab('hangeul', this)"><i data-lucide="scan" class="w-5 h-5 mr-3"></i>Hangeul & Pelafalan</button>
-                <button class="nav-link w-full" onclick="showTab('grammar', this)"><i data-lucide="book-open-check" class="w-5 h-5 mr-3"></i>Tata Bahasa</button>
-                <button class="nav-link w-full" onclick="showTab('downloads', this)"><i data-lucide="folder-down" class="w-5 h-5 mr-3"></i>Pustaka Materi</button>
-                <button class="nav-link w-full" onclick="showTab('chat-ai', this)"><i data-lucide="message-circle" class="w-5 h-5 mr-3"></i>Chat AI Praktik</button>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden glass-mobile-menu">
+                <div class="p-4 space-y-2">
+                    <button class="nav-link-mobile active" onclick="showTab('vocab-container', this)"><i data-lucide="book-open-text"></i>Kosakata Textbook</button>
+                    <button class="nav-link-mobile" onclick="showTab('hangeul', this)"><i data-lucide="scan"></i>Hangeul & Pelafalan</button>
+                    <button class="nav-link-mobile" onclick="showTab('grammar', this)"><i data-lucide="sparkles"></i>Tata Bahasa</button>
+                    <button class="nav-link-mobile" onclick="showTab('downloads', this)"><i data-lucide="cloud-download"></i>Pustaka Materi</button>
+                    <button class="nav-link-mobile ai-mobile" onclick="showTab('chat-ai', this)"><i data-lucide="bot"></i>Chat AI Praktik</button>
+                </div>
             </div>
         </header>
 
-        <main class="flex-grow overflow-y-auto custom-scroll p-4 md:p-8 bg-white/30 dark:bg-black/20 relative transition-colors duration-300">
+        <!-- Main Content -->
+        <main class="flex-grow overflow-y-auto custom-scroll relative z-10 p-4 md:p-8">
             <div class="max-w-7xl mx-auto h-full">
-            <!-- 1. Kosakata -->
-            <div id="vocab-container" class="tab-content animate-fade-in space-y-6">
-                <div id="vocab-textbook" class="vocab-sub-tab space-y-6">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Kosakata Textbook 2024</h2>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">Persiapan ujian EPS-TOPIK per bab.</p>
-                        </div>
-                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                            <button onclick="showVocabSubTab('vocab-selection')" class="bg-pink-600 text-white px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center hover:bg-pink-700 transition shadow-md">
-                                <i data-lucide="graduation-cap" class="w-4 h-4 mr-2"></i>Mulai Latihan Hafalan
-                            </button>
-                            <select id="vocab-chapter-filter" onchange="filterVocabTextbook()" class="p-2.5 rounded-xl border-0 ring-1 ring-gray-200 dark:ring-gray-700 bg-white/80 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
-                                <option value="">Semua</option>
-                                <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
-                                <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
-                                <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
-                                <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
-                                <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
-                                <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
-                                <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
-                                <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
-                                <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
-                                <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>
-                                <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
-                                <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
-                                <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
-                                <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
-                                <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
-                                <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
-                                <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
-                                <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
-                                <option value="BAB 18">BAB 18 취미 (Hobi)</option>
-                                <option value="BAB 19">BAB 19 요리 (Memasak)</option>
-                                <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
-                                <option value="BAB 21">BAB 21 병원 (Rumah sakit)</option>
-                                <option value="BAB 22">BAB 22 약국 (Apotek)</option>
-                                <option value="BAB 23">BAB 23 우체국 (Kantor pos)</option>
-                                <option value="BAB 24">BAB 24 은행 (Bank)</option>
-                                <option value="BAB 25">BAB 25 외국인 근로자 지원 기관 (Lembaga dukungan pekerja asing)</option>
-                                <option value="BAB 26">BAB 26 한국의 주거 문화와 음식 문화 (Budaya makanan dan rumah Korea)</option>
-                                <option value="BAB 27">BAB 27 한국의 기념일 (Hari peringatan)</option>
-                                <option value="BAB 28">BAB 28 한국의 명절 (Hari raya Korea)</option>
-                                <option value="BAB 29">BAB 29 한국의 예절 (Sopan santun Korea)</option>
-                                <option value="BAB 30">BAB 30 한국의 대중문화 (Budaya popular Korea)</option>
-                            </select>
-                            <div class="relative w-full sm:w-64">
-                                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
-                                <input type="text" id="vocab-textbook-search" oninput="filterVocabTextbook()" placeholder="Cari kata..." class="w-full pl-9 p-2.5 rounded-xl border-0 ring-1 ring-gray-200 dark:ring-gray-700 bg-white/80 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
+                
+                <!-- 1. KOSAKATA TAB -->
+                <div id="vocab-container" class="tab-content animate-slide-up space-y-8">
+                    
+                    <!-- Sub-Tab: Textbook List -->
+                    <div id="vocab-textbook" class="vocab-sub-tab space-y-6">
+                        <div class="header-section glass-card p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div class="text-center md:text-left">
+                                <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">Textbook 2024</h2>
+                                <p class="text-gray-500 dark:text-gray-400 mt-1">Mastering EPS-TOPIK Vocabulary</p>
                             </div>
-                        </div>
-                    </div>
-                    <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4"></div>
-                </div>
-
-                <!-- 1.2. Kosakata Selection -->
-                <div id="vocab-selection" class="vocab-sub-tab hidden space-y-6">
-                    <div class="flex justify-between items-center mb-4">
-                         <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Pilih Kosakata</h2>
-                         <button onclick="showVocabSubTab('vocab-textbook')" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 flex items-center transition">
-                             <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Kembali
-                         </button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="glass-card p-5">
-                            <h3 class="text-xl font-semibold text-indigo-700 dark:text-indigo-400 mb-4 flex items-center"><i data-lucide="layers-3" class="w-5 h-5 mr-2"></i> Filter Berdasarkan BAB</h3>
-                            <select id="quiz-chapter-filter" onchange="renderQuizSelection()" class="p-3 rounded-xl border-0 ring-1 ring-gray-200 dark:ring-gray-600 bg-white/80 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm w-full mb-4">
-                                <option value="">Pilih Bab...</option>
-                                <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
-                                <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
-                                <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
-                                <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
-                                <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
-                                <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
-                                <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
-                                <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
-                                <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
-                                <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>
-                                <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
-                                <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
-                                <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
-                                <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
-                                <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
-                                <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
-                                <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
-                                <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
-                                <option value="BAB 18">BAB 18 취미 (Hobi)</option>
-                                <option value="BAB 19">BAB 19 요리 (Memasak)</option>
-                                <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
-                                <option value="BAB 21">BAB 21 병원 (Rumah sakit)</option>
-                                <option value="BAB 22">BAB 22 약국 (Apotek)</option>
-                                <option value="BAB 23">BAB 23 우체국 (Kantor pos)</option>
-                                <option value="BAB 24">BAB 24 은행 (Bank)</option>
-                                <option value="BAB 25">BAB 25 외국인 근로자 지원 기관 (Lembaga dukungan pekerja asing)</option>
-                                <option value="BAB 26">BAB 26 한국의 주거 문화와 음식 문화 (Budaya makanan dan rumah Korea)</option>
-                                <option value="BAB 27">BAB 27 한국의 기념일 (Hari peringatan)</option>
-                                <option value="BAB 28">BAB 28 한국의 명절 (Hari raya Korea)</option>
-                                <option value="BAB 29">BAB 29 한국의 예절 (Sopan santun Korea)</option>
-                                <option value="BAB 30">BAB 30 한국의 대중문화 (Budaya popular Korea)</option>
-
-                            </select>
-                             <div class="flex justify-between items-center mt-3">
-                                <span id="selection-count" class="text-sm text-gray-500 dark:text-gray-400 font-medium">0 kata terpilih</span>
-                                <div class="flex gap-2">
-                                    <button onclick="bulkSelectVocab(true)" class="text-xs bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-700 px-3 py-1.5 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800 transition font-bold shadow-sm">Pilih Semua</button>
-                                    <button onclick="bulkSelectVocab(false)" class="text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 border border-red-200 dark:border-red-700 px-3 py-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-800 transition font-bold shadow-sm">Reset</button>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                <button onclick="showVocabSubTab('vocab-selection')" class="btn-primary-gradient">
+                                    <i data-lucide="gamepad-2" class="w-5 h-5 mr-2"></i>Mulai Latihan
+                                </button>
+                                <div class="glass-input-wrapper">
+                                    <select id="vocab-chapter-filter" onchange="filterVocabTextbook()" class="glass-select">
+                                        <option value="">Semua Bab</option>
+                                        <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
+                                        <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
+                                        <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
+                                        <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
+                                        <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
+                                        <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
+                                        <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
+                                        <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
+                                        <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
+                                        <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>
+                                        <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
+                                        <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
+                                        <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
+                                        <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
+                                        <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
+                                        <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
+                                        <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
+                                        <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
+                                        <option value="BAB 18">BAB 18 취미 (Hobi)</option>
+                                        <option value="BAB 19">BAB 19 요리 (Memasak)</option>
+                                        <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
+                                        <option value="BAB 21">BAB 21 병원 (Rumah sakit)</option>
+                                        <option value="BAB 22">BAB 22 약국 (Apotek)</option>
+                                        <option value="BAB 23">BAB 23 우체국 (Kantor pos)</option>
+                                        <option value="BAB 24">BAB 24 은행 (Bank)</option>
+                                        <option value="BAB 25">BAB 25 외국인 근로자 지원 기관 (Lembaga dukungan pekerja asing)</option>
+                                        <option value="BAB 26">BAB 26 한국의 주거 문화와 음식 문화 (Budaya makanan dan rumah Korea)</option>
+                                        <option value="BAB 27">BAB 27 한국의 기념일 (Hari peringatan)</option>
+                                        <option value="BAB 28">BAB 28 한국의 명절 (Hari raya Korea)</option>
+                                        <option value="BAB 29">BAB 29 한국의 예절 (Sopan santun Korea)</option>
+                                        <option value="BAB 30">BAB 30 한국의 대중문화 (Budaya popular Korea)</option>
+                                    </select>
+                                </div>
+                                <div class="glass-input-wrapper relative w-full sm:w-64">
+                                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                                    <input type="text" id="vocab-textbook-search" oninput="filterVocabTextbook()" placeholder="Cari kata..." class="glass-input pl-10">
                                 </div>
                             </div>
                         </div>
-                         <div class="glass-card p-5">
-                            <h3 class="text-xl font-semibold text-pink-700 dark:text-pink-400 mb-4 flex items-center"><i data-lucide="list-check" class="w-5 h-5 mr-2"></i> Ringkasan</h3>
-                            <div id="selected-vocab-summary" class="text-sm text-gray-600 dark:text-gray-300 h-24 overflow-y-auto custom-scroll p-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50/70 dark:bg-gray-800/50">Belum ada kata yang dipilih.</div>
-                            <button onclick="startQuiz()" id="start-quiz-btn" disabled class="mt-4 bg-gray-400 text-white px-6 py-3 rounded-xl text-lg font-bold flex items-center justify-center hover:bg-pink-700 transition shadow-lg w-full disabled:opacity-50">Mulai Latihan (0 Soal)</button>
+                        
+                        <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4">
+                            <!-- JS Generated Content -->
                         </div>
                     </div>
-                    <div id="vocab-selection-list" class="space-y-2 max-h-[50vh] overflow-y-auto custom-scroll p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-800/50"></div>
-                </div>
 
-                <!-- 1.3. Quiz Mode -->
-                 <div id="quiz-mode" class="vocab-sub-tab hidden h-full flex flex-col relative">
-                     <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full mb-6 overflow-hidden mt-2">
-                         <div id="quiz-progress-bar" class="progress-bar-fill bg-indigo-600 h-full rounded-full" style="width: 0%"></div>
-                     </div>
-                     <div class="flex justify-between items-center mb-4 px-1">
-                         <div class="text-sm font-bold text-gray-500 dark:text-gray-400 tracking-wide">
-                              SOAL <span id="current-question-index" class="text-indigo-600 dark:text-indigo-400 text-lg">1</span> / <span id="total-questions-count">10</span>
+                    <!-- Sub-Tab: Selection -->
+                    <div id="vocab-selection" class="vocab-sub-tab hidden space-y-6">
+                        <div class="flex justify-between items-center mb-2">
+                             <h2 class="text-2xl font-bold dark:text-white">Persiapan Kuis</h2>
+                             <button onclick="showVocabSubTab('vocab-textbook')" class="btn-ghost">
+                                 <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Kembali
+                             </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div class="md:col-span-8 glass-card p-6">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="text-lg font-semibold flex items-center text-indigo-600 dark:text-indigo-400"><i data-lucide="filter" class="w-5 h-5 mr-2"></i> Pilih Materi</h3>
+                                    <div class="flex gap-2">
+                                        <button onclick="bulkSelectVocab(true)" class="btn-xs-primary">Pilih Semua</button>
+                                        <button onclick="bulkSelectVocab(false)" class="btn-xs-danger">Reset</button>
+                                    </div>
+                                </div>
+                                <select id="quiz-chapter-filter" onchange="renderQuizSelection()" class="glass-select w-full mb-4">
+                                    <option value="">Pilih Bab Tertentu...</option>
+                                    <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
+                                    <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
+                                    <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
+                                    <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
+                                    <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
+                                    <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
+                                    <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
+                                    <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
+                                    <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
+                                    <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>
+                                    <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
+                                    <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
+                                    <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
+                                    <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
+                                    <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
+                                    <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
+                                    <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
+                                    <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
+                                    <option value="BAB 18">BAB 18 취미 (Hobi)</option>
+                                    <option value="BAB 19">BAB 19 요리 (Memasak)</option>
+                                    <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
+                                    <option value="BAB 21">BAB 21 병원 (Rumah sakit)</option>
+                                    <option value="BAB 22">BAB 22 약국 (Apotek)</option>
+                                    <option value="BAB 23">BAB 23 우체국 (Kantor pos)</option>
+                                    <option value="BAB 24">BAB 24 은행 (Bank)</option>
+                                    <option value="BAB 25">BAB 25 외국인 근로자 지원 기관 (Lembaga dukungan pekerja asing)</option>
+                                    <option value="BAB 26">BAB 26 한국의 주거 문화와 음식 문화 (Budaya makanan dan rumah Korea)</option>
+                                    <option value="BAB 27">BAB 27 한국의 기념일 (Hari peringatan)</option>
+                                    <option value="BAB 28">BAB 28 한국의 명절 (Hari raya Korea)</option>
+                                    <option value="BAB 29">BAB 29 한국의 예절 (Sopan santun Korea)</option>
+                                    <option value="BAB 30">BAB 30 한국의 대중문화 (Budaya popular Korea)</option>
+                                </select>
+                                <div id="vocab-selection-list" class="space-y-2 max-h-[400px] overflow-y-auto custom-scroll pr-2"></div>
+                            </div>
+                            
+                             <div class="md:col-span-4 glass-card p-6 flex flex-col h-fit sticky top-24">
+                                <h3 class="text-lg font-semibold mb-4 text-pink-600 dark:text-pink-400 flex items-center"><i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i> Ringkasan</h3>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-sm text-gray-500">Kata Terpilih</span>
+                                    <span id="selection-count" class="text-xl font-bold text-gray-800 dark:text-white">0</span>
+                                </div>
+                                <div id="selected-vocab-summary" class="text-sm text-gray-600 dark:text-gray-300 min-h-[100px] max-h-[200px] overflow-y-auto custom-scroll p-3 rounded-xl bg-gray-50/50 dark:bg-black/20 mb-4 border border-gray-100 dark:border-gray-700">Belum ada kata.</div>
+                                <button onclick="startQuiz()" id="start-quiz-btn" disabled class="btn-primary-gradient w-full py-4 text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                    Mulai Latihan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-Tab: Quiz Mode -->
+                     <div id="quiz-mode" class="vocab-sub-tab hidden h-full flex flex-col relative">
+                         <!-- Progress Bar -->
+                         <div class="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full mb-8 overflow-hidden relative">
+                             <div id="quiz-progress-bar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-700 ease-out" style="width: 0%"></div>
                          </div>
-                         <button onclick="showVocabSubTab('vocab-selection')" class="text-gray-400 hover:text-red-500 transition p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/30"><i data-lucide="x" class="w-5 h-5"></i></button>
-                     </div>
-                     <div class="flex-grow flex flex-col items-center justify-start overflow-y-auto custom-scroll pb-48 w-full">
-                        <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 mb-8 border border-indigo-50 dark:border-indigo-900 text-center relative overflow-hidden group shrink-0 transition-colors">
-                            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 block">Terjemahkan</span>
-                            <div id="quiz-question" class="text-5xl font-black text-gray-800 dark:text-white font-['Noto_Sans_KR'] mb-4 transition transform group-hover:scale-105 duration-300">...</div>
-                            <button id="quiz-speaker-btn" onclick="speak(document.getElementById('quiz-question').innerText)" class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-600 hover:text-white transition shadow-sm"><i data-lucide="volume-2" class="w-6 h-6"></i></button>
-                        </div>
-                        <div id="quiz-options" class="grid grid-cols-1 gap-3 w-full max-w-md"></div>
-                     </div>
-                     <div class="absolute bottom-0 left-0 right-0 p-4 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 flex flex-col items-center z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-                         <div id="quiz-feedback" class="h-6 text-sm font-bold text-center mb-2 transition-opacity opacity-0"></div>
-                         <button onclick="nextQuestion()" id="next-question-btn" disabled class="w-full max-w-md bg-gray-300 text-gray-500 px-6 py-3.5 rounded-xl text-lg font-bold transition shadow-sm flex items-center justify-center">Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i></button>
-                     </div>
-                 </div>
-            </div>
+                         
+                         <div class="flex justify-between items-center mb-6">
+                             <div class="glass-badge px-4 py-2">
+                                  <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold mr-2">Soal</span>
+                                  <span id="current-question-index" class="text-indigo-600 dark:text-indigo-400 text-lg font-bold">1</span> 
+                                  <span class="text-gray-400 mx-1">/</span> 
+                                  <span id="total-questions-count" class="text-gray-600 dark:text-gray-300">10</span>
+                             </div>
+                             <button onclick="showVocabSubTab('vocab-selection')" class="btn-icon-danger"><i data-lucide="x" class="w-5 h-5"></i></button>
+                         </div>
 
-            <!-- 2. Hangeul -->
-            <div id="hangeul" class="tab-content hidden animate-fade-in space-y-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Belajar Hangeul</h2>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Klik kartu untuk mendengarkan. Perhatikan bunyi <b>Awal</b> dan <b>Akhir</b>.</p>
-                </div>
-                <div id="hangeul-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 pb-8"></div>
-            </div>
-
-            <!-- 3. Grammar -->
-            <div id="grammar" class="tab-content hidden animate-fade-in space-y-6">
-                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Tata Bahasa</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Struktur kalimat dasar hingga menengah.</p>
-                    </div>
-                    <div class="relative w-full md:w-64">
-                         <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
-                        <input type="text" id="grammar-search" oninput="filterGrammar()" placeholder="Cari grammar..." class="w-full pl-9 p-2.5 rounded-xl border-0 ring-1 ring-gray-200 dark:ring-gray-700 bg-white/80 dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none text-sm shadow-sm">
-                    </div>
-                </div>
-                <div id="grammar-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            </div>
-
-            <!-- 4. Downloads -->
-            <div id="downloads" class="tab-content hidden animate-fade-in space-y-6">
-                <div>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Pustaka Materi</h2>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm">Download materi belajar format PDF & Audio.</p>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="filterDownloads('all', this)" class="dl-filter active px-4 py-2 rounded-lg text-sm font-semibold shadow-md">Semua</button>
-                    <button onclick="filterDownloads('textbook', this)" class="dl-filter px-4 py-2 rounded-lg text-sm font-semibold shadow-md">Buku Paket</button>
-                    <button onclick="filterDownloads('grammar', this)" class="dl-filter px-4 py-2 rounded-lg text-sm font-semibold shadow-md">Tata Bahasa</button>
-                    <button onclick="filterDownloads('vocab', this)" class="dl-filter px-4 py-2 rounded-lg text-sm font-semibold shadow-md">Kosakata</button>
-                    <button onclick="filterDownloads('exam', this)" class="dl-filter px-4 py-2 rounded-lg text-sm font-semibold shadow-md">Latihan Soal</button>
-                </div>
-                <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-12"></div>
-            </div>
-
-            <!-- 5. Chat AI (MODIFIED - WA STYLE) -->
-            <div id="chat-ai" class="tab-content hidden animate-fade-in h-[calc(100%+2rem)] md:h-[calc(100%+4rem)] flex flex-col -mx-4 -my-4 md:-mx-8 md:-my-8 relative overflow-hidden bg-[#efe7dd] dark:bg-[#0b141a]">
-                <!-- WA Background Pattern -->
-                <div class="absolute inset-0 wa-bg-pattern pointer-events-none z-0"></div>
-
-                <!-- WA Header -->
-                <div class="bg-wa-light dark:bg-wa-dark p-3 flex flex-col shadow-md z-10 text-white relative">
-                    <div class="flex items-center justify-between w-full">
-                        <div class="flex items-center gap-3">
-                            <button onclick="showTab('vocab-container')" class="md:hidden text-white"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
-                            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center overflow-hidden border border-white/30 relative">
-                                <i id="ai-avatar-icon" data-lucide="bot" class="w-6 h-6 text-white"></i>
+                         <div class="flex-grow flex flex-col items-center justify-start w-full max-w-2xl mx-auto">
+                            <!-- Question Card -->
+                            <div class="w-full glass-card p-10 mb-8 text-center relative overflow-hidden group hover-lift">
+                                <div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
+                                
+                                <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-4 block">Terjemahkan ke Indonesia</span>
+                                <div id="quiz-question" class="text-6xl font-black text-gray-800 dark:text-white font-korean mb-6 tracking-tight">...</div>
+                                <button id="quiz-speaker-btn" onclick="speak(document.getElementById('quiz-question').innerText)" class="btn-circle-soft mx-auto">
+                                    <i data-lucide="volume-2" class="w-6 h-6"></i>
+                                </button>
                             </div>
-                            <div class="flex flex-col">
-                                <h1 id="ai-header-name" class="font-bold text-base leading-tight">Tutor AI Korea</h1>
-                                <span id="ai-status" class="text-xs text-white/80">Mode Tutor • Online</span>
+
+                            <!-- Options -->
+                            <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"></div>
+                         </div>
+
+                         <!-- Footer Feedback -->
+                         <div class="fixed bottom-6 left-0 right-0 px-4 flex flex-col items-center pointer-events-none">
+                             <div class="pointer-events-auto max-w-xl w-full glass-panel-solid p-4 rounded-2xl shadow-2xl flex flex-col items-center transform transition-all duration-300 translate-y-20 opacity-0" id="quiz-footer-container">
+                                 <div id="quiz-feedback" class="text-base font-bold text-center mb-3"></div>
+                                 <button onclick="nextQuestion()" id="next-question-btn" disabled class="btn-primary-gradient w-full py-3">
+                                     Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                                 </button>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+
+                <!-- 2. HANGEUL TAB -->
+                <div id="hangeul" class="tab-content hidden animate-slide-up space-y-6">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold dark:text-white mb-2">Hangeul Mastery</h2>
+                        <p class="text-gray-500 dark:text-gray-400">Klik kartu untuk mendengar pelafalan Native Speaker</p>
+                    </div>
+                    <div id="hangeul-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-8"></div>
+                </div>
+
+                <!-- 3. GRAMMAR TAB -->
+                <div id="grammar" class="tab-content hidden animate-slide-up space-y-6">
+                     <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+                        <div>
+                            <h2 class="text-3xl font-bold dark:text-white">Tata Bahasa</h2>
+                            <p class="text-gray-500 dark:text-gray-400">Struktur kalimat dasar hingga mahir</p>
+                        </div>
+                        <div class="glass-input-wrapper relative w-full md:w-80">
+                             <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                            <input type="text" id="grammar-search" oninput="filterGrammar()" placeholder="Cari pola grammar..." class="glass-input pl-10">
+                        </div>
+                    </div>
+                    <div id="grammar-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- 4. DOWNLOADS TAB -->
+                <div id="downloads" class="tab-content hidden animate-slide-up space-y-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold dark:text-white mb-2">Pustaka Digital</h2>
+                        <p class="text-gray-500 dark:text-gray-400">Unduh materi PDF & Audio berkualitas tinggi</p>
+                    </div>
+                    
+                    <div class="flex justify-center flex-wrap gap-3">
+                        <button onclick="filterDownloads('all', this)" class="filter-chip active">Semua</button>
+                        <button onclick="filterDownloads('textbook', this)" class="filter-chip">Buku Paket</button>
+                        <button onclick="filterDownloads('grammar', this)" class="filter-chip">Tata Bahasa</button>
+                        <button onclick="filterDownloads('vocab', this)" class="filter-chip">Kosakata</button>
+                        <button onclick="filterDownloads('exam', this)" class="filter-chip">Latihan Soal</button>
+                    </div>
+                    
+                    <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12"></div>
+                </div>
+
+                <!-- 5. CHAT AI TAB (Redesigned) -->
+                <div id="chat-ai" class="tab-content hidden h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] flex flex-col relative rounded-3xl overflow-hidden glass-panel-solid shadow-2xl border border-white/20">
+                    
+                    <!-- Chat Header -->
+                    <div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center z-20">
+                        <div class="flex items-center gap-4">
+                            <button onclick="showTab('vocab-container')" class="md:hidden btn-icon-glass"><i data-lucide="arrow-left"></i></button>
+                            <div class="relative">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 p-0.5">
+                                    <div class="w-full h-full bg-white dark:bg-gray-900 rounded-full flex items-center justify-center overflow-hidden">
+                                        <i id="ai-avatar-icon" data-lucide="bot" class="w-6 h-6 text-indigo-500"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></div>
+                            </div>
+                            <div>
+                                <h1 id="ai-header-name" class="font-bold text-gray-800 dark:text-white text-base">Tutor AI Korea</h1>
+                                <span id="ai-status" class="text-xs text-indigo-500 font-medium">Online • Siap membantu</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-4 text-white">
-                            <button onclick="startCall()" class="p-2 rounded-full hover:bg-white/10 transition"><i data-lucide="phone" class="w-5 h-5 fill-current"></i></button>
-                            <button onclick="toggleChatSettings()" class="p-2 rounded-full hover:bg-white/10 transition"><i data-lucide="settings-2" class="w-5 h-5"></i></button>
-                            <button onclick="resetChat()" class="p-2 rounded-full hover:bg-white/10 transition"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="startCall()" class="btn-icon-glass text-green-500 bg-green-50 dark:bg-green-900/20"><i data-lucide="phone"></i></button>
+                            <button onclick="toggleChatSettings()" class="btn-icon-glass"><i data-lucide="sliders-horizontal"></i></button>
+                            <button onclick="resetChat()" class="btn-icon-glass text-red-500 hover:bg-red-50"><i data-lucide="trash-2"></i></button>
                         </div>
                     </div>
 
-                    <!-- Chat Settings (Dropdowns) -->
-                    <div id="chat-settings" class="w-full mt-2 bg-white/10 rounded-lg backdrop-blur-sm border border-white/20 px-3 py-2 gap-2 flex flex-col sm:flex-row text-sm">
-                        <div class="flex-1">
-                            <label class="text-[10px] uppercase text-white/70 font-bold mb-1 block">Mode Percakapan</label>
-                            <select id="chat-mode-select" onchange="updateChatMode()" class="w-full bg-black/20 text-white border border-white/30 rounded-md p-1.5 focus:outline-none focus:bg-black/40 text-sm">
-                                <option value="tutor">🎓 Tutor Formal (Koreksi & Belajar)</option>
-                                <option value="casual">👩🏻 Teman Santai (Ji-eun)</option>
-                            </select>
+                    <!-- Chat Settings Panel (Slide Down) -->
+                    <div id="chat-settings" class="absolute top-[72px] left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700 p-4 z-10 shadow-lg transform -translate-y-full transition-transform duration-300">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Google Gemini API Key</label>
+                                <div class="flex gap-2">
+                                    <input type="password" id="api-key-input" placeholder="Paste your API Key here" class="glass-input text-sm">
+                                    <button onclick="saveApiKey()" class="btn-primary-gradient py-2 text-xs whitespace-nowrap">Simpan</button>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">Key disimpan di browser Anda (LocalStorage).</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Persona</label>
+                                    <select id="chat-mode-select" onchange="updateChatMode()" class="glass-select-sm">
+                                        <option value="tutor">🎓 Tutor Formal</option>
+                                        <option value="casual">👩🏻 Teman Santai (Ji-eun)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Level Kamu</label>
+                                    <select id="chat-level-select" onchange="updateChatMode()" class="glass-select-sm">
+                                        <option value="pemula">🌱 Pemula</option>
+                                        <option value="menengah">🌿 Menengah</option>
+                                        <option value="lanjut">🌳 Lanjut</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex-1">
-                            <label class="text-[10px] uppercase text-white/70 font-bold mb-1 block">Level Saya</label>
-                            <select id="chat-level-select" onchange="updateChatMode()" class="w-full bg-black/20 text-white border border-white/30 rounded-md p-1.5 focus:outline-none focus:bg-black/40 text-sm">
-                                <option value="pemula">🌱 Pemula (Beginner)</option>
-                                <option value="menengah">🌿 Menengah (Intermediate)</option>
-                                <option value="lanjut">🌳 Lanjut (Advanced)</option>
-                            </select>
+                    </div>
+
+                    <!-- Chat Messages Area -->
+                    <div id="chat-box" class="flex-grow overflow-y-auto custom-scroll p-4 space-y-4 bg-gray-50/50 dark:bg-black/20">
+                        <!-- Messages injected by JS -->
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
+                        <div class="flex items-end gap-2 max-w-4xl mx-auto">
+                            <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+                            <button onclick="document.getElementById('image-upload').click()" class="btn-icon-glass shrink-0 text-indigo-500">
+                                <i data-lucide="image-plus"></i>
+                            </button>
+
+                            <div class="flex-grow relative">
+                                <input type="text" id="user-input" class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 pr-12 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500/50 transition-all" placeholder="Ketik pesan..." onkeydown="handleChatEnter(event)" autocomplete="off">
+                                <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition"><i data-lucide="smile"></i></button>
+                            </div>
+
+                            <button id="action-btn" onclick="toggleVoiceRecording()" class="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-pink-600 text-white shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center transform active:scale-95 transition-all">
+                                <i data-lucide="mic" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Image Preview Modal (Overlay inside Chat Tab) -->
+                    <div id="image-preview-modal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex flex-col justify-center items-center p-6 animate-fade-in">
+                        <div class="glass-card p-2 w-full max-w-sm">
+                            <div class="relative rounded-lg overflow-hidden bg-black">
+                                <img id="preview-img" class="w-full max-h-[300px] object-contain">
+                                <button onclick="cancelImage()" class="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full"><i data-lucide="x"></i></button>
+                            </div>
+                            <div class="p-3">
+                                <button onclick="sendImage()" class="btn-primary-gradient w-full py-2">Kirim Foto</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Chat Area -->
-                <div id="chat-box" class="flex-grow overflow-y-auto custom-scroll p-4 space-y-2 z-10">
-                    <!-- Date Divider -->
-                    <div class="flex justify-center my-4 sticky top-0 z-10">
-                        <span class="bg-gray-200 dark:bg-[#182229] text-gray-600 dark:text-gray-300 text-xs px-3 py-1 rounded-lg shadow-sm font-medium">Hari Ini</span>
-                    </div>
-                </div>
-
-                <!-- WA Input Area -->
-                <div class="bg-wa-bg dark:bg-wa-dark p-2 flex items-end gap-2 z-20 min-h-[62px] items-center">
-                    <!-- Upload Image -->
-                    <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
-                    <button onclick="document.getElementById('image-upload').click()" class="p-3 text-gray-500 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition shrink-0">
-                        <i data-lucide="camera" class="w-6 h-6"></i>
-                    </button>
-
-                    <!-- Text Input -->
-                    <div class="flex-grow bg-white dark:bg-[#2a3942] rounded-2xl flex items-center px-4 py-2 shadow-sm min-h-[42px]">
-                        <button class="mr-2 text-gray-400 dark:text-gray-500 hover:text-gray-600"><i data-lucide="smile" class="w-6 h-6"></i></button>
-                        <input type="text" id="user-input" class="w-full bg-transparent border-none outline-none text-gray-800 dark:text-white text-base max-h-24 font-korean" placeholder="Ketik pesan..." onkeydown="handleChatEnter(event)" autocomplete="off">
-                    </div>
-
-                    <!-- Mic / Send Button -->
-                    <button id="action-btn" onclick="toggleVoiceRecording()" class="p-3 bg-wa-light dark:bg-wa-light text-white rounded-full shadow-md hover:opacity-90 transition transform active:scale-95 shrink-0 flex items-center justify-center w-12 h-12">
-                        <i data-lucide="mic" class="w-6 h-6 fill-current"></i>
-                    </button>
-                </div>
-
-                <!-- Image Preview Modal -->
-                <div id="image-preview-modal" class="absolute inset-0 bg-black/90 z-50 hidden flex flex-col justify-center items-center p-4">
-                    <div class="w-full max-w-sm bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-2xl">
-                        <div class="p-3 border-b dark:border-gray-700 flex justify-between items-center">
-                            <span class="font-bold dark:text-white">Kirim Foto</span>
-                            <button onclick="cancelImage()" class="text-gray-500"><i data-lucide="x" class="w-5 h-5"></i></button>
-                        </div>
-                        <div class="p-4 bg-gray-100 dark:bg-gray-900 flex justify-center">
-                            <img id="preview-img" class="max-h-64 rounded-md object-contain">
-                        </div>
-                        <div class="p-3 flex justify-end gap-2">
-                            <button onclick="sendImage()" class="bg-wa-light text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 flex items-center gap-2"><i data-lucide="send" class="w-4 h-4"></i> Kirim</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             </div>
         </main>
     </div>
 
-    <!-- MODALS -->
-    <!-- Audio Call Modal -->
-    <div id="call-modal" class="fixed inset-0 bg-[#0b141a]/95 z-[70] hidden flex flex-col items-center justify-between py-12 text-white backdrop-blur-sm transition-all duration-300">
+    <!-- GLOBAL MODALS -->
+    
+    <!-- Call Modal (Updated for Real-time Logic) -->
+    <div id="call-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] hidden flex flex-col items-center justify-between py-12 transition-all duration-500">
         <div class="text-center mt-10">
-            <div class="w-24 h-24 rounded-full bg-gray-600 mx-auto flex items-center justify-center mb-4 border-4 border-[#202c33] overflow-hidden">
-                <i data-lucide="bot" class="w-12 h-12 text-white/50"></i>
+            <div class="w-32 h-32 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 to-pink-500 mx-auto mb-6">
+                <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden relative">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=korea" class="w-20 h-20 opacity-80 z-10 relative">
+                    <!-- Glow effect behind avatar -->
+                    <div class="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full animate-pulse"></div>
+                </div>
             </div>
-            <h2 class="text-2xl font-bold mb-1 tracking-wide">Tutor AI Korea</h2>
-            <p id="call-timer" class="text-green-400 text-sm animate-pulse">Memanggil...</p>
+            <h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Tutor AI</h2>
+            <p id="call-status" class="text-indigo-400 font-mono text-sm tracking-widest uppercase">MENGHUBUNGKAN...</p>
         </div>
         
-        <!-- Waveform Simulation -->
-        <div class="flex items-center justify-center gap-1.5 h-12 w-full px-8 opacity-70">
-            <div class="w-1.5 h-4 bg-white rounded-full animate-[pulse_1s_ease-in-out_infinite]"></div>
-            <div class="w-1.5 h-8 bg-white rounded-full animate-[pulse_1.2s_ease-in-out_infinite]"></div>
-            <div class="w-1.5 h-12 bg-white rounded-full animate-[pulse_0.8s_ease-in-out_infinite]"></div>
-            <div class="w-1.5 h-8 bg-white rounded-full animate-[pulse_1.5s_ease-in-out_infinite]"></div>
-            <div class="w-1.5 h-4 bg-white rounded-full animate-[pulse_1s_ease-in-out_infinite]"></div>
+        <!-- Audio Visualizer (Interactive) -->
+        <div id="wave-container" class="flex items-center justify-center gap-2 h-16 w-full opacity-80">
+             <span class="w-2 h-6 bg-white rounded-full animate-wave-1 transition-colors duration-300"></span>
+             <span class="w-2 h-10 bg-white rounded-full animate-wave-2 transition-colors duration-300"></span>
+             <span class="w-2 h-14 bg-white rounded-full animate-wave-3 transition-colors duration-300"></span>
+             <span class="w-2 h-10 bg-white rounded-full animate-wave-2 transition-colors duration-300"></span>
+             <span class="w-2 h-6 bg-white rounded-full animate-wave-1 transition-colors duration-300"></span>
         </div>
 
-        <div class="flex gap-8 items-center pb-8">
-            <button class="p-4 rounded-full bg-gray-700/50 hover:bg-gray-700 transition backdrop-blur-md"><i data-lucide="mic-off" class="w-6 h-6"></i></button>
-            <button onclick="endCall()" class="p-5 rounded-full bg-red-500 hover:bg-red-600 shadow-lg transform active:scale-95 transition"><i data-lucide="phone-off" class="w-8 h-8 fill-current"></i></button>
-            <button class="p-4 rounded-full bg-gray-700/50 hover:bg-gray-700 transition backdrop-blur-md"><i data-lucide="volume-2" class="w-6 h-6"></i></button>
+        <div class="flex gap-8 items-center pb-10">
+            <!-- Tombol Mute -->
+            <button id="mute-btn" onclick="toggleMute()" class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md">
+                <i data-lucide="mic"></i>
+            </button>
+            
+            <!-- Tombol End Call -->
+            <button onclick="endCall()" class="w-20 h-20 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30 flex items-center justify-center transform hover:scale-110 transition duration-300">
+                <i data-lucide="phone-off" class="w-8 h-8 fill-current"></i>
+            </button>
+            
+            <!-- Speaker Toggle (Visual) -->
+            <button class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md">
+                <i data-lucide="volume-2"></i>
+            </button>
         </div>
     </div>
 
-    <div id="quiz-finish-modal" class="fixed inset-0 modal-backdrop z-[70] hidden flex items-center justify-center p-4 transition-all duration-300">
-        <div class="glass-card p-8 w-full max-w-sm text-center transform transition-all duration-300 scale-100 relative overflow-hidden dark:bg-gray-800 dark:border-gray-700">
-            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#F472B6 2px, transparent 2px); background-size: 20px 20px;"></div>
-            <div class="mb-6 relative">
-                <div class="w-24 h-24 bg-yellow-100 dark:bg-yellow-900/50 rounded-full mx-auto flex items-center justify-center mb-2 shadow-inner"><i data-lucide="trophy" class="w-12 h-12 text-yellow-500"></i></div>
-                <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">SELESAI</div>
+    <!-- Quiz Result Modal -->
+    <div id="quiz-finish-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideQuizFinishModal()"></div>
+        <div class="glass-card p-8 w-full max-w-sm text-center relative z-10 animate-scale-in border-t-4 border-indigo-500">
+            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
+                <div class="w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-600 rounded-full flex items-center justify-center shadow-lg ring-4 ring-white dark:ring-gray-800">
+                    <i data-lucide="trophy" class="w-12 h-12 text-white fill-current"></i>
+                </div>
             </div>
-            <h3 class="text-2xl font-bold text-gray-800 dark:text-white mb-1">Hasil Latihan</h3>
-            <div class="my-6 p-4 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl border border-indigo-100 dark:border-indigo-800">
-                <div class="text-sm text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide mb-1">Skor Kamu</div>
-                <div class="text-5xl font-black text-indigo-600 dark:text-indigo-400" id="final-score-number">0</div>
-                <div class="text-sm text-gray-600 dark:text-gray-300 mt-2 font-medium" id="final-score-detail">0 dari 0 Benar</div>
+            
+            <h3 class="text-2xl font-bold mt-10 text-gray-800 dark:text-white">Latihan Selesai!</h3>
+            <p id="final-score-message" class="text-gray-500 dark:text-gray-400 text-sm mb-6">Kerja bagus, terus tingkatkan!</p>
+            
+            <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 mb-6 border border-gray-100 dark:border-gray-700">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Skor Akhir</div>
+                <div class="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400" id="final-score-number">0</div>
+                <div class="text-sm font-medium text-gray-600 dark:text-gray-300 mt-2" id="final-score-detail">0 / 0 Benar</div>
             </div>
-            <p id="final-score-message" class="text-gray-600 dark:text-gray-400 mb-6 text-sm italic">"Teruslah berlatih!"</p>
-            <div class="flex flex-col gap-3">
-                <button onclick="restartQuiz()" class="bg-pink-600 text-white px-4 py-3.5 rounded-xl font-bold hover:bg-pink-700 transition flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-1"><i data-lucide="rotate-ccw" class="w-5 h-5 mr-2"></i> Ulangi Latihan</button>
-                <button onclick="hideQuizFinishModal(); showVocabSubTab('vocab-selection')" class="bg-white dark:bg-gray-700 text-gray-600 dark:text-white border border-gray-200 dark:border-gray-600 px-4 py-3.5 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-gray-600 transition flex items-center justify-center"><i data-lucide="list-check" class="w-5 h-5 mr-2"></i> Menu Pilihan</button>
+
+            <div class="space-y-3">
+                <button onclick="restartQuiz()" class="btn-primary-gradient w-full justify-center">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Ulangi Latihan
+                </button>
+                <button onclick="hideQuizFinishModal(); showVocabSubTab('vocab-selection')" class="btn-ghost w-full justify-center border border-gray-200 dark:border-gray-700">
+                    <i data-lucide="layout-grid" class="w-4 h-4 mr-2"></i> Pilih Materi Lain
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script>
-        // Init
+        // ==========================================
+        // APP INIT & EVENT LISTENERS
+        // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
             initTheme();
             lucide.createIcons();
             renderHangeul();
             renderGrammar(grammarData);
+            
+            // Load saved API Key
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if(savedKey) document.getElementById('api-key-input').value = savedKey;
+
+            // Default tab
             showTab('vocab-container', document.querySelector('.nav-link.active'));
             resetChat();
             
-            // Input Listener for Mic/Send button toggle
+            // Chat Input dynamic button logic
             const input = document.getElementById('user-input');
             const actionBtn = document.getElementById('action-btn');
             
@@ -657,9 +944,9 @@
                 if(input.value.trim().length > 0) {
                     actionBtn.innerHTML = '<i data-lucide="send" class="w-5 h-5 ml-1 fill-none"></i>';
                     actionBtn.onclick = () => sendMessage();
-                    actionBtn.classList.remove('recording-pulse');
+                    actionBtn.classList.remove('animate-pulse'); // remove recording pulse if any
                 } else {
-                    actionBtn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 fill-current"></i>';
+                    actionBtn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
                     actionBtn.onclick = toggleVoiceRecording;
                 }
                 lucide.createIcons();
@@ -667,304 +954,7 @@
         });
 
         // ==========================================
-        // CHAT & CALL AI LOGIC (WA MODIFIED)
-        // ==========================================
-        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=";
-        const API_KEY = "AIzaSyBWU-SM3OmO2yrIQjtql9_buHmNOTGzo6k"; // ⚠️ ISI API KEY DI SINI
-
-        let chatHistory = [];
-        let isTyping = false;
-        let selectedImageBase64 = null;
-        let recognition = null;
-        let isRecording = false;
-
-        function getTimeString() {
-            const now = new Date();
-            return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        }
-
-        function addMessage(text, sender, isImage = false) {
-            const chatBox = document.getElementById('chat-box');
-            const div = document.createElement('div');
-            const time = getTimeString();
-            
-            // WA Bubble Styles
-            const bubbleClass = sender === 'user' ? 'wa-bubble wa-bubble-user' : 'wa-bubble wa-bubble-ai';
-            const checkIcon = sender === 'user' ? '<i data-lucide="check-check" class="inline w-3 h-3 text-blue-400 ml-1"></i>' : '';
-            
-            let contentHtml = '';
-            
-            if (isImage) {
-                contentHtml = `<div class="mb-1 rounded-lg overflow-hidden"><img src="${text}" class="w-full h-auto max-h-64 object-cover"></div><div class="text-sm">Tolong koreksi gambar ini.</div>`;
-            } else if (text.includes("[VOICE NOTE]")) {
-                const cleanText = text.replace("[VOICE NOTE]", "").trim();
-                const iconColor = sender === 'user' ? 'text-gray-500' : 'text-green-500';
-                contentHtml = `
-                    <div class="flex items-center gap-3 min-w-[200px] py-1">
-                        <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-300 transition">
-                            <i data-lucide="play" class="w-4 h-4 text-gray-600 dark:text-gray-300 ml-0.5 fill-current"></i>
-                        </div>
-                        <div class="flex flex-col w-full">
-                            <div class="h-1 bg-gray-300 dark:bg-gray-600 rounded-full w-full overflow-hidden">
-                                <div class="h-full bg-gray-500 w-1/3"></div>
-                            </div>
-                            <span class="text-[10px] text-gray-500 mt-1 dark:text-gray-400">Audio • ${cleanText}</span>
-                        </div>
-                    </div>`;
-            } else {
-                contentHtml = text.replace(/\n/g, '<br>');
-            }
-
-            div.className = `${bubbleClass} shadow-sm animate-fade-in`;
-            div.innerHTML = `
-                <div class="font-korean leading-relaxed">${contentHtml}</div>
-                <div class="wa-time">${time} ${checkIcon}</div>
-            `;
-            
-            chatBox.appendChild(div);
-            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
-            lucide.createIcons();
-        }
-
-        // --- NEW CHAT MODES LOGIC ---
-        function toggleChatSettings() {
-            const settings = document.getElementById('chat-settings');
-            settings.classList.toggle('open');
-        }
-
-        function updateChatMode() {
-            const mode = document.getElementById('chat-mode-select').value;
-            const headerName = document.getElementById('ai-header-name');
-            const status = document.getElementById('ai-status');
-            const icon = document.getElementById('ai-avatar-icon');
-            
-            if(mode === 'casual') {
-                headerName.innerText = "Ji-eun (Teman Korea)";
-                status.innerText = "Mode Santai • Online";
-                icon.setAttribute('data-lucide', 'smile-plus');
-            } else {
-                headerName.innerText = "Tutor AI Korea";
-                status.innerText = "Mode Tutor • Online";
-                icon.setAttribute('data-lucide', 'bot');
-            }
-            lucide.createIcons();
-            // Reset chat history when mode changes to keep context clean
-            resetChat();
-        }
-
-        function resetChat() {
-            chatHistory = [];
-            const mode = document.getElementById('chat-mode-select') ? document.getElementById('chat-mode-select').value : 'tutor';
-            let welcomeMsg = "";
-            
-            if(mode === 'casual') {
-                welcomeMsg = "Annyeong! Aku Ji-eun, teman ngobrolmu! 👋<br>Ayo cerita-cerita, pakai bahasa santai aja ya! 😄";
-            } else {
-                welcomeMsg = "Annyeonghaseyo! 👋<br>Saya Tutor AI Korea Anda. Mari belajar grammar, koreksi tulisan, atau latihan percakapan formal.";
-            }
-
-            document.getElementById('chat-box').innerHTML = `
-                <div class="flex justify-center my-4 sticky top-0 z-10">
-                    <span class="bg-gray-200 dark:bg-[#182229] text-gray-600 dark:text-gray-300 text-xs px-3 py-1 rounded-lg shadow-sm font-medium">Hari Ini</span>
-                </div>
-                <!-- Welcome Message -->
-                <div class="wa-bubble wa-bubble-ai shadow-sm animate-fade-in">
-                    <div class="font-korean leading-relaxed">${welcomeMsg}</div>
-                    <div class="wa-time">${getTimeString()}</div>
-                </div>
-            `;
-            const statusText = mode === 'casual' ? 'Mode Santai • Online' : 'Mode Tutor • Online';
-            if(document.getElementById('ai-status')) document.getElementById('ai-status').innerText = statusText;
-        }
-
-        function handleChatEnter(e) { if(e.key === 'Enter') sendMessage(); }
-
-        async function sendMessage(manualText = null) {
-            if (isTyping) return;
-            const input = document.getElementById('user-input');
-            const text = manualText || input.value.trim();
-            const btn = document.getElementById('action-btn');
-            
-            if (!text && !selectedImageBase64) return;
-
-            isTyping = true;
-            if(!manualText) input.value = '';
-            
-            // Reset UI Button
-            btn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 fill-current"></i>';
-            btn.onclick = toggleVoiceRecording;
-            lucide.createIcons();
-            
-            // Display User Message
-            if(selectedImageBase64) {
-                addMessage(selectedImageBase64, 'user', true);
-            } else {
-                addMessage(text, 'user');
-            }
-
-            document.getElementById('ai-status').innerText = 'Mengetik...';
-
-            // --- DYNAMIC PROMPT LOGIC ---
-            const mode = document.getElementById('chat-mode-select').value;
-            const level = document.getElementById('chat-level-select').value;
-            
-            let systemPrompt = "";
-
-            if (mode === 'casual') {
-                // Mode 2: Teman Santai (Ji-eun)
-                systemPrompt = `
-                    Anda adalah 'Ji-eun', seorang teman perempuan Korea yang ramah, asik, sedikit gaul, dan suka bercanda.
-                    Level teman bicara Anda: ${level}.
-                    
-                    ATURAN UTAMA:
-                    1. JANGAN bersikap kaku atau formal seperti guru/robot.
-                    2. JANGAN mengoreksi grammar user kecuali mereka minta. Fokus ke alur obrolan yang natural.
-                    3. JIKA user chat bahasa Indonesia -> Balas bahasa Indonesia santai/gaul (contoh: "Iya nih", "Wkwk", "Serius?").
-                    4. JIKA user chat bahasa Korea -> Balas bahasa Korea Banmal (informal/akrab) layaknya teman dekat.
-                    5. Gunakan emoji untuk ekspresi.
-                    6. Jawab singkat dan padat seperti chatting di WhatsApp.
-                    7. Jika ada voice note/gambar, komentari isinya layaknya teman melihat kiriman teman, bukan mengoreksi.
-                `;
-            } else {
-                // Mode 1: Tutor Formal
-                systemPrompt = `
-                    Anda adalah Tutor Bahasa Korea profesional dan ramah.
-                    Level murid Anda: ${level}.
-                    
-                    Tugas:
-                    1. Koreksi setiap grammar atau spelling bahasa Korea user yang salah. Jelaskan perbaikannya dengan singkat.
-                    2. Gunakan bahasa Korea sopan (Jondaemal/Formal) atau bahasa Indonesia baku untuk penjelasan.
-                    3. Jika ada gambar tulisan Hangeul, baca dan koreksi jika ada kesalahan penulisan.
-                    4. Jika ada voice note, koreksi pelafalan (pronunciation).
-                    5. Selalu bersikap suportif dan edukatif.
-                    6. Jawab singkat dan padat.
-                `;
-            }
-
-            // Build Payload for Gemini
-            let parts = [];
-            if (selectedImageBase64) {
-                 const base64Data = selectedImageBase64.split(',')[1];
-                 parts.push({ text: "Lihat gambar ini: " + (text || "") });
-                 parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Data } });
-            } else {
-                parts.push({ text: text });
-            }
-
-            chatHistory.push({ role: "user", parts: parts });
-
-            try {
-                const response = await fetch(GEMINI_API_URL + API_KEY, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: chatHistory,
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    })
-                });
-
-                const data = await response.json();
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, AI sedang sibuk.";
-                
-                chatHistory.push({ role: "model", parts: [{ text: reply }] });
-                addMessage(reply, 'ai');
-            } catch (err) {
-                console.error(err);
-                addMessage("Gagal terhubung ke server.", 'ai');
-            } finally {
-                isTyping = false;
-                selectedImageBase64 = null;
-                const statusText = mode === 'casual' ? 'Mode Santai • Online' : 'Mode Tutor • Online';
-                document.getElementById('ai-status').innerText = statusText;
-                if(!manualText && window.innerWidth > 768) input.focus();
-            }
-        }
-
-        // --- IMAGE HANDLING ---
-        function handleImageSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                selectedImageBase64 = e.target.result;
-                document.getElementById('preview-img').src = selectedImageBase64;
-                document.getElementById('image-preview-modal').classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-            e.target.value = ''; 
-        }
-
-        function cancelImage() {
-            selectedImageBase64 = null;
-            document.getElementById('image-preview-modal').classList.add('hidden');
-        }
-
-        function sendImage() {
-            document.getElementById('image-preview-modal').classList.add('hidden');
-            sendMessage("Gambar terkirim");
-        }
-
-        // --- VOICE NOTE & CALL ---
-        function toggleVoiceRecording() {
-            if (!('webkitSpeechRecognition' in window)) {
-                alert("Browser tidak mendukung Voice Note. Gunakan Chrome.");
-                return;
-            }
-
-            const btn = document.getElementById('action-btn');
-
-            if (isRecording) {
-                recognition.stop();
-                isRecording = false;
-                btn.classList.remove('recording-pulse');
-                btn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 fill-current"></i>';
-            } else {
-                recognition = new webkitSpeechRecognition();
-                recognition.lang = 'ko-KR';
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-
-                recognition.onstart = () => {
-                    isRecording = true;
-                    btn.classList.add('recording-pulse');
-                    btn.innerHTML = '<i data-lucide="square" class="w-5 h-5 fill-current"></i>';
-                    lucide.createIcons();
-                };
-
-                recognition.onresult = (event) => {
-                    const transcript = event.results[0][0].transcript;
-                    sendMessage(`[VOICE NOTE] ${transcript}`);
-                };
-
-                recognition.onerror = () => {
-                    isRecording = false;
-                    btn.classList.remove('recording-pulse');
-                    btn.innerHTML = '<i data-lucide="mic" class="w-6 h-6 fill-current"></i>';
-                    lucide.createIcons();
-                };
-
-                recognition.start();
-            }
-            lucide.createIcons();
-        }
-
-        function startCall() {
-            document.getElementById('call-modal').classList.remove('hidden');
-            document.getElementById('call-timer').innerText = "Menghubungkan...";
-            setTimeout(() => {
-                document.getElementById('call-timer').innerText = "Berdering...";
-            }, 1000);
-            setTimeout(() => {
-                document.getElementById('call-timer').innerText = "00:01";
-            }, 3000);
-        }
-
-        function endCall() {
-            document.getElementById('call-modal').classList.add('hidden');
-        }
-
-        // ==========================================
-        // OTHER LOGIC (UNCHANGED)
+        // THEME & NAVIGATION LOGIC
         // ==========================================
         function initTheme() {
             if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -976,6 +966,7 @@
             }
             lucide.createIcons();
         }
+
         function toggleDarkMode() {
             if (document.documentElement.classList.contains('dark')) {
                 document.documentElement.classList.remove('dark');
@@ -988,50 +979,66 @@
             }
             lucide.createIcons();
         }
+
         function toggleMenu() {
             const menu = document.getElementById('mobile-menu');
             const btn = document.getElementById('burger-btn');
             if (menu.classList.contains('open')) {
                 menu.classList.remove('open');
-                btn.innerHTML = '<i data-lucide="menu" class="w-7 h-7"></i>';
+                btn.innerHTML = '<i data-lucide="menu" class="w-6 h-6"></i>';
             } else {
                 menu.classList.add('open');
-                btn.innerHTML = '<i data-lucide="x" class="w-7 h-7"></i>';
+                btn.innerHTML = '<i data-lucide="x" class="w-6 h-6"></i>';
             }
             lucide.createIcons();
         }
+
         function showTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
-            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+            
+            const target = document.getElementById(tabId);
+            target.classList.remove('hidden');
+            target.classList.remove('animate-slide-up');
+            void target.offsetWidth; 
+            target.classList.add('animate-slide-up');
+
+            document.querySelectorAll('.nav-link, .nav-link-mobile').forEach(btn => btn.classList.remove('active'));
+            
             if(element) {
-                const textContent = element.textContent.trim();
-                document.querySelectorAll('.nav-link').forEach(btn => { if(btn.textContent.trim() === textContent) btn.classList.add('active'); });
+                if(element.classList.contains('nav-link')) element.classList.add('active');
+                if(element.classList.contains('nav-link-mobile')) element.classList.add('active');
             }
+
             const menu = document.getElementById('mobile-menu');
             if (menu.classList.contains('open')) toggleMenu();
-            if (tabId === 'vocab-container') { showVocabSubTab('vocab-textbook'); filterVocabTextbook(); } 
-            else if (tabId === 'downloads') renderDownloads();
+
+            if (tabId === 'vocab-container') { 
+                showVocabSubTab('vocab-textbook'); 
+                filterVocabTextbook(); 
+            } else if (tabId === 'downloads') {
+                renderDownloads();
+            }
+            
             lucide.createIcons();
         }
+
         function showVocabSubTab(subTabId) {
              document.querySelectorAll('.vocab-sub-tab').forEach(el => el.classList.add('hidden'));
-             document.getElementById(subTabId).classList.remove('hidden');
-             if (subTabId === 'vocab-selection') { document.getElementById('quiz-chapter-filter').value = ''; renderQuizSelection(); }
+             const sub = document.getElementById(subTabId);
+             sub.classList.remove('hidden');
+             sub.classList.remove('animate-fade-in');
+             void sub.offsetWidth;
+             sub.classList.add('animate-fade-in');
+
+             if (subTabId === 'vocab-selection') { 
+                 document.getElementById('quiz-chapter-filter').value = ''; 
+                 renderQuizSelection(); 
+            }
         }
 
-        // DATA
-        const downloadsData = [
-            { category: 'textbook', title: 'TEXTBOOK 2024', desc: 'Textbook Versi Baru Terjemahan Indonesia Lengkap', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/1AJEIXUcCHfUpRbuMKqpLnSVTqmx50jPe?usp=drive_link', icon: 'book', color: 'blue' },
-            { category: 'textbook', title: 'TEXTBOOK 2024 (KOSONG)', desc: 'Textbook Versi Baru Kosongan Lengkap', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/11eMsZsIT4qdU6WHsWsEM13254a3pkC5Z?usp=drive_link', icon: 'book', color: 'blue' },
-            { category: 'textbook', title: 'TEXTBOOK 2015', desc: 'Textbook Versi Lama Terjemahan Indonesia Lengkap', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/1AIq0IDbSBeOv_yr_qkpgLOs6hFU4FC7t?usp=drive_link', icon: 'book-open', color: 'blue' },
-            { category: 'textbook', title: 'TEXTBOOK 2015 (PERKATA)', desc: 'Textbook Versi Lama Terjemahan Indonesia Perkata', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/1gQJAxuIa50o7QZpL4pozYCiHwBqWYWnF?usp=drive_link', icon: 'book-open', color: 'blue' },
-            { category: 'grammar', title: 'TATA BAHASA TB 2024', desc: 'Rangkuman Tata Bahasa Textbook Baru 2024', size: 'Google Drive', link: 'https://drive.google.com/file/d/1c5LV9GqPE3-Mgny5Wp7AqKI77VsETjzc/view?usp=drive_link', icon: 'scroll', color: 'purple' },
-            { category: 'vocab', title: 'KOSAKATA TB 2024 (ARTI)', desc: 'Kumpulan Kosakata Textbook 2024 Lengkap 60 Bab Dengan Arti', size: 'Google Drive', link: 'https://drive.google.com/file/d/14_w9xsF-3gEUCYbTcsYgiCjaEPEyPTA2/view?usp=drive_link', icon: 'languages', color: 'green' },
-            { category: 'vocab', title: 'KOSAKATA TB 2024 (NO ARTI)', desc: 'Kumpulan Kosakata Textbook 2024 Lengkap 60 Bab Tanpa Arti', size: 'Google Drive', link: 'https://drive.google.com/file/d/14tJ9Q4A2NXsYlYIsK0XGmcvUbihwzZHu/view?usp=drive_link', icon: 'languages', color: 'green' },
-            { category: 'exam', title: 'SOAL GIDOHAE 2025', desc: 'Paket Soal Gidohae 2025 Set 1-25 Lengkap Dengan Kunci Jawaban', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/18v70xiBXyJj7IReTUDuoZ35o6YNoe3C9?usp=drive_link', icon: 'file-question', color: 'orange' }
-        ];
-
+        // ==========================================
+        // DATA & RENDERING LOGIC
+        // ==========================================
         const hangeulData = [
             { hangeul: "ㄱ", rom: "g/k", type: "Konsonan Dasar", awal: "G", akhir: "K" },
             { hangeul: "ㄴ", rom: "n", type: "Konsonan Dasar", awal: "N", akhir: "N" },
@@ -2889,138 +2896,853 @@
             { struktur: "~은/는", arti: "Partikel Penanda Topik", fungsi: ["Partikel ini digunakan untuk menunjukkan subjek atau topik pembicaraan dalam sebuah kalimat.", "• 은 digunakan jika kata sebelumnya berakhiran konsonan.", "• 는 digunakan jika kata sebelumnya berakhiran vokal."], contoh: [{ kalimat: "투안은 목수입니다.", arti: "Tuan adalah tukang kayu." }, { kalimat: "리리는 중국 사람입니다", arti: "Riri adalah orang cina" }] }
         ];
 
+        const downloadsData = [
+            { category: 'textbook', title: 'TEXTBOOK 2024', desc: 'Textbook Versi Baru Terjemahan Indonesia Lengkap', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/1AJEIXUcCHfUpRbuMKqpLnSVTqmx50jPe?usp=drive_link', icon: 'book', color: 'blue' },
+            { category: 'textbook', title: 'TEXTBOOK 2024 (KOSONG)', desc: 'Textbook Versi Baru Kosongan Lengkap', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/11eMsZsIT4qdU6WHsWsEM13254a3pkC5Z?usp=drive_link', icon: 'book', color: 'blue' },
+            { category: 'textbook', title: 'TEXTBOOK 2015', desc: 'Textbook Versi Lama Terjemahan Indonesia Lengkap', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/1AIq0IDbSBeOv_yr_qkpgLOs6hFU4FC7t?usp=drive_link', icon: 'book-open', color: 'blue' },
+            { category: 'textbook', title: 'TEXTBOOK 2015 (PERKATA)', desc: 'Textbook Versi Lama Terjemahan Indonesia Perkata', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/1gQJAxuIa50o7QZpL4pozYCiHwBqWYWnF?usp=drive_link', icon: 'book-open', color: 'blue' },
+            { category: 'grammar', title: 'TATA BAHASA TB 2024', desc: 'Rangkuman Tata Bahasa Textbook Baru 2024', size: 'Google Drive', link: 'https://drive.google.com/file/d/1c5LV9GqPE3-Mgny5Wp7AqKI77VsETjzc/view?usp=drive_link', icon: 'scroll', color: 'purple' },
+            { category: 'vocab', title: 'KOSAKATA TB 2024 (ARTI)', desc: 'Kumpulan Kosakata Textbook 2024 Lengkap 60 Bab Dengan Arti', size: 'Google Drive', link: 'https://drive.google.com/file/d/14_w9xsF-3gEUCYbTcsYgiCjaEPEyPTA2/view?usp=drive_link', icon: 'languages', color: 'green' },
+            { category: 'vocab', title: 'KOSAKATA TB 2024 (NO ARTI)', desc: 'Kumpulan Kosakata Textbook 2024 Lengkap 60 Bab Tanpa Arti', size: 'Google Drive', link: 'https://drive.google.com/file/d/14tJ9Q4A2NXsYlYIsK0XGmcvUbihwzZHu/view?usp=drive_link', icon: 'languages', color: 'green' },
+            { category: 'exam', title: 'SOAL GIDOHAE 2025', desc: 'Paket Soal Gidohae 2025 Set 1-25 Lengkap Dengan Kunci Jawaban', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/18v70xiBXyJj7IReTUDuoZ35o6YNoe3C9?usp=drive_link', icon: 'file-question', color: 'orange' }
+        ];
+
         function speak(text, lang = 'ko-KR', onEndCallback = null) {
-            if (!'speechSynthesis' in window) return;
+            if (!('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = lang; utterance.rate = 0.9; 
+            utterance.lang = lang; 
+            utterance.rate = 0.9; 
             if (onEndCallback) utterance.onend = onEndCallback;
             window.speechSynthesis.speak(utterance);
         }
 
-        let currentDownloadFilter = 'all';
-        function renderDownloads() {
-            const container = document.getElementById('downloads-grid');
-            const filtered = currentDownloadFilter === 'all' ? downloadsData : downloadsData.filter(d => d.category === currentDownloadFilter);
-            container.innerHTML = filtered.map(item => {
-                let colorClass = item.color === 'blue' ? 'text-blue-600 dark:text-blue-400' : item.color === 'purple' ? 'text-purple-600 dark:text-purple-400' : item.color === 'green' ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400';
-                return `<div class="download-card bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between h-full group relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-gray-100 to-transparent dark:from-gray-700 rounded-bl-full -mr-12 -mt-12 transition-all duration-300 group-hover:scale-150 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20"></div>
-                    <div><div class="flex items-center gap-4 mb-4"><div class="file-icon-wrapper w-16 h-16 shrink-0 shadow-inner dark:shadow-none bg-gray-50 dark:bg-gray-700/50"><i data-lucide="${item.icon}" class="w-8 h-8 ${colorClass}"></i></div><div><h4 class="font-bold text-gray-800 dark:text-white text-lg leading-tight mb-1 line-clamp-2">${item.title}</h4><span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">${item.category}</span></div></div><p class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">${item.desc}</p></div>
-                    <a href="${item.link}" target="_blank" class="w-full mt-auto bg-gray-50 dark:bg-gray-700 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 text-gray-600 dark:text-gray-300 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-md">Download <i data-lucide="download-cloud" class="w-4 h-4"></i></a>
-                </div>`;
-            }).join('');
-            lucide.createIcons();
-        }
-        function filterDownloads(category, btnElement) {
-            currentDownloadFilter = category;
-            document.querySelectorAll('.dl-filter').forEach(btn => { btn.classList.remove('active', 'bg-indigo-600', 'text-white', 'shadow-md'); btn.classList.add('bg-gray-200', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300'); });
-            if(btnElement) { btnElement.classList.remove('bg-gray-200', 'text-gray-700', 'dark:bg-gray-700', 'dark:text-gray-300'); btnElement.classList.add('active', 'bg-indigo-600', 'text-white', 'shadow-md'); }
-            renderDownloads();
-        }
         function renderHangeul() {
             const container = document.getElementById('hangeul-grid');
             const grouped = hangeulData.reduce((acc, item) => { if (!acc[item.type]) acc[item.type] = []; acc[item.type].push(item); return acc; }, {});
-            let html = ''; const order = ['Konsonan Dasar', 'Konsonan Rangkap', 'Vokal Dasar', 'Vokal Rangkap'];
+            let html = ''; 
+            const order = ['Konsonan Dasar', 'Konsonan Rangkap', 'Vokal Dasar', 'Vokal Rangkap'];
+            
             order.forEach(type => {
                 if (grouped[type]) {
-                    html += `<div class="col-span-full mt-4 mb-2"><h3 class="text-lg font-bold text-indigo-700 dark:text-indigo-400 border-b border-indigo-100 dark:border-indigo-900 pb-1">${type}</h3></div>`;
+                    html += `<div class="col-span-full mt-6 mb-3"><h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 border-b-2 border-indigo-100 dark:border-gray-700 pb-2 inline-block">${type}</h3></div>`;
                     grouped[type].forEach(item => {
-                        const details = item.awal ? `<div class="grid grid-cols-2 gap-1 w-full text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-50 dark:bg-gray-900/50 rounded p-1 border border-gray-100 dark:border-gray-700"><div class="text-center border-r border-gray-200 dark:border-gray-700"><span class="block text-[9px] text-gray-400">Awal</span><span class="font-bold text-indigo-600 dark:text-indigo-400">${item.awal}</span></div><div class="text-center"><span class="block text-[9px] text-gray-400">Akhir</span><span class="font-bold text-pink-600 dark:text-pink-400">${item.akhir}</span></div></div>` : `<div class="mt-2 text-xs font-bold text-gray-400 dark:text-gray-500">${item.rom}</div>`;
-                        html += `<div class="glass-card p-3 flex flex-col items-center justify-between cursor-pointer hover:bg-white dark:hover:bg-gray-700 text-center group h-full transition-all duration-200" onclick="speak('${item.hangeul}')"><div class="flex-grow flex items-center justify-center"><span class="text-3xl sm:text-4xl font-black text-gray-800 dark:text-white font-['Noto_Sans_KR'] group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">${item.hangeul}</span></div>${details}</div>`;
+                        const details = item.awal 
+                            ? `<div class="grid grid-cols-2 gap-1 w-full text-[10px] mt-2 bg-gray-50 dark:bg-gray-800 rounded p-1.5 border border-gray-100 dark:border-gray-700">
+                                <div class="text-center border-r border-gray-200 dark:border-gray-700">
+                                    <span class="block text-[9px] text-gray-400">Awal</span>
+                                    <span class="font-bold text-indigo-600 dark:text-indigo-400">${item.awal}</span>
+                                </div>
+                                <div class="text-center">
+                                    <span class="block text-[9px] text-gray-400">Akhir</span>
+                                    <span class="font-bold text-pink-600 dark:text-pink-400">${item.akhir}</span>
+                                </div>
+                               </div>` 
+                            : `<div class="mt-2 text-xs font-bold text-gray-400 tracking-widest">${item.rom}</div>`;
+                        
+                        html += `
+                        <div class="glass-card p-4 flex flex-col items-center justify-between cursor-pointer hover-lift group h-full relative overflow-hidden" onclick="speak('${item.hangeul}')">
+                            <div class="absolute inset-0 bg-gradient-to-br from-indigo-50 to-transparent dark:from-indigo-900/20 opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                            <div class="flex-grow flex items-center justify-center z-10">
+                                <span class="text-4xl font-black text-gray-800 dark:text-white font-korean group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-500 group-hover:to-pink-500 transition-all">${item.hangeul}</span>
+                            </div>
+                            <div class="z-10 w-full text-center">${details}</div>
+                        </div>`;
                     });
                 }
             });
             container.innerHTML = html;
         }
+
         function renderVocab(data) {
             const container = document.getElementById('vocab-textbook-list');
-            if (data.length === 0) { container.innerHTML = `<div class="p-8 text-center text-gray-400 bg-white/50 dark:bg-gray-800/50 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700">Tidak ada data.</div>`; return; }
+            if (data.length === 0) { 
+                container.innerHTML = `<div class="p-10 text-center text-gray-400 glass-card border-dashed border-2 border-gray-300 dark:border-gray-700">Tidak ada data ditemukan.</div>`; 
+                return; 
+            }
             const grouped = data.reduce((acc, item) => { if (!acc[item.bab]) acc[item.bab] = []; acc[item.bab].push(item); return acc; }, {});
             let html = '';
+            
             for (const [bab, items] of Object.entries(grouped)) {
-                html += `<div class="bg-indigo-50/50 dark:bg-indigo-900/20 p-2 rounded-lg mb-2"><h3 class="font-bold text-indigo-700 dark:text-indigo-400 ml-2 mb-2 flex items-center"><i data-lucide="bookmark" class="w-4 h-4 mr-2"></i>${bab}</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-3">${items.map(item => `<div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex justify-between items-center hover:shadow-md transition group"><div><div class="text-xl md:text-2xl font-black text-gray-900 dark:text-white font-['Noto_Sans_KR'] mb-1 tracking-tight group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">${item.hangeul}</div><div class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">${item.rom}</div><div class="text-base md:text-lg font-bold text-gray-700 dark:text-gray-300">${item.arti}</div></div><button class="p-3 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 transition shadow-sm" onclick="speak('${item.hangeul}')"><i data-lucide="volume-2" class="w-5 h-5"></i></button></div>`).join('')}</div></div>`;
+                html += `
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg text-indigo-600 dark:text-indigo-400 mb-3 flex items-center bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 rounded-lg w-fit">
+                        <i data-lucide="bookmark" class="w-4 h-4 mr-2"></i>${bab}
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${items.map(item => `
+                        <div class="glass-card p-5 flex justify-between items-center hover-lift group border-l-4 border-l-transparent hover:border-l-indigo-500">
+                            <div>
+                                <div class="text-2xl font-black text-gray-900 dark:text-white font-korean mb-1 tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">${item.hangeul}</div>
+                                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">${item.rom}</div>
+                                <div class="text-lg font-bold text-gray-700 dark:text-gray-300">${item.arti}</div>
+                            </div>
+                            <button class="btn-circle-soft shadow-sm" onclick="speak('${item.hangeul}')">
+                                <i data-lucide="volume-2" class="w-5 h-5"></i>
+                            </button>
+                        </div>`).join('')}
+                    </div>
+                </div>`;
             }
             container.innerHTML = html;
             lucide.createIcons();
         }
+
         function filterVocabTextbook() {
             const chapter = document.getElementById('vocab-chapter-filter').value;
             const search = document.getElementById('vocab-textbook-search').value.toLowerCase();
-            const filtered = vocabTextbookData.filter(item => { const matchBab = chapter === '' || item.bab === chapter; const matchText = item.hangeul.includes(search) || item.rom.includes(search) || item.arti.toLowerCase().includes(search); return matchBab && matchText; });
+            const filtered = vocabTextbookData.filter(item => { 
+                const matchBab = chapter === '' || item.bab === chapter; 
+                const matchText = item.hangeul.includes(search) || item.rom.includes(search) || item.arti.toLowerCase().includes(search); 
+                return matchBab && matchText; 
+            });
             renderVocab(filtered);
         }
+
         function renderGrammar(data) {
             const container = document.getElementById('grammar-list');
             container.innerHTML = data.map(item => {
-                let fungsiHTML = Array.isArray(item.fungsi) ? item.fungsi.map(f => `<p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">${f}</p>`).join('') : `<p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">${item.fungsi}</p>`;
-                let contohHTML = item.contoh.map(c => `<div class="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700 mb-2"><div class="flex justify-between items-start"><p class="text-indigo-800 dark:text-indigo-300 font-bold font-['Noto_Sans_KR']">${c.kalimat}</p><button onclick="speak('${c.kalimat}')" class="text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"><i data-lucide="volume-2" class="w-4 h-4"></i></button></div><p class="text-xs text-gray-600 dark:text-gray-400 italic mt-1 font-semibold">${c.arti}</p></div>`).join('');
-                return `<div class="glass-card p-5 relative overflow-hidden group dark:bg-gray-800"><div class="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-indigo-100 to-transparent dark:from-indigo-900 rounded-bl-full -mr-8 -mt-8 opacity-50 group-hover:opacity-100 transition"></div><div class="relative z-10"><h3 class="text-xl font-black text-indigo-700 dark:text-indigo-400 font-['Noto_Sans_KR'] mb-1">${item.struktur}</h3><p class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3 border-b border-gray-100 dark:border-gray-700 pb-2">${item.arti}</p>${fungsiHTML}<div class="mt-4 pt-2 border-t border-gray-100 dark:border-gray-700">${contohHTML}</div></div></div>`;
+                let fungsiHTML = Array.isArray(item.fungsi) 
+                    ? item.fungsi.map(f => `<li class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-1 relative pl-4"><span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-indigo-400"></span>${f}</li>`).join('') 
+                    : `<p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">${item.fungsi}</p>`;
+                
+                let contohHTML = item.contoh.map(c => `
+                    <div class="bg-indigo-50/50 dark:bg-gray-800 rounded-xl p-3 border border-indigo-100 dark:border-gray-700">
+                        <div class="flex justify-between items-start">
+                            <p class="text-indigo-800 dark:text-indigo-300 font-bold font-korean text-lg">${c.kalimat}</p>
+                            <button onclick="speak('${c.kalimat}')" class="text-gray-400 hover:text-indigo-600 transition"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
+                        </div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 italic mt-1 border-t border-indigo-100 dark:border-gray-700 pt-1">${c.arti}</p>
+                    </div>`).join('');
+                    
+                return `
+                <div class="glass-card p-6 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-indigo-100 to-transparent dark:from-indigo-900/30 rounded-bl-full -mr-10 -mt-10 opacity-60 transition-transform group-hover:scale-110"></div>
+                    
+                    <div class="relative z-10">
+                        <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-3">Tata Bahasa</span>
+                        <h3 class="text-2xl font-black text-gray-800 dark:text-white font-korean mb-1">${item.struktur}</h3>
+                        <p class="text-base font-bold text-gray-600 dark:text-gray-300 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">${item.arti}</p>
+                        <ul class="mb-5 space-y-1">${fungsiHTML}</ul>
+                        <div class="space-y-2">
+                            <h4 class="text-xs font-bold text-gray-400 uppercase">Contoh Kalimat</h4>
+                            ${contohHTML}
+                        </div>
+                    </div>
+                </div>`;
             }).join('');
             lucide.createIcons();
         }
+
         function filterGrammar() {
             const query = document.getElementById('grammar-search').value.toLowerCase();
             const filtered = grammarData.filter(item => item.struktur.toLowerCase().includes(query) || item.arti.toLowerCase().includes(query));
             renderGrammar(filtered);
         }
 
-        // QUIZ LOGIC (UNCHANGED)
-        let selectedVocabForQuiz = []; let quizQuestions = []; let currentQuestionIndex = 0; let currentScore = 0;
-        function shuffle(array) { let currentIndex = array.length, randomIndex; while (currentIndex !== 0) { randomIndex = Math.floor(Math.random() * currentIndex); currentIndex--; [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]; } return array; }
+        let currentDownloadFilter = 'all';
+        function renderDownloads() {
+            const container = document.getElementById('downloads-grid');
+            const filtered = currentDownloadFilter === 'all' ? downloadsData : downloadsData.filter(d => d.category === currentDownloadFilter);
+            
+            container.innerHTML = filtered.map(item => {
+                let colorClass = 'text-indigo-600';
+                if(item.color === 'purple') colorClass = 'text-purple-600';
+                if(item.color === 'green') colorClass = 'text-emerald-600';
+                if(item.color === 'orange') colorClass = 'text-orange-600';
+
+                return `
+                <div class="glass-card p-6 flex flex-col justify-between h-full group hover-lift relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-gray-100 to-transparent dark:from-gray-700 rounded-bl-full -mr-12 -mt-12 transition-all duration-300 group-hover:scale-150"></div>
+                    
+                    <div>
+                        <div class="flex items-center gap-4 mb-5">
+                            <div class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center shadow-inner ${colorClass}">
+                                <i data-lucide="${item.icon}" class="w-7 h-7"></i>
+                            </div>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md mb-1 inline-block">${item.category}</span>
+                                <h4 class="font-bold text-gray-800 dark:text-white text-lg leading-tight line-clamp-2">${item.title}</h4>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed border-t border-gray-100 dark:border-gray-700 pt-4">${item.desc}</p>
+                    </div>
+                    
+                    <a href="${item.link}" target="_blank" class="mt-auto w-full bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-lg">
+                        Download <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                    </a>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function filterDownloads(category, btnElement) {
+            currentDownloadFilter = category;
+            document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+            renderDownloads();
+        }
+
+        // ==========================================
+        // QUIZ LOGIC
+        // ==========================================
+        let selectedVocabForQuiz = []; 
+        let quizQuestions = []; 
+        let currentQuestionIndex = 0; 
+        let currentScore = 0;
+
+        function shuffle(array) { 
+            let currentIndex = array.length, randomIndex; 
+            while (currentIndex !== 0) { 
+                randomIndex = Math.floor(Math.random() * currentIndex); 
+                currentIndex--; 
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]; 
+            } 
+            return array; 
+        }
+
         function renderQuizSelection() {
             const chapter = document.getElementById('quiz-chapter-filter').value;
             const container = document.getElementById('vocab-selection-list');
+            
             const filteredData = chapter ? vocabTextbookData.filter(item => item.bab === chapter) : vocabTextbookData;
-            if (filteredData.length === 0) { container.innerHTML = `<div class="p-4 text-center text-gray-500">Tidak ada kosakata di bab ini.</div>`; updateQuizSelectionSummary(); return; }
+            
+            if (filteredData.length === 0) { 
+                container.innerHTML = `<div class="p-4 text-center text-sm text-gray-400 italic">Tidak ada kosakata di bab ini.</div>`; 
+                updateQuizSelectionSummary(); 
+                return; 
+            }
+            
             const selectedIds = selectedVocabForQuiz.map(v => v.id);
-            container.innerHTML = filteredData.map(item => `<label class="flex items-center justify-between p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-100 dark:border-gray-600 hover:bg-indigo-50 dark:hover:bg-gray-600 transition cursor-pointer"><span class="flex-grow font-bold text-gray-800 dark:text-gray-200">${item.hangeul} <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">(${item.arti})</span></span><input type="checkbox" data-id="${item.id}" onchange="toggleVocabSelection(this, ${item.id})" class="form-checkbox h-5 w-5 text-pink-600 rounded focus:ring-pink-500" ${selectedIds.includes(item.id) ? 'checked' : ''}></label>`).join('');
+            
+            container.innerHTML = filteredData.map(item => `
+                <label class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-700/50 transition cursor-pointer group">
+                    <div class="flex items-center gap-3">
+                         <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:bg-indigo-200 group-hover:text-indigo-700 transition-colors">
+                            ${item.id}
+                         </div>
+                         <div class="flex flex-col">
+                            <span class="font-bold text-gray-800 dark:text-gray-200 font-korean text-lg leading-none mb-1">${item.hangeul}</span>
+                            <span class="text-xs text-gray-500 dark:text-gray-400">${item.arti}</span>
+                         </div>
+                    </div>
+                    <input type="checkbox" data-id="${item.id}" onchange="toggleVocabSelection(this, ${item.id})" class="form-checkbox h-5 w-5 text-indigo-600 rounded-md border-gray-300 focus:ring-indigo-500 transition" ${selectedIds.includes(item.id) ? 'checked' : ''}>
+                </label>`).join('');
+                
             updateQuizSelectionSummary();
         }
-        function toggleVocabSelection(checkbox, id) { if (checkbox.checked) { if (!selectedVocabForQuiz.some(v => v.id === id)) selectedVocabForQuiz.push(vocabTextbookData.find(v => v.id === id)); } else { selectedVocabForQuiz = selectedVocabForQuiz.filter(v => v.id !== id); } updateQuizSelectionSummary(); }
+
+        function toggleVocabSelection(checkbox, id) { 
+            if (checkbox.checked) { 
+                if (!selectedVocabForQuiz.some(v => v.id === id)) selectedVocabForQuiz.push(vocabTextbookData.find(v => v.id === id)); 
+            } else { 
+                selectedVocabForQuiz = selectedVocabForQuiz.filter(v => v.id !== id); 
+            } 
+            updateQuizSelectionSummary(); 
+        }
+
         function bulkSelectVocab(shouldSelect) {
             const container = document.getElementById('vocab-selection-list');
             const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
             const visibleIds = checkboxes.map(cb => parseInt(cb.getAttribute('data-id')));
-            if (shouldSelect) { visibleIds.forEach(id => { if (!selectedVocabForQuiz.some(v => v.id === id)) selectedVocabForQuiz.push(vocabTextbookData.find(v => v.id === id)); }); } else { selectedVocabForQuiz = selectedVocabForQuiz.filter(v => !visibleIds.includes(v.id)); }
-            checkboxes.forEach(cb => cb.checked = shouldSelect); updateQuizSelectionSummary();
+            
+            if (shouldSelect) { 
+                visibleIds.forEach(id => { if (!selectedVocabForQuiz.some(v => v.id === id)) selectedVocabForQuiz.push(vocabTextbookData.find(v => v.id === id)); }); 
+            } else { 
+                selectedVocabForQuiz = selectedVocabForQuiz.filter(v => !visibleIds.includes(v.id)); 
+            }
+            
+            checkboxes.forEach(cb => cb.checked = shouldSelect); 
+            updateQuizSelectionSummary();
         }
+
         function updateQuizSelectionSummary() {
-            const count = selectedVocabForQuiz.length; document.getElementById('selection-count').innerText = `${count} kata terpilih`; const startBtn = document.getElementById('start-quiz-btn'); const summaryContainer = document.getElementById('selected-vocab-summary');
-            if (count > 0) { summaryContainer.innerHTML = selectedVocabForQuiz.map(v => `<span class="inline-block bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300 text-xs font-bold mr-1 mb-1 px-2 py-0.5 rounded-full">${v.hangeul}</span>`).join(''); startBtn.disabled = false; startBtn.innerText = `Mulai Latihan (${count} Soal)`; startBtn.classList.remove('bg-gray-400'); startBtn.classList.add('bg-pink-600'); } else { summaryContainer.innerHTML = 'Belum ada kata yang dipilih.'; startBtn.disabled = true; startBtn.innerText = `Mulai Latihan (0 Soal)`; startBtn.classList.add('bg-gray-400'); startBtn.classList.remove('bg-pink-600'); }
+            const count = selectedVocabForQuiz.length; 
+            document.getElementById('selection-count').innerText = count; 
+            
+            const startBtn = document.getElementById('start-quiz-btn'); 
+            const summaryContainer = document.getElementById('selected-vocab-summary');
+            
+            if (count > 0) { 
+                summaryContainer.innerHTML = selectedVocabForQuiz.map(v => `<span class="inline-block bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-bold mr-1 mb-1 px-2 py-1 rounded-md shadow-sm">${v.hangeul}</span>`).join(''); 
+                startBtn.disabled = false; 
+                startBtn.innerHTML = `Mulai Latihan (${count})`; 
+            } else { 
+                summaryContainer.innerHTML = '<span class="italic opacity-50">Belum ada kata yang dipilih.</span>'; 
+                startBtn.disabled = true; 
+                startBtn.innerHTML = `Pilih Kata Dulu`; 
+            }
         }
+
         function createQuestion(vocabItem) {
-            const correctAnswer = vocabItem.arti; const allPossibleAnswers = vocabTextbookData.filter(item => item.arti !== correctAnswer).map(item => item.arti); const wrongAnswers = shuffle(allPossibleAnswers).slice(0, 3);
+            const correctAnswer = vocabItem.arti; 
+            const allPossibleAnswers = vocabTextbookData.filter(item => item.arti !== correctAnswer).map(item => item.arti); 
+            const wrongAnswers = shuffle(allPossibleAnswers).slice(0, 3);
             return { hangeul: vocabItem.hangeul, correctAnswer: correctAnswer, options: shuffle([...wrongAnswers, correctAnswer]) };
         }
-        function startQuiz() { if (selectedVocabForQuiz.length < 1) return; quizQuestions = shuffle(selectedVocabForQuiz.map(createQuestion)); currentQuestionIndex = 0; currentScore = 0; document.getElementById('total-questions-count').innerText = quizQuestions.length; showVocabSubTab('quiz-mode'); renderQuestion(currentQuestionIndex); }
+
+        function startQuiz() { 
+            if (selectedVocabForQuiz.length < 1) return; 
+            quizQuestions = shuffle(selectedVocabForQuiz.map(createQuestion)); 
+            currentQuestionIndex = 0; 
+            currentScore = 0; 
+            document.getElementById('total-questions-count').innerText = quizQuestions.length; 
+            showVocabSubTab('quiz-mode'); 
+            renderQuestion(currentQuestionIndex); 
+        }
+
         function renderQuestion(index) {
             if (index >= quizQuestions.length) { showQuizFinishModal(); return; }
+            
             document.getElementById('quiz-progress-bar').style.width = `${((index)/quizQuestions.length)*100}%`;
             const question = quizQuestions[index];
+            
             document.getElementById('current-question-index').innerText = index + 1;
             document.getElementById('quiz-question').innerText = question.hangeul;
-            document.getElementById('quiz-feedback').classList.remove('opacity-100');
+            
+            // Reset footer
+            const footerContainer = document.getElementById('quiz-footer-container');
+            footerContainer.classList.add('translate-y-20', 'opacity-0');
+            
             const nextBtn = document.getElementById('next-question-btn');
-            nextBtn.disabled = true; nextBtn.className = "w-full max-w-md bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 px-6 py-3.5 rounded-xl text-lg font-bold transition shadow-sm flex items-center justify-center";
+            nextBtn.disabled = true;
+            
             const optionsContainer = document.getElementById('quiz-options');
-            optionsContainer.innerHTML = question.options.map((option, i) => `<button class="quiz-option w-full bg-white dark:bg-gray-700 p-4 rounded-xl border border-gray-200 dark:border-gray-600 text-lg font-bold text-gray-700 dark:text-gray-200 text-left shadow-sm flex items-center group" data-answer="${option}" onclick="checkAnswer(this, '${question.correctAnswer}')"><div class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-gray-600 text-indigo-600 dark:text-gray-300 flex items-center justify-center font-bold text-sm mr-3 group-hover:bg-indigo-100 dark:group-hover:bg-gray-500 transition-colors border border-indigo-100 dark:border-gray-500">${i + 1}</div><span>${option}</span></button>`).join('');
+            optionsContainer.innerHTML = question.options.map((option, i) => `
+                <button class="quiz-option w-full bg-white/50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-lg font-bold text-gray-700 dark:text-gray-200 text-left shadow-sm flex items-center group hover:bg-white dark:hover:bg-gray-700" data-answer="${option}" onclick="checkAnswer(this, '${question.correctAnswer}')">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-500 flex items-center justify-center font-bold text-sm mr-4 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+                        ${['A', 'B', 'C', 'D'][i]}
+                    </div>
+                    <span>${option}</span>
+                </button>`).join('');
+                
             speak(question.hangeul);
         }
+
         function checkAnswer(selectedElement, correctAnswer) {
             const selectedAnswer = selectedElement.getAttribute('data-answer');
             const isCorrect = selectedAnswer === correctAnswer;
             const allOptions = document.querySelectorAll('#quiz-options .quiz-option');
-            allOptions.forEach(btn => { btn.classList.add('disabled'); btn.onclick = null; });
-            const feedbackEl = document.getElementById('quiz-feedback'); const nextBtn = document.getElementById('next-question-btn');
-            if (isCorrect) { currentScore++; selectedElement.classList.add('correct'); feedbackEl.innerHTML = '<span class="text-green-600 dark:text-green-400 flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-5 h-5"></i> Jawaban Benar!</span>'; } 
-            else { selectedElement.classList.add('incorrect'); feedbackEl.innerHTML = `<span class="text-red-600 dark:text-red-400 flex items-center justify-center gap-2"><i data-lucide="x-circle" class="w-5 h-5"></i> Salah. Jawaban: ${correctAnswer}</span>`; allOptions.forEach(btn => { if (btn.getAttribute('data-answer') === correctAnswer) btn.classList.add('correct'); }); }
-            nextBtn.disabled = false; nextBtn.className = "w-full max-w-md bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3.5 rounded-xl text-lg font-bold transition shadow-lg flex items-center justify-center"; feedbackEl.classList.add('opacity-100'); lucide.createIcons();
+            
+            allOptions.forEach(btn => { 
+                btn.classList.add('pointer-events-none', 'opacity-60'); 
+                btn.onclick = null; 
+            });
+            
+            selectedElement.classList.remove('opacity-60');
+            
+            const feedbackEl = document.getElementById('quiz-feedback'); 
+            const footerContainer = document.getElementById('quiz-footer-container');
+            const nextBtn = document.getElementById('next-question-btn');
+            
+            if (isCorrect) { 
+                currentScore++; 
+                selectedElement.classList.add('correct'); 
+                feedbackEl.innerHTML = '<span class="text-green-600 dark:text-green-400 flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-6 h-6"></i> Benar! Excellent.</span>'; 
+            } else { 
+                selectedElement.classList.add('incorrect'); 
+                feedbackEl.innerHTML = `<span class="text-red-600 dark:text-red-400 flex items-center justify-center gap-2"><i data-lucide="x-circle" class="w-6 h-6"></i> Salah. Jawaban: ${correctAnswer}</span>`; 
+                
+                allOptions.forEach(btn => { 
+                    if (btn.getAttribute('data-answer') === correctAnswer) {
+                        btn.classList.add('correct'); 
+                        btn.classList.remove('opacity-60');
+                    }
+                }); 
+            }
+            
+            nextBtn.disabled = false; 
+            footerContainer.classList.remove('translate-y-20', 'opacity-0');
+            lucide.createIcons();
         }
+
         function nextQuestion() { renderQuestion(++currentQuestionIndex); }
-        function showQuizFinishModal() { document.getElementById('quiz-progress-bar').style.width = `100%`; const total = quizQuestions.length; const score = Math.round((currentScore / total) * 100); document.getElementById('final-score-number').innerText = score; document.getElementById('final-score-detail').innerText = `${currentScore} dari ${total} Benar`; document.getElementById('quiz-finish-modal').classList.remove('hidden'); }
-        function hideQuizFinishModal() { document.getElementById('quiz-finish-modal').classList.add('hidden'); }
-        function restartQuiz() { hideQuizFinishModal(); startQuiz(); }
+
+        function showQuizFinishModal() { 
+            document.getElementById('quiz-progress-bar').style.width = `100%`; 
+            const total = quizQuestions.length; 
+            const score = Math.round((currentScore / total) * 100); 
+            document.getElementById('final-score-number').innerText = score; 
+            document.getElementById('final-score-detail').innerText = `${currentScore} / ${total} Benar`; 
+            document.getElementById('quiz-finish-modal').classList.remove('hidden'); 
+        }
+
+        function hideQuizFinishModal() { 
+            document.getElementById('quiz-finish-modal').classList.add('hidden'); 
+        }
+
+        function restartQuiz() { 
+            hideQuizFinishModal(); 
+            startQuiz(); 
+        }
+
+        // ==========================================
+        // CHAT AI LOGIC (Modernized)
+        // ==========================================
+        const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=";
+        
+        let chatHistory = [];
+        let isTyping = false;
+        let selectedImageBase64 = null;
+        let recognition = null;
+        let isRecording = false;
+
+        // --- NEW VARIABLES FOR CALL FEATURE ---
+        let isCallActive = false;
+        let callSpeechSynth = window.speechSynthesis;
+        let callRecognition = null;
+        let isAIThinking = false;
+        let isCallSpeaking = false;
+        let userMuted = false;
+
+        function getApiKey() {
+            return localStorage.getItem('gemini_api_key') || "";
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('api-key-input').value.trim();
+            if(key) {
+                localStorage.setItem('gemini_api_key', key);
+                alert("API Key berhasil disimpan!");
+                toggleChatSettings();
+            } else {
+                alert("API Key tidak boleh kosong.");
+            }
+        }
+
+        function getTimeString() {
+            const now = new Date();
+            return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        }
+
+        function addMessage(text, sender, isImage = false) {
+            const chatBox = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            const time = getTimeString();
+            
+            const bubbleClass = sender === 'user' ? 'wa-bubble wa-bubble-user' : 'wa-bubble wa-bubble-ai';
+            const checkIcon = sender === 'user' ? '<i data-lucide="check-check" class="inline w-3 h-3 text-white/70 ml-1"></i>' : '';
+            
+            let contentHtml = '';
+            
+            if (isImage) {
+                contentHtml = `<div class="mb-2 rounded-xl overflow-hidden shadow-sm"><img src="${text}" class="w-full h-auto max-h-64 object-cover"></div><div class="text-sm opacity-90">Koreksi foto ini.</div>`;
+            } else if (text.includes("[VOICE NOTE]")) {
+                const cleanText = text.replace("[VOICE NOTE]", "").trim();
+                contentHtml = `
+                    <div class="flex items-center gap-3 min-w-[200px] py-1">
+                        <div class="w-10 h-10 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0 cursor-pointer hover:scale-110 transition">
+                            <i data-lucide="play" class="w-4 h-4 ml-0.5 fill-current"></i>
+                        </div>
+                        <div class="flex flex-col w-full">
+                            <div class="h-1 bg-black/10 dark:bg-white/10 rounded-full w-full overflow-hidden">
+                                <div class="h-full bg-current w-1/3 opacity-50"></div>
+                            </div>
+                            <span class="text-[10px] opacity-70 mt-1 font-mono">Audio • ${cleanText.substring(0, 15)}...</span>
+                        </div>
+                    </div>`;
+            } else {
+                contentHtml = text.replace(/\n/g, '<br>');
+            }
+
+            div.className = `${bubbleClass}`;
+            div.innerHTML = `
+                <div class="font-korean">${contentHtml}</div>
+                <div class="wa-time">${time} ${checkIcon}</div>
+            `;
+            
+            chatBox.appendChild(div);
+            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+            lucide.createIcons();
+        }
+
+        function toggleChatSettings() {
+            const settings = document.getElementById('chat-settings');
+            if(settings.classList.contains('translate-y-0')) {
+                settings.classList.remove('translate-y-0');
+                settings.classList.add('-translate-y-full');
+            } else {
+                settings.classList.remove('-translate-y-full');
+                settings.classList.add('translate-y-0');
+            }
+        }
+
+        function updateChatMode() {
+            const mode = document.getElementById('chat-mode-select').value;
+            const headerName = document.getElementById('ai-header-name');
+            const status = document.getElementById('ai-status');
+            const icon = document.getElementById('ai-avatar-icon');
+            
+            if(mode === 'casual') {
+                headerName.innerText = "Ji-eun (Teman Korea)";
+                status.innerText = "Mode Santai";
+                icon.setAttribute('data-lucide', 'smile-plus');
+            } else {
+                headerName.innerText = "Tutor AI Korea";
+                status.innerText = "Mode Tutor";
+                icon.setAttribute('data-lucide', 'bot');
+            }
+            lucide.createIcons();
+            resetChat();
+        }
+
+        function resetChat() {
+            chatHistory = [];
+            const mode = document.getElementById('chat-mode-select') ? document.getElementById('chat-mode-select').value : 'tutor';
+            let welcomeMsg = "";
+            
+            if(mode === 'casual') {
+                welcomeMsg = "Annyeong! 👋 Aku Ji-eun.<br>Mau cerita apa hari ini? Pakai banmal (santai) aja ya!";
+            } else {
+                welcomeMsg = "Annyeonghaseyo! 👋<br>Saya Tutor AI. Silakan kirim kalimat untuk dikoreksi atau bertanya grammar.";
+            }
+
+            document.getElementById('chat-box').innerHTML = `
+                <div class="flex justify-center my-6">
+                    <span class="bg-gray-200/50 dark:bg-gray-800/50 backdrop-blur text-gray-500 dark:text-gray-400 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-gray-100 dark:border-gray-700">Hari Ini</span>
+                </div>
+                <!-- Welcome Message -->
+                <div class="wa-bubble wa-bubble-ai">
+                    <div class="font-korean leading-relaxed">${welcomeMsg}</div>
+                    <div class="wa-time">${getTimeString()}</div>
+                </div>
+            `;
+        }
+
+        function handleChatEnter(e) { if(e.key === 'Enter') sendMessage(); }
+
+        async function sendMessage(manualText = null) {
+            if (isTyping) return;
+            const apiKey = getApiKey();
+            
+            if (!apiKey) {
+                alert("Mohon masukkan API Key Gemini di menu pengaturan chat (ikon slider) agar AI bisa merespons.");
+                toggleChatSettings();
+                return;
+            }
+
+            const input = document.getElementById('user-input');
+            const text = manualText || input.value.trim();
+            const btn = document.getElementById('action-btn');
+            
+            if (!text && !selectedImageBase64) return;
+
+            isTyping = true;
+            if(!manualText) input.value = '';
+            
+            btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+            btn.onclick = toggleVoiceRecording;
+            lucide.createIcons();
+            
+            if(selectedImageBase64) {
+                addMessage(selectedImageBase64, 'user', true);
+            } else {
+                addMessage(text, 'user');
+            }
+
+            document.getElementById('ai-status').innerText = 'Mengetik...';
+
+            const mode = document.getElementById('chat-mode-select').value;
+            const level = document.getElementById('chat-level-select').value;
+            
+            let systemPrompt = mode === 'casual' 
+                ? `Anda adalah 'Ji-eun', teman Korea yang ramah dan gaul. Level teman: ${level}. Jangan kaku, gunakan banmal jika diajak santai. Koreksi hanya jika diminta.` 
+                : `Anda adalah Tutor Bahasa Korea profesional. Level murid: ${level}. Koreksi grammar/spelling yang salah, jelaskan sopan.`;
+
+            let parts = [];
+            if (selectedImageBase64) {
+                 const base64Data = selectedImageBase64.split(',')[1];
+                 parts.push({ text: "Lihat gambar ini: " + (text || "") });
+                 parts.push({ inlineData: { mimeType: "image/jpeg", data: base64Data } });
+            } else {
+                parts.push({ text: text });
+            }
+
+            chatHistory.push({ role: "user", parts: parts });
+
+            try {
+                const response = await fetch(GEMINI_API_URL + apiKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: chatHistory,
+                        systemInstruction: { parts: [{ text: systemPrompt }] }
+                    })
+                });
+
+                const data = await response.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Maaf, AI sedang istirahat.";
+                
+                chatHistory.push({ role: "model", parts: [{ text: reply }] });
+                addMessage(reply, 'ai');
+            } catch (err) {
+                console.error(err);
+                addMessage("Koneksi error atau API Key salah.", 'ai');
+            } finally {
+                isTyping = false;
+                selectedImageBase64 = null;
+                document.getElementById('ai-status').innerText = mode === 'casual' ? 'Mode Santai' : 'Mode Tutor';
+                if(!manualText && window.innerWidth > 768) input.focus();
+            }
+        }
+
+        // Image Handling
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedImageBase64 = e.target.result;
+                document.getElementById('preview-img').src = selectedImageBase64;
+                document.getElementById('image-preview-modal').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+            e.target.value = ''; 
+        }
+
+        function cancelImage() {
+            selectedImageBase64 = null;
+            document.getElementById('image-preview-modal').classList.add('hidden');
+        }
+
+        function sendImage() {
+            document.getElementById('image-preview-modal').classList.add('hidden');
+            sendMessage("Gambar terkirim");
+        }
+
+        // Voice Logic (Chat Mode)
+        function toggleVoiceRecording() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Browser tidak mendukung Voice Note. Gunakan Chrome.");
+                return;
+            }
+
+            const btn = document.getElementById('action-btn');
+
+            if (isRecording) {
+                recognition.stop();
+                isRecording = false;
+                btn.classList.remove('animate-pulse', 'bg-red-500');
+                btn.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-pink-600');
+                btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+            } else {
+                recognition = new webkitSpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    btn.classList.remove('bg-gradient-to-r', 'from-indigo-600', 'to-pink-600');
+                    btn.classList.add('animate-pulse', 'bg-red-500');
+                    btn.innerHTML = '<i data-lucide="square" class="w-5 h-5 fill-current"></i>';
+                    lucide.createIcons();
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    sendMessage(`[VOICE NOTE] ${transcript}`);
+                };
+
+                recognition.onerror = () => {
+                    isRecording = false;
+                    btn.classList.remove('animate-pulse', 'bg-red-500');
+                    btn.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-pink-600');
+                    btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+                    lucide.createIcons();
+                };
+
+                recognition.start();
+            }
+            lucide.createIcons();
+        }
+
+        // ==========================================
+        // CALL FEATURE LOGIC (REAL-TIME VOICE)
+        // ==========================================
+
+        function updateCallUI(state) {
+            const statusEl = document.getElementById('call-status');
+            const waveContainer = document.getElementById('wave-container');
+            const modal = document.getElementById('call-modal');
+            
+            // Reset Classes
+            modal.classList.remove('call-listening', 'call-thinking', 'call-speaking');
+            
+            if (state === 'listening') {
+                statusEl.innerText = "MENDENGARKAN ANDA...";
+                statusEl.className = "text-green-400 font-bold tracking-widest animate-pulse";
+                modal.classList.add('call-listening');
+            } else if (state === 'thinking') {
+                statusEl.innerText = "AI SEDANG BERPIKIR...";
+                statusEl.className = "text-yellow-400 font-bold tracking-widest animate-pulse";
+                modal.classList.add('call-thinking');
+            } else if (state === 'speaking') {
+                statusEl.innerText = "AI BERBICARA...";
+                statusEl.className = "text-pink-400 font-bold tracking-widest";
+                modal.classList.add('call-speaking');
+            } else {
+                statusEl.innerText = "MENGHUBUNGKAN...";
+                statusEl.className = "text-indigo-400 font-mono text-sm tracking-widest";
+            }
+        }
+
+        function toggleMute() {
+            userMuted = !userMuted;
+            const btn = document.getElementById('mute-btn');
+            if(userMuted) {
+                btn.classList.add('bg-red-500', 'hover:bg-red-600');
+                btn.classList.remove('bg-white/10', 'hover:bg-white/20');
+                btn.innerHTML = '<i data-lucide="mic-off"></i>';
+                if(callRecognition) callRecognition.stop();
+            } else {
+                btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+                btn.classList.add('bg-white/10', 'hover:bg-white/20');
+                btn.innerHTML = '<i data-lucide="mic"></i>';
+                if(!isCallSpeaking && !isAIThinking) startListeningLoop();
+            }
+            lucide.createIcons();
+        }
+
+        function startCall() {
+            if (!('webkitSpeechRecognition' in window) || !('speechSynthesis' in window)) {
+                alert("Browser Anda tidak mendukung fitur panggilan suara penuh. Gunakan Chrome/Edge terbaru.");
+                return;
+            }
+
+            const apiKey = getApiKey();
+            if(!apiKey) {
+                alert("Masukkan API Key Gemini di Pengaturan Chat terlebih dahulu untuk menggunakan fitur telepon.");
+                toggleChatSettings();
+                return;
+            }
+
+            isCallActive = true;
+            isCallSpeaking = false;
+            isAIThinking = false;
+            userMuted = false;
+            
+            document.getElementById('call-modal').classList.remove('hidden');
+            updateCallUI('connecting');
+            
+            // Init Recognition
+            if(!callRecognition) {
+                callRecognition = new webkitSpeechRecognition();
+                callRecognition.lang = 'ko-KR'; // Listen for Korean
+                callRecognition.continuous = false;
+                callRecognition.interimResults = false;
+
+                callRecognition.onstart = () => {
+                    if(isCallActive && !isAIThinking && !isCallSpeaking) updateCallUI('listening');
+                };
+
+                callRecognition.onresult = async (event) => {
+                    if(userMuted) return;
+                    const transcript = event.results[0][0].transcript;
+                    console.log("User said:", transcript);
+                    if(transcript.trim().length > 0) {
+                        await processCallResponse(transcript);
+                    } else {
+                        startListeningLoop();
+                    }
+                };
+                
+                callRecognition.onerror = (event) => {
+                    if(event.error !== 'no-speech') console.error("Speech Error", event.error);
+                };
+
+                callRecognition.onend = () => {
+                     // Auto-restart listening if call is active and not busy
+                    if (isCallActive && !isAIThinking && !isCallSpeaking && !userMuted) {
+                        startListeningLoop();
+                    }
+                };
+            }
+
+            // Start Conversation
+            setTimeout(() => {
+                const mode = document.getElementById('chat-mode-select').value;
+                const greeting = mode === 'casual' ? "Annyeong! Jal jinaesseo?" : "Annyeonghaseyo! Sijak haebolkkayo?";
+                speakInCall(greeting);
+            }, 1000);
+        }
+        
+        function startListeningLoop() {
+            try { 
+                if(isCallActive && !userMuted) callRecognition.start(); 
+            } catch(e) {
+                // Ignore error if already started
+            }
+        }
+
+        async function processCallResponse(userText) {
+            isAIThinking = true;
+            callRecognition.stop(); // Stop listening while thinking
+            updateCallUI('thinking');
+            
+            const apiKey = getApiKey();
+            const mode = document.getElementById('chat-mode-select').value;
+            const systemPrompt = mode === 'casual' 
+                ? "Jawab lisan yang pendek (max 2 kalimat) seperti teman Korea (Banmal)." 
+                : "Jawab lisan yang pendek (max 2 kalimat) sebagai tutor (Formal/Sopan).";
+
+            // Use separate history for call context
+            const callHistory = [
+                { role: "user", parts: [{ text: userText }] }
+            ];
+
+            try {
+                const response = await fetch(GEMINI_API_URL + apiKey, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: callHistory,
+                        systemInstruction: { parts: [{ text: systemPrompt + " (Strictly Korean output)" }] }
+                    })
+                });
+
+                const data = await response.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "Mianhaeyo, dasi malhae juseyo?";
+                
+                isAIThinking = false;
+                speakInCall(reply);
+
+            } catch (err) {
+                console.error(err);
+                isAIThinking = false;
+                speakInCall("Joesonghamnida, Internet error.");
+            }
+        }
+
+        function speakInCall(text) {
+            if (!isCallActive) return;
+            
+            isCallSpeaking = true;
+            updateCallUI('speaking');
+            callSpeechSynth.cancel(); // Stop previous audio
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ko-KR';
+            utterance.rate = 1.0; 
+            
+            utterance.onend = () => {
+                isCallSpeaking = false;
+                if (isCallActive) {
+                    updateCallUI('listening');
+                    startListeningLoop(); // Start listening again
+                }
+            };
+            
+            callSpeechSynth.speak(utterance);
+        }
+
+        function endCall() {
+            isCallActive = false;
+            isCallSpeaking = false;
+            if(callRecognition) callRecognition.stop();
+            callSpeechSynth.cancel();
+            document.getElementById('call-modal').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
