@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KR-Dict | Learning Hub</title>
+    <title>KR-Dict | Future Learning Hub</title>
     
     <!-- Load Fonts (Plus Jakarta Sans & Noto Sans KR) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,7 +29,7 @@
     <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Custom Modern CSS (Digabungkan agar tidak error load) -->
+    <!-- Custom Modern CSS -->
     <style>
         /* =========================================
            1. RESET & VARIABLES (2025 THEME)
@@ -325,7 +325,91 @@
         }
 
         /* =========================================
-           6. CHAT AI MODERN (Futuristic Style)
+           6. CULTURE & INFORMATION STYLES (NEW)
+           ========================================= */
+        .culture-card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        .chapter-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+        
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 10px;
+            font-size: 14px;
+            text-align: left;
+            min-width: 500px;
+        }
+        .vocab-header {
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        .v-term { font-weight: 600; color: #1e293b; white-space: nowrap; }
+        .dark .v-term { color: #f1f5f9; }
+        .v-func { color: #64748b; font-size: 13px; line-height: 1.4; }
+        .dark .v-func { color: #94a3b8; }
+        .v-def { color: #1e293b; font-weight: 500; }
+        .dark .v-def { color: #f1f5f9; }
+
+        @media (max-width: 640px) {
+            .vocab-grid { min-width: 100%; grid-template-columns: 1fr; gap: 4px; }
+            .vocab-header { display: none; }
+            .v-term { color: var(--primary); margin-top: 8px; }
+        }
+
+        .reveal-box {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 15px;
+            font-size: 15px;
+            line-height: 1.6;
+            border-left: 4px solid;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+        .dark .reveal-box { background: rgba(0, 0, 0, 0.2); }
+        .reveal-box.trans { border-color: #ec4899; }
+        .reveal-box.vocab { border-color: #22c55e; }
+
+        .pill-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 16px; border-radius: 12px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer; border: 1px solid transparent;
+            transition: all 0.2s;
+            background: rgba(255,255,255,0.5);
+            color: #64748b;
+        }
+        .dark .pill-btn { background: rgba(255,255,255,0.05); color: #94a3b8; }
+        .pill-btn:hover { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .pill-btn.active { background: var(--primary); color: white; }
+        .pill-btn.playing { animation: pulse-soft 2s infinite; background: #ec4899; color: white; }
+
+        @keyframes pulse-soft {
+            0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+        }
+
+        /* =========================================
+           7. CHAT AI MODERN (Futuristic Style)
            ========================================= */
         .wa-bubble {
             padding: 12px 16px;
@@ -371,7 +455,7 @@
         }
 
         /* =========================================
-           7. ANIMATIONS
+           8. ANIMATIONS
            ========================================= */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -477,7 +561,7 @@
                             </div>
                             <div>
                                 <h1 class="text-xl md:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">KR-Dict</h1>
-                                <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Study Hub</p>
+                                <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Future Study Hub</p>
                             </div>
                         </div>
                     </div>
@@ -492,6 +576,9 @@
                         </button>
                         <button class="nav-link" onclick="showTab('grammar', this)">
                             <i data-lucide="sparkles" class="w-4 h-4"></i><span>Grammar</span>
+                        </button>
+                        <button class="nav-link" onclick="showTab('culture', this)">
+                            <i data-lucide="globe-2" class="w-4 h-4"></i><span>Budaya</span>
                         </button>
                         <button class="nav-link" onclick="showTab('downloads', this)">
                             <i data-lucide="cloud-download" class="w-4 h-4"></i><span>Materi</span>
@@ -514,6 +601,7 @@
                     <button class="nav-link-mobile active" onclick="showTab('vocab-container', this)"><i data-lucide="book-open-text"></i>Kosakata Textbook</button>
                     <button class="nav-link-mobile" onclick="showTab('hangeul', this)"><i data-lucide="scan"></i>Hangeul & Pelafalan</button>
                     <button class="nav-link-mobile" onclick="showTab('grammar', this)"><i data-lucide="sparkles"></i>Tata Bahasa</button>
+                    <button class="nav-link-mobile" onclick="showTab('culture', this)"><i data-lucide="globe-2"></i>Budaya & Info</button>
                     <button class="nav-link-mobile" onclick="showTab('downloads', this)"><i data-lucide="cloud-download"></i>Pustaka Materi</button>
                     <button class="nav-link-mobile ai-mobile" onclick="showTab('chat-ai', this)"><i data-lucide="bot"></i>Chat AI Praktik</button>
                 </div>
@@ -725,7 +813,12 @@
                     <div id="grammar-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
                 </div>
 
-                <!-- 4. DOWNLOADS TAB -->
+                <!-- 4. CULTURE & INFO TAB (NEW FEATURE) -->
+                <div id="culture" class="tab-content hidden animate-slide-up space-y-6">
+                    <!-- Dynamic Content Loaded Here via JS -->
+                </div>
+
+                <!-- 5. DOWNLOADS TAB -->
                 <div id="downloads" class="tab-content hidden animate-slide-up space-y-8">
                     <div class="text-center">
                         <h2 class="text-3xl font-bold dark:text-white mb-2">Pustaka Digital</h2>
@@ -743,7 +836,7 @@
                     <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12"></div>
                 </div>
 
-                <!-- 5. CHAT AI TAB (Redesigned) -->
+                <!-- 6. CHAT AI TAB -->
                 <div id="chat-ai" class="tab-content hidden h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] flex flex-col relative rounded-3xl overflow-hidden glass-panel-solid shadow-2xl border border-white/20">
                     
                     <!-- Chat Header -->
@@ -1017,6 +1110,8 @@
                 filterVocabTextbook(); 
             } else if (tabId === 'downloads') {
                 renderDownloads();
+            } else if (tabId === 'culture') {
+                renderCultureList();
             }
             
             lucide.createIcons();
@@ -2892,9 +2987,122 @@
         ];
 
         const grammarData = [
-            { struktur: "~입니다 / ~입니까?", arti: "Adalah / Apakah (Formal)", fungsi: ["Digunakan untuk menyatakan atau bertanya secara formal.", "• 입니다 digunakan untuk menyatakan.", "• 입니까? digunakan untuk bertanya."], contoh: [{ kalimat: "저는 학생입니다.", arti: "Saya adalah pelajar." }, { kalimat: "어느 나라 사람입니까?", arti: "Anda orang negara mana?" }] },
-            { struktur: "~은/는", arti: "Partikel Penanda Topik", fungsi: ["Partikel ini digunakan untuk menunjukkan subjek atau topik pembicaraan dalam sebuah kalimat.", "• 은 digunakan jika kata sebelumnya berakhiran konsonan.", "• 는 digunakan jika kata sebelumnya berakhiran vokal."], contoh: [{ kalimat: "투안은 목수입니다.", arti: "Tuan adalah tukang kayu." }, { kalimat: "리리는 중국 사람입니다", arti: "Riri adalah orang cina" }] }
+            { struktur: "~입니다 / ~입니까?", arti: "Adalah / Apakah (Formal)", fungsi: ["Digunakan untuk menyatakan atau bertanya secara formal.", "입니다 digunakan untuk menyatakan.", "입니까? digunakan untuk bertanya."], contoh: [{ kalimat: "저는 학생입니다.", arti: "Saya adalah pelajar." }, { kalimat: "어느 나라 사람입니까?", arti: "Anda orang negara mana?" }] },
+            { struktur: "~은/는", arti: "Partikel Penanda Topik", fungsi: ["Partikel ini digunakan untuk menunjukkan subjek atau topik pembicaraan dalam sebuah kalimat.", "은 digunakan jika kata sebelumnya berakhiran konsonan.", "는 digunakan jika kata sebelumnya berakhiran vokal."], contoh: [{ kalimat: "투안은 목수입니다.", arti: "Tuan adalah tukang kayu." }, { kalimat: "리리는 중국 사람입니다", arti: "Riri adalah orang cina" }] }
         ];
+        
+        // --- DATA BUDAYA (NEW) ---
+        const CULTURE_DATA = {
+            babs: [
+                {
+                    id: 1,
+                    title: "한국의 인사 예절 (Etika Salam di Korea)",
+                    pages: [
+                        {
+                            id: 1,
+                            korean: "한국에서는 상대에 따라 인사하는 방식이 다릅니다.",
+                            arti_full: "Di Korea, cara memberi salam berbeda-beda tergantung pada lawan bicara.",
+                            arti_per_kata: [
+                                { bagian: "한국에서는", fungsi: "한국 (Korea), 에서 (di), 는 (penanda topik)", arti: "Di Korea" },
+                                { bagian: "상대에 따라", fungsi: "상대 (lawan bicara) , 에 따라 (tergantung pada)", arti: "Tergantung pada lawan bicara" },
+                                { bagian: "인사하는 방식이", fungsi: "인사하다 (memberi salam) , 는 방식 (cara/metode) , 이 (subjek)", arti: "Cara memberi salam" },
+                                { bagian: "다릅니다", fungsi: "다르다 (berbeda) , ㅂ니다 (akhiran formal)", arti: "Berbeda" }
+                            ]
+                        },
+                        {
+                            id: 2,
+                            korean: "자신보다 나이가 많거나 지위가 높은 사람에게는 “안녕하세요?” 또는 “안녕하십니까?”라고 말하며 고개를 숙이거나 허리를 굽혀 인사합니다.",
+                            arti_full: "Kepada orang yang lebih tua atau memiliki jabatan lebih tinggi, ucapkan ‘Annyeonghaseyo?’ atau ‘Annyeonghasimnikka?’ sambil menundukkan kepala atau membungkukkan badan saat memberi salam.",
+                            arti_per_kata: [
+                                { bagian: "자신보다", fungsi: "자신 (diri sendiri) , KB+보다 (daripada)", arti: "Daripada diri sendiri" },
+                                { bagian: "나이가 많거나", fungsi: "나이 (umur) , 가 (subjek) , 많다 (banysk) , KK/KK+거나 (atau)", arti: "Atau lebih banyak umurnya" },
+                                { bagian: "지위가 높은 사람에게는", fungsi: "지위 (jabatan) , 가 (subjek) , 높다 (tinggi) , 은 (yang) , 사람 (orang) , KB,에게 (kepada) , 는 (penanda topik)", arti: "Kepada orang yang tinggi jabatannya" },
+                                { bagian: "“안녕하세요?” 또는 “안녕하십니까?”라고 말하며", fungsi: "또는 (atau) , (으)라고 말하다 (mengatakan) , KK/KS+(으)며 ", arti: "Sambil mengatakan ‘Annyeonghaseyo?’ atau ‘Annyeonghasimnikka?’" },
+                                { bagian: "고개를 숙이거나", fungsi: "고개 (kepala) , 를 (objek) , 숙이다 (menundukkan) , 거나 (atau)", arti: "Atau menundukkan kepala" },
+                                { bagian: "허리를 굽혀", fungsi: "허리 (pinggang/badan) , 를 (objek) , 굽히다 (membungkukkan) ", arti: "Dengan membungkukkan pinggang" },
+                                { bagian: "인사합니다", fungsi: "인사하다 (memberi salam) , ㅂ니다 (akhiran formal)", arti: "Memberi salam" }
+                            ]
+                        },
+                        {
+                            id: 3,
+                            korean: "고개를 숙이거나 허리를 굽히는 것은 상대방에 대한 존경을 나타내는 제스처입니다.",
+                            arti_full: "Menundukkan kepala atau membungkukkan badan adalah gestur yang menunjukkan rasa hormat kepada lawan bicara.",
+                            arti_per_kata: [
+                                { bagian: "고개를 숙이거나", fungsi: "고개 (kepala) , 를 (objek) , 숙이다 (menundukkan) , 거나 (atau)", arti: "Atau menundukkan kepala" },
+                                { bagian: "허리를 굽히는 것은", fungsi: "허리 (badan/pinggang) , 를 (objek) , 굽히다 (membungkukkan) , KK+는 것 (merubah KK menjadi KB) , 은 (penanda topik)", arti: "Membungkukkan pinggang" },
+                                { bagian: "상대방에 대한", fungsi: "상대방 (lawan bicara) , -에 대한 (kepada/terhadap)", arti: "Terhadap lawan bicara" },
+                                { bagian: "존경을", fungsi: "존경 (rasa hormat) , 을 (objek)", arti: "Rasa hormat" },
+                                { bagian: "나타내는", fungsi: "나타내다 (menunjukkan) , 는 (yang)", arti: "Yang menunjukkan" },
+                                { bagian: "제스처입니다", fungsi: "제스처 (gestur) , 입니다 (adalah)", arti: "Adalah gestur" }
+                            ]
+                        }
+
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "한국에서 알뜰하게 생필품을 구입하는 팁 (Tips Membeli Kebutuhan Sehari-hari secara Hemat di Korea)",
+                    pages: [
+                        {
+                            id: 1,
+                            korean: "내용이 곧 업데이트될 예정입니다.", 
+                            arti_full: "Konten akan segera diperbarui.", 
+                            arti_per_kata: [
+                                { bagian: "내용이", fungsi: "내용 (isi) + 이 (subjek)", arti: "Isi/Konten" }
+
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "한국의 도시 (Kota di Korea)",
+                    pages: [
+                        {
+                            id: 1,
+                            korean: "내용이 곧 업데이트될 예정입니다.", 
+                            arti_full: "Konten akan segera diperbarui.", 
+                            arti_per_kata: [
+                                { bagian: "내용이", fungsi: "내용 (isi) + 이 (subjek)", arti: "Isi/Konten" }
+
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "동작과 사울 (Aksi dan Benda)",
+                    pages: [
+                        {
+                            id: 1,
+                            korean: "내용이 곧 업데이트될 예정입니다.", 
+                            arti_full: "Konten akan segera diperbarui.", 
+                            arti_per_kata: [
+                                { bagian: "내용이", fungsi: "내용 (isi) + 이 (subjek)", arti: "Isi/Konten" }
+
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 5,
+                    title: "한국의 좌식 문화 Budaya Korea Duduk di Lantai)",
+                    pages: [
+                        {
+                            id: 1,
+                            korean: "내용이 곧 업데이트될 예정입니다.", 
+                            arti_full: "Konten akan segera diperbarui.", 
+                            arti_per_kata: [
+                                { bagian: "내용이", fungsi: "내용 (isi) + 이 (subjek)", arti: "Isi/Konten" }
+
+                            ]
+                        }
+                    ]
+                }
+
+                
+            ]
+        }
 
         const downloadsData = [
             { category: 'textbook', title: 'TEXTBOOK 2024', desc: 'Textbook Versi Baru Terjemahan Indonesia Lengkap', size: 'Google Drive', link: 'https://drive.google.com/drive/folders/1AJEIXUcCHfUpRbuMKqpLnSVTqmx50jPe?usp=drive_link', icon: 'book', color: 'blue' },
@@ -3038,6 +3246,169 @@
             const query = document.getElementById('grammar-search').value.toLowerCase();
             const filtered = grammarData.filter(item => item.struktur.toLowerCase().includes(query) || item.arti.toLowerCase().includes(query));
             renderGrammar(filtered);
+        }
+        
+        // ==========================================
+        // CULTURE & INFORMATION LOGIC (NEW)
+        // ==========================================
+        function renderCultureList() {
+            const container = document.getElementById('culture');
+            
+            // Header Search
+            let html = `
+                <div class="header-section glass-card p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">Budaya & Informasi</h2>
+                        <p class="text-gray-500 dark:text-gray-400 mt-1">Pelajari Budaya dan Infomasi Textbook 2024</p>
+                    </div>
+                    <div class="glass-input-wrapper relative w-full md:w-80">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <input type="text" id="culture-search" oninput="filterCulture()" placeholder="Cari bab budaya..." class="glass-input pl-10">
+                    </div>
+                </div>
+                <div id="culture-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            `;
+            
+            // Grid Items
+            CULTURE_DATA.babs.forEach(bab => {
+                html += `
+                <div class="glass-card p-6 flex flex-col justify-between h-full group hover-lift relative overflow-hidden cursor-pointer" onclick="renderCultureDetail(${bab.id})" data-title="${bab.title.toLowerCase()}" data-id="${bab.id}">
+                    <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
+                    <div class="culture-card-top">
+                        <span class="chapter-badge">BAB ${bab.id}</span>
+                        <div class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
+                    <h3 class="font-bold text-gray-800 dark:text-white text-lg leading-tight line-clamp-3 mb-4">${bab.title}</h3>
+                    <div class="mt-auto flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+                        Mulai Belajar <i data-lucide="arrow-right" class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </div>`;
+            });
+            
+            html += `</div>`;
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function filterCulture() {
+            const query = document.getElementById('culture-search').value.toLowerCase();
+            const cards = document.querySelectorAll('#culture-grid > div');
+            
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title');
+                const id = card.getAttribute('data-id');
+                if (title.includes(query) || id.includes(query)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        function renderCultureDetail(babId) {
+            const container = document.getElementById('culture');
+            const bab = CULTURE_DATA.babs.find(b => b.id === babId);
+            
+            if (!bab) return;
+
+            // Detail View HTML
+            let html = `
+                <div class="max-w-3xl mx-auto animate-slide-up">
+                    <button onclick="renderCultureList()" class="btn-ghost mb-6 pl-0 hover:bg-transparent hover:text-indigo-500">
+                        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i> Kembali ke Daftar
+                    </button>
+                    
+                    <div class="text-center mb-10">
+                        <span class="chapter-badge mb-2 inline-block">BAB ${bab.id}</span>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">${bab.title}</h2>
+                    </div>
+            `;
+
+            // Cards
+            bab.pages.forEach((page, idx) => {
+                const transId = `culture-trans-${bab.id}-${idx}`;
+                const vocabId = `culture-vocab-${bab.id}-${idx}`;
+                
+                // Build Vocab 3-Column
+                let vocabHtml = `
+                    <div class="vocab-grid vocab-header">
+                        <div class="v-term">Bagian Kalimat</div>
+                        <div class="v-func">Fungsi / Grammar</div>
+                        <div class="v-def">Arti</div>
+                    </div>
+                `;
+                
+                if(page.arti_per_kata && page.arti_per_kata.length > 0) {
+                    page.arti_per_kata.forEach(v => {
+                        vocabHtml += `
+                            <div class="vocab-grid border-t border-dashed border-gray-200 dark:border-gray-700 pt-2 mt-2">
+                                <div class="v-term">${v.bagian}</div>
+                                <div class="v-func">${v.fungsi || '-'}</div>
+                                <div class="v-def">${v.arti}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                     vocabHtml = `<p class="v-def text-center text-gray-500 italic py-4">Tidak ada detail kosakata.</p>`;
+                }
+
+                html += `
+                <div class="glass-card p-6 md:p-8 mb-8 relative">
+                    <div class="text-2xl font-medium font-korean text-gray-800 dark:text-gray-100 leading-relaxed mb-6">
+                        ${page.korean}
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3 mb-4">
+                        <button class="pill-btn" onclick="playAudio('${page.korean.replace(/'/g, "\\'")}', this)">
+                            <i data-lucide="volume-2" class="w-4 h-4"></i> Dengar
+                        </button>
+                        <button class="pill-btn" onclick="toggleCultureSection('${transId}', this)">
+                            <i data-lucide="languages" class="w-4 h-4"></i> Arti
+                        </button>
+                        <button class="pill-btn" onclick="toggleCultureSection('${vocabId}', this)">
+                            <i data-lucide="list-tree" class="w-4 h-4"></i> Rincian
+                        </button>
+                    </div>
+
+                    <div id="${transId}" class="reveal-box trans">
+                        <p class="font-medium text-gray-800 dark:text-gray-200">${page.arti_full}</p>
+                    </div>
+
+                    <div id="${vocabId}" class="reveal-box vocab overflow-x-auto">
+                        ${vocabHtml}
+                    </div>
+                </div>`;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+            lucide.createIcons();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleCultureSection(id, btn) {
+            const el = document.getElementById(id);
+            if (el.style.display === 'block') {
+                el.style.display = 'none';
+                btn.classList.remove('active');
+            } else {
+                el.style.display = 'block';
+                btn.classList.add('active');
+            }
+        }
+        
+        function playAudio(text, btn) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'ko-KR';
+                u.rate = 0.85;
+                if(btn) btn.classList.add('playing');
+                u.onend = () => { if(btn) btn.classList.remove('playing'); };
+                window.speechSynthesis.speak(u);
+            } else {
+                alert('Browser tidak mendukung suara.');
+            }
         }
 
         let currentDownloadFilter = 'all';
@@ -3746,4 +4117,3 @@
     </script>
 </body>
 </html>
-
