@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KR-Dict | Learning Hub</title>
+    
+    <!-- Load Fonts (Plus Jakarta Sans & Noto Sans KR) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Load Tailwind CSS (Untuk Layout Utility Saja) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        korean: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Modern CSS -->
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="antialiased">
+
+    <!-- Background Ambient Animation -->
+    <div class="ambient-bg"></div>
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+
+    <div id="app" class="main-layout transition-colors duration-500">
+        
+        <!-- Header / Navigation Bar -->
+        <header class="glass-nav sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-20">
+                    
+                    <!-- Logo Area -->
+                    <div class="flex items-center gap-4">
+                        <button id="burger-btn" onclick="toggleMenu()" class="md:hidden icon-btn-glass">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                        <div class="flex items-center gap-3 logo-container">
+                            <div class="logo-box">
+                                <i data-lucide="book-open" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl md:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">KR-Dict</h1>
+                                <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Study Hub</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Nav -->
+                    <nav class="hidden md:flex items-center gap-2 bg-white/10 dark:bg-black/20 p-1.5 rounded-full border border-white/20 backdrop-blur-md">
+                        <button class="nav-link active" onclick="showTab('vocab-container', this)">
+                            <i data-lucide="book-open-text" class="w-4 h-4"></i><span>Kosakata</span>
+                        </button>
+                        <button class="nav-link" onclick="showTab('hangeul', this)">
+                            <i data-lucide="scan" class="w-4 h-4"></i><span>Hangeul</span>
+                        </button>
+                        <button class="nav-link" onclick="showTab('grammar', this)">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i><span>Grammar</span>
+                        </button>
+                        <button class="nav-link" onclick="showTab('culture', this)">
+                            <i data-lucide="globe-2" class="w-4 h-4"></i><span>Budaya</span>
+                        </button>
+                        <button class="nav-link" onclick="showTab('downloads', this)">
+                            <i data-lucide="cloud-download" class="w-4 h-4"></i><span>Materi</span>
+                        </button>
+                        <button class="nav-link special-ai-nav" onclick="showTab('chat-ai', this)">
+                            <i data-lucide="bot" class="w-4 h-4"></i><span>AI Tutor</span>
+                        </button>
+                    </nav>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleDarkMode()" class="theme-toggle-btn">
+                         <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="md:hidden glass-mobile-menu">
+                <div class="p-4 space-y-2">
+                    <button class="nav-link-mobile active" onclick="showTab('vocab-container', this)"><i data-lucide="book-open-text"></i>Kosakata Textbook</button>
+                    <button class="nav-link-mobile" onclick="showTab('hangeul', this)"><i data-lucide="scan"></i>Hangeul & Pelafalan</button>
+                    <button class="nav-link-mobile" onclick="showTab('grammar', this)"><i data-lucide="sparkles"></i>Tata Bahasa</button>
+                    <button class="nav-link-mobile" onclick="showTab('culture', this)"><i data-lucide="globe-2"></i>Budaya & Info</button>
+                    <button class="nav-link-mobile" onclick="showTab('downloads', this)"><i data-lucide="cloud-download"></i>Pustaka Materi</button>
+                    <button class="nav-link-mobile ai-mobile" onclick="showTab('chat-ai', this)"><i data-lucide="bot"></i>Chat AI Praktik</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow overflow-y-auto custom-scroll relative z-10 p-4 md:p-8">
+            <div class="max-w-7xl mx-auto h-full">
+                
+                <!-- 1. KOSAKATA TAB -->
+                <div id="vocab-container" class="tab-content animate-slide-up space-y-8">
+                    
+                    <!-- Sub-Tab: Textbook List -->
+                    <div id="vocab-textbook" class="vocab-sub-tab space-y-6">
+                        <div class="header-section glass-card p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div class="text-center md:text-left">
+                                <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">Textbook 2024</h2>
+                                <p class="text-gray-500 dark:text-gray-400 mt-1">Mastering EPS-TOPIK Vocabulary</p>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                <button onclick="showVocabSubTab('vocab-selection')" class="btn-primary-gradient">
+                                    <i data-lucide="gamepad-2" class="w-5 h-5 mr-2"></i>Mulai Latihan
+                                </button>
+                                <div class="glass-input-wrapper">
+                                    <select id="vocab-chapter-filter" onchange="filterVocabTextbook()" class="glass-select">
+                                        <option value="">Semua Bab</option>
+                                        <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
+                                        <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
+                                        <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
+                                        <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
+                                        <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
+                                        <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
+                                        <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
+                                        <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
+                                        <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
+                                        <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>
+                                        <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
+                                        <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
+                                        <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
+                                        <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
+                                        <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
+                                        <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
+                                        <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
+                                        <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
+                                        <option value="BAB 18">BAB 18 취미 (Hobi)</option>
+                                        <option value="BAB 19">BAB 19 요리 (Memasak)</option>
+                                        <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
+                                        <option value="BAB 21">BAB 21 병원 (Rumah sakit)</option>
+                                        <option value="BAB 22">BAB 22 약국 (Apotek)</option>
+                                        <option value="BAB 23">BAB 23 우체국 (Kantor pos)</option>
+                                        <option value="BAB 24">BAB 24 은행 (Bank)</option>
+                                        <option value="BAB 25">BAB 25 외국인 근로자 지원 기관 (Lembaga dukungan pekerja asing)</option>
+                                        <option value="BAB 26">BAB 26 한국의 주거 문화와 음식 문화 (Budaya makanan dan rumah Korea)</option>
+                                        <option value="BAB 27">BAB 27 한국의 기념일 (Hari peringatan)</option>
+                                        <option value="BAB 28">BAB 28 한국의 명절 (Hari raya Korea)</option>
+                                        <option value="BAB 29">BAB 29 한국의 예절 (Sopan santun Korea)</option>
+                                        <option value="BAB 30">BAB 30 한국의 대중문화 (Budaya popular Korea)</option>
+                                    </select>
+                                </div>
+                                <div class="glass-input-wrapper relative w-full sm:w-64">
+                                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                                    <input type="text" id="vocab-textbook-search" oninput="filterVocabTextbook()" placeholder="Cari kata..." class="glass-input pl-10">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4">
+                            <!-- JS Generated Content -->
+                        </div>
+                    </div>
+
+                    <!-- Sub-Tab: Selection -->
+                    <div id="vocab-selection" class="vocab-sub-tab hidden space-y-6">
+                        <div class="flex justify-between items-center mb-2">
+                             <h2 class="text-2xl font-bold dark:text-white">Persiapan Kuis</h2>
+                             <button onclick="showVocabSubTab('vocab-textbook')" class="btn-ghost">
+                                 <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Kembali
+                             </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <div class="md:col-span-8 glass-card p-6">
+                                <div class="flex justify-between items-center mb-6">
+                                    <h3 class="text-lg font-semibold flex items-center text-indigo-600 dark:text-indigo-400"><i data-lucide="filter" class="w-5 h-5 mr-2"></i> Pilih Materi</h3>
+                                    <div class="flex gap-2">
+                                        <button onclick="bulkSelectVocab(true)" class="btn-xs-primary">Pilih Semua</button>
+                                        <button onclick="bulkSelectVocab(false)" class="btn-xs-danger">Reset</button>
+                                    </div>
+                                </div>
+                                <select id="quiz-chapter-filter" onchange="renderQuizSelection()" class="glass-select w-full mb-4">
+                                    <option value="">Pilih Bab Tertentu...</option>
+                                    <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
+                                    <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
+                                    <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
+                                    <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
+                                    <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
+                                    <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
+                                    <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
+                                    <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>      
+                                    <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>   
+                                    <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>
+                                    <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>    
+                                    <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
+                                    <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
+                                    <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
+                                    <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
+                                    <option value="BAB 15">BAB 15 옷차림 (Berpakaian)</option>
+                                    <option value="BAB 16">BAB 16 집 구하기 (Mencari rumah)</option>
+                                    <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
+                                    <option value="BAB 18">BAB 18 취미 (Hobi)</option>
+                                    <option value="BAB 19">BAB 19 요리 (Memasak)</option>
+                                    <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
+                                    <option value="BAB 21">BAB 21 병원 (Rumah sakit)</option>
+                                    <option value="BAB 22">BAB 22 약국 (Apotek)</option>
+                                    <option value="BAB 23">BAB 23 우체국 (Kantor pos)</option>
+                                    <option value="BAB 24">BAB 24 은행 (Bank)</option>
+                                    <option value="BAB 25">BAB 25 외국인 근로자 지원 기관 (Lembaga dukungan pekerja asing)</option>
+                                    <option value="BAB 26">BAB 26 한국의 주거 문화와 음식 문화 (Budaya makanan dan rumah Korea)</option>
+                                    <option value="BAB 27">BAB 27 한국의 기념일 (Hari peringatan)</option>
+                                    <option value="BAB 28">BAB 28 한국의 명절 (Hari raya Korea)</option>
+                                    <option value="BAB 29">BAB 29 한국의 예절 (Sopan santun Korea)</option>
+                                    <option value="BAB 30">BAB 30 한국의 대중문화 (Budaya popular Korea)</option>
+                                </select>
+                                <div id="vocab-selection-list" class="space-y-2 max-h-[400px] overflow-y-auto custom-scroll pr-2"></div>
+                            </div>
+                            
+                             <div class="md:col-span-4 glass-card p-6 flex flex-col h-fit sticky top-24">
+                                <h3 class="text-lg font-semibold mb-4 text-pink-600 dark:text-pink-400 flex items-center"><i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i> Ringkasan</h3>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-sm text-gray-500">Kata Terpilih</span>
+                                    <span id="selection-count" class="text-xl font-bold text-gray-800 dark:text-white">0</span>
+                                </div>
+                                <div id="selected-vocab-summary" class="text-sm text-gray-600 dark:text-gray-300 min-h-[100px] max-h-[200px] overflow-y-auto custom-scroll p-3 rounded-xl bg-gray-50/50 dark:bg-black/20 mb-4 border border-gray-100 dark:border-gray-700">Belum ada kata.</div>
+                                <button onclick="startQuiz()" id="start-quiz-btn" disabled class="btn-primary-gradient w-full py-4 text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                    Mulai Latihan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sub-Tab: Quiz Mode -->
+                    
+                     <div id="quiz-mode" class="vocab-sub-tab hidden h-full flex flex-col relative overflow-y-auto">
+                         <!-- Progress Bar -->
+                         <div class="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full mb-8 overflow-hidden relative">
+                             <div id="quiz-progress-bar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-700 ease-out" style="width: 0%"></div>
+                         </div>
+                         
+                         <div class="flex justify-between items-center mb-6">
+                             <div class="glass-badge px-4 py-2">
+                                  <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold mr-2">Soal</span>
+                                  <span id="current-question-index" class="text-indigo-600 dark:text-indigo-400 text-lg font-bold">1</span> 
+                                  <span class="text-gray-400 mx-1">/</span> 
+                                  <span id="total-questions-count" class="text-gray-600 dark:text-gray-300">10</span>
+                             </div>
+                             <button onclick="showVocabSubTab('vocab-selection')" class="btn-icon-danger"><i data-lucide="x" class="w-5 h-5"></i></button>
+                         </div>
+
+                         <div class="flex-grow flex flex-col items-center justify-start w-full max-w-2xl mx-auto">
+                            <!-- Question Card -->
+                            <div class="w-full glass-card p-10 mb-8 text-center relative overflow-hidden group hover-lift">
+                                <div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
+                                
+                                <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-4 block">Terjemahkan ke Indonesia</span>
+                                <div id="quiz-question" class="text-6xl font-black text-gray-800 dark:text-white font-korean mb-6 tracking-tight">...</div>
+                                <button id="quiz-speaker-btn" onclick="speak(document.getElementById('quiz-question').innerText)" class="btn-circle-soft mx-auto">
+                                    <i data-lucide="volume-2" class="w-6 h-6"></i>
+                                </button>
+                            </div>
+
+                            <!-- Options -->
+                            <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-24 md:mb-0"></div>
+                         </div>
+
+                         <!-- Footer Feedback -->
+                         <div class="fixed bottom-6 left-0 right-0 px-4 flex flex-col items-center pointer-events-none">
+                             <div class="pointer-events-auto max-w-xl w-full glass-panel-solid p-4 rounded-2xl shadow-2xl flex flex-col items-center transform transition-all duration-300 translate-y-20 opacity-0" id="quiz-footer-container">
+                                 <div id="quiz-feedback" class="text-base font-bold text-center mb-3"></div>
+                                 <button onclick="nextQuestion()" id="next-question-btn" disabled class="btn-primary-gradient w-full py-3">
+                                     Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                                 </button>
+                             </div>
+                         </div>
+                     </div>
+                </div>
+
+                <!-- 2. HANGEUL TAB -->
+                <div id="hangeul" class="tab-content hidden animate-slide-up space-y-6">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold dark:text-white mb-2">Hangeul Mastery</h2>
+                        <p class="text-gray-500 dark:text-gray-400">Klik kartu untuk mendengar pelafalan Native Speaker</p>
+                    </div>
+                    <div id="hangeul-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-8"></div>
+                </div>
+
+                <!-- 3. GRAMMAR TAB -->
+                <div id="grammar" class="tab-content hidden animate-slide-up space-y-6">
+                     <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
+                        <div>
+                            <h2 class="text-3xl font-bold dark:text-white">Tata Bahasa</h2>
+                            <p class="text-gray-500 dark:text-gray-400">Struktur kalimat dasar hingga mahir</p>
+                        </div>
+                        <div class="glass-input-wrapper relative w-full md:w-80">
+                             <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                            <input type="text" id="grammar-search" oninput="filterGrammar()" placeholder="Cari pola grammar..." class="glass-input pl-10">
+                        </div>
+                    </div>
+                    <div id="grammar-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                </div>
+
+                <!-- 4. CULTURE & INFO TAB (NEW FEATURE) -->
+                <div id="culture" class="tab-content hidden animate-slide-up space-y-6">
+                    <!-- Dynamic Content Loaded Here via JS -->
+                </div>
+
+                <!-- 5. DOWNLOADS TAB -->
+                <div id="downloads" class="tab-content hidden animate-slide-up space-y-8">
+                    <div class="text-center">
+                        <h2 class="text-3xl font-bold dark:text-white mb-2">Pustaka Digital</h2>
+                        <p class="text-gray-500 dark:text-gray-400">Unduh materi PDF & Audio berkualitas tinggi</p>
+                    </div>
+                    
+                    <div class="flex justify-center flex-wrap gap-3">
+                        <button onclick="filterDownloads('all', this)" class="filter-chip active">Semua</button>
+                        <button onclick="filterDownloads('textbook', this)" class="filter-chip">Buku Paket</button>
+                        <button onclick="filterDownloads('grammar', this)" class="filter-chip">Tata Bahasa</button>
+                        <button onclick="filterDownloads('vocab', this)" class="filter-chip">Kosakata</button>
+                        <button onclick="filterDownloads('exam', this)" class="filter-chip">Latihan Soal</button>
+                    </div>
+                    
+                    <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12"></div>
+                </div>
+
+                <!-- 6. CHAT AI TAB -->
+                <div id="chat-ai" class="tab-content hidden h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] flex flex-col relative rounded-3xl overflow-hidden glass-panel-solid shadow-2xl border border-white/20">
+                    
+                    <!-- Chat Header -->
+                    <div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center z-20">
+                        <div class="flex items-center gap-4">
+                            <button onclick="showTab('vocab-container')" class="md:hidden btn-icon-glass"><i data-lucide="arrow-left"></i></button>
+                            <div class="relative">
+                                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 p-0.5">
+                                    <div class="w-full h-full bg-white dark:bg-gray-900 rounded-full flex items-center justify-center overflow-hidden">
+                                        <i id="ai-avatar-icon" data-lucide="bot" class="w-6 h-6 text-indigo-500"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></div>
+                            </div>
+                            <div>
+                                <h1 id="ai-header-name" class="font-bold text-gray-800 dark:text-white text-base">Tutor AI Korea</h1>
+                                <span id="ai-status" class="text-xs text-indigo-500 font-medium">Online • Siap membantu</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="startCall()" class="btn-icon-glass text-green-500 bg-green-50 dark:bg-green-900/20"><i data-lucide="phone"></i></button>
+                            <button onclick="toggleChatSettings()" class="btn-icon-glass"><i data-lucide="sliders-horizontal"></i></button>
+                            <button onclick="resetChat()" class="btn-icon-glass text-red-500 hover:bg-red-50"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Chat Settings Panel (Slide Down) -->
+                    <div id="chat-settings" class="absolute top-[72px] left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700 p-4 z-10 shadow-lg transform -translate-y-full transition-transform duration-300">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Google Gemini API Key</label>
+                                <div class="flex gap-2">
+                                    <input type="password" id="api-key-input" placeholder="Paste your API Key here" class="glass-input text-sm">
+                                    <button onclick="saveApiKey()" class="btn-primary-gradient py-2 text-xs whitespace-nowrap">Simpan</button>
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-1">Key disimpan di browser Anda (LocalStorage).</p>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Persona</label>
+                                    <select id="chat-mode-select" onchange="updateChatMode()" class="glass-select-sm">
+                                        <option value="tutor">🎓 Tutor Formal</option>
+                                        <option value="casual">👩🏻 Teman Santai (Ji-eun)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Level Kamu</label>
+                                    <select id="chat-level-select" onchange="updateChatMode()" class="glass-select-sm">
+                                        <option value="pemula">🌱 Pemula</option>
+                                        <option value="menengah">🌿 Menengah</option>
+                                        <option value="lanjut">🌳 Lanjut</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages Area -->
+                    <div id="chat-box" class="flex-grow overflow-y-auto custom-scroll p-4 space-y-4 bg-gray-50/50 dark:bg-black/20">
+                        <!-- Messages injected by JS -->
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
+                        <div class="flex items-end gap-2 max-w-4xl mx-auto">
+                            <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+                            <button onclick="document.getElementById('image-upload').click()" class="btn-icon-glass shrink-0 text-indigo-500">
+                                <i data-lucide="image-plus"></i>
+                            </button>
+
+                            <div class="flex-grow relative">
+                                <input type="text" id="user-input" class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 pr-12 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500/50 transition-all" placeholder="Ketik pesan..." onkeydown="handleChatEnter(event)" autocomplete="off">
+                                <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition"><i data-lucide="smile"></i></button>
+                            </div>
+
+                            <button id="action-btn" onclick="toggleVoiceRecording()" class="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-pink-600 text-white shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center transform active:scale-95 transition-all">
+                                <i data-lucide="mic" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Image Preview Modal (Overlay inside Chat Tab) -->
+                    <div id="image-preview-modal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex flex-col justify-center items-center p-6 animate-fade-in">
+                        <div class="glass-card p-2 w-full max-w-sm">
+                            <div class="relative rounded-lg overflow-hidden bg-black">
+                                <img id="preview-img" class="w-full max-h-[300px] object-contain">
+                                <button onclick="cancelImage()" class="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full"><i data-lucide="x"></i></button>
+                            </div>
+                            <div class="p-3">
+                                <button onclick="sendImage()" class="btn-primary-gradient w-full py-2">Kirim Foto</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- GLOBAL MODALS -->
+    
+    <!-- Call Modal (Updated for Real-time Logic) -->
+    <div id="call-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] hidden flex flex-col items-center justify-between py-12 transition-all duration-500">
+        <div class="text-center mt-10">
+            <div class="w-32 h-32 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 to-pink-500 mx-auto mb-6">
+                <div class="w-full h-full rounded-full bg-gray-900 flex items-center justify-center overflow-hidden relative">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=korea" class="w-20 h-20 opacity-80 z-10 relative">
+                    <!-- Glow effect behind avatar -->
+                    <div class="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full animate-pulse"></div>
+                </div>
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Tutor AI</h2>
+            <p id="call-status" class="text-indigo-400 font-mono text-sm tracking-widest uppercase">MENGHUBUNGKAN...</p>
+        </div>
+        
+        <!-- Audio Visualizer (Interactive) -->
+        <div id="wave-container" class="flex items-center justify-center gap-2 h-16 w-full opacity-80">
+             <span class="w-2 h-6 bg-white rounded-full animate-wave-1 transition-colors duration-300"></span>
+             <span class="w-2 h-10 bg-white rounded-full animate-wave-2 transition-colors duration-300"></span>
+             <span class="w-2 h-14 bg-white rounded-full animate-wave-3 transition-colors duration-300"></span>
+             <span class="w-2 h-10 bg-white rounded-full animate-wave-2 transition-colors duration-300"></span>
+             <span class="w-2 h-6 bg-white rounded-full animate-wave-1 transition-colors duration-300"></span>
+        </div>
+
+        <div class="flex gap-8 items-center pb-10">
+            <!-- Tombol Mute -->
+            <button id="mute-btn" onclick="toggleMute()" class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md">
+                <i data-lucide="mic"></i>
+            </button>
+            
+            <!-- Tombol End Call -->
+            <button onclick="endCall()" class="w-20 h-20 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30 flex items-center justify-center transform hover:scale-110 transition duration-300">
+                <i data-lucide="phone-off" class="w-8 h-8 fill-current"></i>
+            </button>
+            
+            <!-- Speaker Toggle (Visual) -->
+            <button class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md">
+                <i data-lucide="volume-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Quiz Result Modal -->
+    <div id="quiz-finish-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideQuizFinishModal()"></div>
+        <div class="glass-card p-8 w-full max-w-sm text-center relative z-10 animate-scale-in border-t-4 border-indigo-500">
+            <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
+                <div class="w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-600 rounded-full flex items-center justify-center shadow-lg ring-4 ring-white dark:ring-gray-800">
+                    <i data-lucide="trophy" class="w-12 h-12 text-white fill-current"></i>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-bold mt-10 text-gray-800 dark:text-white">Latihan Selesai!</h3>
+            <p id="final-score-message" class="text-gray-500 dark:text-gray-400 text-sm mb-6">Kerja bagus, terus tingkatkan!</p>
+            
+            <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 mb-6 border border-gray-100 dark:border-gray-700">
+                <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Skor Akhir</div>
+                <div class="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400" id="final-score-number">0</div>
+                <div class="text-sm font-medium text-gray-600 dark:text-gray-300 mt-2" id="final-score-detail">0 / 0 Benar</div>
+            </div>
+
+            <div class="space-y-3">
+                <button onclick="restartQuiz()" class="btn-primary-gradient w-full justify-center">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Ulangi Latihan
+                </button>
+                <button onclick="hideQuizFinishModal(); showVocabSubTab('vocab-selection')" class="btn-ghost w-full justify-center border border-gray-200 dark:border-gray-700">
+                    <i data-lucide="layout-grid" class="w-4 h-4 mr-2"></i> Pilih Materi Lain
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/app.js"></script>
+    
+</body>
+</html>
