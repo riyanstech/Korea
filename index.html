@@ -2,7 +2,7 @@
 <html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>KR-Dict | Learning Hub</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -310,15 +310,12 @@
                     <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12"></div>
                 </div>
 
-                <!-- 6. QUIZ HUB (RESTRUCTURED) -->
+                <!-- 6. QUIZ HUB -->
                 <div id="quiz-hub" class="tab-content hidden animate-slide-up">
-
-                    <!-- List Mode -->
                     <div id="quizHubHeader" class="text-center mb-8">
                         <h2 class="text-3xl font-bold dark:text-white mb-2">Latihan Soal</h2>
                         <p class="text-gray-500 dark:text-gray-400">Practice Reading & Listening — siap untuk EPS-TOPIK</p>
                     </div>
-
                     <div id="quizListWrap">
                         <div id="quizPackLoading" class="text-center py-12">
                             <div class="loader-kr mx-auto"></div>
@@ -331,10 +328,7 @@
                         </div>
                         <div id="quizPackGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
                     </div>
-
-                    <!-- Test Mode (NEW LAYOUT: sticky top+bottom) -->
                     <div id="quizTestWrap" class="hidden flex-col relative">
-                        <!-- Sticky Header -->
                         <div class="quiz-test-sticky-top">
                             <div class="flex items-center gap-3">
                                 <button id="quizTestExit" class="btn-icon-glass" title="Keluar">
@@ -355,11 +349,7 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Question Area (natural page scroll) -->
                         <div id="quizTestQuestion" class="quiz-test-question-area"></div>
-
-                        <!-- Sticky Footer -->
                         <div class="quiz-test-sticky-bottom">
                             <div id="quizTestNav" class="quiz-test-nav-dots"></div>
                             <div class="flex gap-2">
@@ -378,8 +368,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Result Mode -->
                     <div id="quizResultWrap" class="hidden">
                         <div class="max-w-3xl mx-auto pb-8">
                             <div class="text-center mb-6">
@@ -389,18 +377,12 @@
                                 <h2 class="text-2xl font-bold dark:text-white">Hasil Latihan</h2>
                                 <p id="quizResultTitle" class="text-sm text-gray-500 mt-1"></p>
                             </div>
-
                             <div id="quizResultScore" class="mb-6"></div>
                             <div id="quizResultStats" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"></div>
-
-                            <!-- ACTION BUTTONS -->
                             <div id="quizResultActions" class="quiz-result-actions"></div>
-
-                            <!-- Review Section -->
                             <div id="quizResultReviewWrap" class="mt-8">
                                 <div id="quizResultReview"></div>
                             </div>
-
                             <button id="quizResultClose" class="btn-primary-gradient w-full mt-6 py-4 justify-center">
                                 <i data-lucide="check" class="w-5 h-5 mr-2"></i> Selesai
                             </button>
@@ -408,88 +390,149 @@
                     </div>
                 </div>
 
-                <!-- 7. CHAT AI TAB -->
-                <div id="chat-ai" class="tab-content hidden h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] flex flex-col relative rounded-3xl overflow-hidden glass-panel-solid shadow-2xl border border-white/20">
-                    <div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center z-20">
-                        <div class="flex items-center gap-4">
-                            <button onclick="showTab('vocab-container')" class="md:hidden btn-icon-glass"><i data-lucide="arrow-left"></i></button>
-                            <div class="relative">
-                                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-500 to-pink-500 p-0.5">
-                                    <div class="w-full h-full bg-white dark:bg-gray-900 rounded-full flex items-center justify-center overflow-hidden">
-                                        <i id="ai-avatar-icon" data-lucide="bot" class="w-6 h-6 text-indigo-500"></i>
-                                    </div>
-                                </div>
-                                <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-900 rounded-full animate-pulse"></div>
-                            </div>
-                            <div>
-                                <h1 id="ai-header-name" class="font-bold text-gray-800 dark:text-white text-base">Tutor AI Korea</h1>
-                                <span id="ai-status" class="text-xs text-indigo-500 font-medium">Online • Siap membantu</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="startCall()" class="btn-icon-glass text-green-500 bg-green-50 dark:bg-green-900/20"><i data-lucide="phone"></i></button>
-                            <button onclick="toggleChatSettings()" class="btn-icon-glass"><i data-lucide="sliders-horizontal"></i></button>
-                            <button onclick="resetChat()" class="btn-icon-glass text-red-500 hover:bg-red-50"><i data-lucide="trash-2"></i></button>
-                        </div>
-                    </div>
+                <!-- ================= 7. AI TUTOR TAB (NEW v2.0) ================= -->
+                <div id="chat-ai" class="tab-content hidden chat-shell">
 
-                    <div id="chat-settings" class="absolute top-[72px] left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700 p-4 z-10 shadow-lg transform -translate-y-full transition-transform duration-300">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Google Gemini API Key</label>
-                                <div class="flex gap-2">
-                                    <input type="password" id="api-key-input" placeholder="Paste your API Key here" class="glass-input text-sm">
-                                    <button onclick="saveApiKey()" class="btn-primary-gradient py-2 text-xs whitespace-nowrap">Simpan</button>
-                                </div>
-                                <p class="text-[10px] text-gray-400 mt-1">Key disimpan di browser Anda (LocalStorage).</p>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Persona</label>
-                                    <select id="chat-mode-select" onchange="updateChatMode()" class="glass-select-sm">
-                                        <option value="tutor">🎓 Tutor Formal</option>
-                                        <option value="casual">👩🏻 Teman Santai (Ji-eun)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="text-xs font-bold text-gray-400 uppercase mb-2 block">Level Kamu</label>
-                                    <select id="chat-level-select" onchange="updateChatMode()" class="glass-select-sm">
-                                        <option value="pemula">🌱 Pemula</option>
-                                        <option value="menengah">🌿 Menengah</option>
-                                        <option value="lanjut">🌳 Lanjut</option>
-                                    </select>
-                                </div>
-                            </div>
+                    <!-- Header -->
+                    <div class="chat-header">
+                        <button onclick="showTab('vocab-container')" class="chat-back-btn md:hidden" aria-label="Kembali">
+                            <i data-lucide="arrow-left"></i>
+                        </button>
+                        <div class="chat-avatar">
+                            <i id="ai-avatar-icon" data-lucide="bot"></i>
+                            <span class="chat-status-dot"></span>
+                        </div>
+                        <div class="chat-header-info">
+                            <h1 id="ai-header-name">Tutor AI Korea</h1>
+                            <span id="ai-status">Online • Siap membantu</span>
+                        </div>
+                        <div class="chat-header-actions">
+                            <button onclick="startCall()" title="Panggilan suara" class="chat-hdr-btn">
+                                <i data-lucide="phone"></i>
+                            </button>
+                            <button onclick="toggleChatSettings()" title="Pengaturan" class="chat-hdr-btn">
+                                <i data-lucide="settings-2"></i>
+                            </button>
+                            <button onclick="resetChat()" title="Reset chat" class="chat-hdr-btn">
+                                <i data-lucide="rotate-ccw"></i>
+                            </button>
                         </div>
                     </div>
 
-                    <div id="chat-box" class="flex-grow overflow-y-auto custom-scroll p-4 space-y-4 bg-gray-50/50 dark:bg-black/20"></div>
+                    <!-- Quick mode chips -->
+                    <div class="chat-quick-modes" id="chatQuickModes" role="tablist">
+                        <button class="chat-chip active" data-mode="tutor" onclick="setQuickMode('tutor')">
+                            <span>🎓</span><span>Tutor</span>
+                        </button>
+                        <button class="chat-chip" data-mode="correct" onclick="setQuickMode('correct')">
+                            <span>✏️</span><span>Koreksi</span>
+                        </button>
+                        <button class="chat-chip" data-mode="explain" onclick="setQuickMode('explain')">
+                            <span>📖</span><span>Jelaskan</span>
+                        </button>
+                        <button class="chat-chip" data-mode="translate" onclick="setQuickMode('translate')">
+                            <span>🌐</span><span>Terjemah</span>
+                        </button>
+                        <button class="chat-chip" data-mode="practice" onclick="setQuickMode('practice')">
+                            <span>💬</span><span>Ngobrol</span>
+                        </button>
+                        <button class="chat-chip" data-mode="quiz" onclick="setQuickMode('quiz')">
+                            <span>🎯</span><span>Kuis</span>
+                        </button>
+                    </div>
 
-                    <div class="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
-                        <div class="flex items-end gap-2 max-w-4xl mx-auto">
+                    <!-- Messages -->
+                    <div id="chat-box" class="chat-messages"></div>
+
+                    <!-- Input area -->
+                    <div class="chat-input-area">
+                        <div class="chat-input-inner">
                             <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
-                            <button onclick="document.getElementById('image-upload').click()" class="btn-icon-glass shrink-0 text-indigo-500">
+                            <button onclick="document.getElementById('image-upload').click()" class="chat-input-btn" title="Kirim foto">
                                 <i data-lucide="image-plus"></i>
                             </button>
-                            <div class="flex-grow relative">
-                                <input type="text" id="user-input" class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 pr-12 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500/50 transition-all" placeholder="Ketik pesan..." onkeydown="handleChatEnter(event)" autocomplete="off">
-                                <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition"><i data-lucide="smile"></i></button>
-                            </div>
-                            <button id="action-btn" onclick="toggleVoiceRecording()" class="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-pink-600 text-white shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center transform active:scale-95 transition-all">
-                                <i data-lucide="mic" class="w-5 h-5"></i>
+                            <textarea id="user-input" class="chat-input-field" placeholder="Ketik pesan atau kalimat Korea..." rows="1" onkeydown="handleChatEnter(event)" oninput="autoGrowTextarea(this)"></textarea>
+                            <button id="action-btn" onclick="toggleVoiceRecording()" class="chat-input-action" title="Rekam suara">
+                                <i data-lucide="mic"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div id="image-preview-modal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex flex-col justify-center items-center p-6 animate-fade-in">
-                        <div class="glass-card p-2 w-full max-w-sm">
-                            <div class="relative rounded-lg overflow-hidden bg-black">
-                                <img id="preview-img" class="w-full max-h-[300px] object-contain">
-                                <button onclick="cancelImage()" class="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full"><i data-lucide="x"></i></button>
+                    <!-- Settings bottom sheet -->
+                    <div id="chat-settings" class="chat-settings-sheet">
+                        <div class="chat-settings-backdrop" onclick="toggleChatSettings()"></div>
+                        <div class="chat-settings-panel">
+                            <div class="chat-settings-handle"></div>
+                            <div class="chat-settings-header">
+                                <h3><i data-lucide="sliders-horizontal"></i> Pengaturan AI</h3>
+                                <button onclick="toggleChatSettings()" class="chat-hdr-btn"><i data-lucide="x"></i></button>
                             </div>
-                            <div class="p-3">
-                                <button onclick="sendImage()" class="btn-primary-gradient w-full py-2">Kirim Foto</button>
+                            <div class="chat-settings-body">
+
+                                <div class="chat-settings-group">
+                                    <label class="chat-settings-label">🤖 AI Provider</label>
+                                    <select id="ai-provider-select" onchange="onProviderChange()" class="chat-settings-input"></select>
+                                    <p class="chat-settings-hint" id="ai-provider-desc">Pilih penyedia AI yang ingin digunakan</p>
+                                </div>
+
+                                <div class="chat-settings-group">
+                                    <label class="chat-settings-label">⚙️ Model</label>
+                                    <select id="ai-model-select" onchange="onModelChange()" class="chat-settings-input"></select>
+                                </div>
+
+                                <div class="chat-settings-group hidden" id="custom-endpoint-group">
+                                    <label class="chat-settings-label">🔗 Custom Endpoint URL</label>
+                                    <input type="text" id="ai-custom-endpoint" class="chat-settings-input" placeholder="https://api.example.com/v1/chat/completions">
+                                </div>
+
+                                <div class="chat-settings-group">
+                                    <label class="chat-settings-label">🔑 API Key</label>
+                                    <div class="chat-settings-key-row">
+                                        <input type="password" id="ai-key-input" class="chat-settings-input" placeholder="Masukkan API Key...">
+                                        <button onclick="saveApiKeyMulti()" class="chat-settings-save-btn">
+                                            <i data-lucide="check"></i>
+                                        </button>
+                                    </div>
+                                    <a id="ai-key-help" href="#" target="_blank" rel="noopener" class="chat-settings-help">
+                                        🔗 Cara mendapatkan API Key →
+                                    </a>
+                                    <p class="chat-settings-hint">🔒 Key disimpan lokal di browser Anda (LocalStorage).</p>
+                                </div>
+
+                                <div class="chat-settings-row">
+                                    <div class="chat-settings-group">
+                                        <label class="chat-settings-label">👤 Persona</label>
+                                        <select id="chat-mode-select" onchange="updateChatMode()" class="chat-settings-input">
+                                            <option value="tutor">🎓 Tutor Formal</option>
+                                            <option value="casual">👩🏻 Teman Santai (Ji-eun)</option>
+                                        </select>
+                                    </div>
+                                    <div class="chat-settings-group">
+                                        <label class="chat-settings-label">📊 Level</label>
+                                        <select id="chat-level-select" onchange="updateChatMode()" class="chat-settings-input">
+                                            <option value="pemula">🌱 Pemula</option>
+                                            <option value="menengah">🌿 Menengah</option>
+                                            <option value="lanjut">🌳 Lanjut</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Image preview modal -->
+                    <div id="image-preview-modal" class="chat-img-preview hidden">
+                        <div class="chat-img-preview-card">
+                            <div class="chat-img-preview-img-wrap">
+                                <img id="preview-img" alt="Preview">
+                                <button onclick="cancelImage()" class="chat-img-preview-close">
+                                    <i data-lucide="x"></i>
+                                </button>
+                            </div>
+                            <button onclick="sendImage()" class="btn-primary-gradient w-full py-3 mt-3">
+                                <i data-lucide="send" class="w-4 h-4 mr-2"></i> Kirim Foto
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -581,7 +624,7 @@
         </div>
     </div>
 
-    <!-- ✅ CERTIFICATE MODAL (preview) -->
+    <!-- CERTIFICATE MODAL -->
     <div id="certModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="KR.quiz.closeCertModal()"></div>
         <div class="relative z-10 max-w-5xl w-full max-h-[92vh] overflow-y-auto custom-scroll glass-panel-solid rounded-3xl p-4">
@@ -611,7 +654,7 @@
         </div>
     </div>
 
-    <!-- ================= LOGIN SCREEN ================= -->
+    <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4 login-screen-bg">
         <div class="login-card glass-panel-solid rounded-3xl shadow-2xl p-8 w-full max-w-sm">
             <div class="text-center mb-6">
@@ -645,7 +688,7 @@
         </div>
     </div>
 
-    <!-- ================= ADMIN DASHBOARD ================= -->
+    <!-- ADMIN DASHBOARD -->
     <div id="adminDashboard" class="hidden fixed inset-0 z-[500] admin-bg flex flex-col">
         <header class="admin-header shrink-0">
             <div class="admin-header-icon"><i data-lucide="shield-check"></i></div>
@@ -768,7 +811,6 @@
 
     <div id="toastContainer" class="fixed top-20 right-4 z-[2000] flex flex-col gap-2 pointer-events-none max-w-sm"></div>
 
-    <!-- Scripts -->
     <script src="assets/js/data.js"></script>
     <script src="assets/js/auth.js"></script>
     <script src="assets/js/github.js"></script>
@@ -780,6 +822,7 @@
             await KR.auth.init();
             if (KR.quiz) KR.quiz.init();
             if (KR.admin) KR.admin.init();
+            if (KR.ai) KR.ai.init();
         });
     </script>
 </body>
