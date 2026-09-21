@@ -1,6 +1,8 @@
 /* =========================================
-   KR-Dict — Design System v4.0 (MODERN)
-   Fix: Navbar + Vibrant modern design
+   KR-Dict — Design System v4.1 (FINAL)
+   - Modern vibrant design
+   - Fixed navbar
+   - Complete Quiz Hub module
    ========================================= */
 
 /* ---------- TOKENS ---------- */
@@ -123,7 +125,6 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  position: relative;
 }
 .dark .app-header {
   background: rgba(11, 18, 32, 0.72);
@@ -409,7 +410,7 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
   box-shadow: 0 6px 14px -4px rgba(239,68,68,0.5);
 }
 
-/* ---------- LEGACY NAV (for backward compat) ---------- */
+/* ---------- LEGACY NAV (backward compat) ---------- */
 .glass-nav {
   position: sticky; top: 0; z-index: 50;
   background: var(--bg-elev);
@@ -753,7 +754,7 @@ main.app-main {
 .dark .vocab-modern-card { background: rgba(17, 24, 39, 0.7); }
 .dark .vocab-modern-speak { background: rgba(51, 65, 85, 0.5); }
 
-/* ---------- LEGACY VOCAB (backward compat) ---------- */
+/* ---------- LEGACY VOCAB ---------- */
 .vocab-grid-cards { display: grid; gap: var(--sp-4); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .vocab-grid-cards { grid-template-columns: repeat(2, 1fr); } }
 
@@ -896,7 +897,7 @@ main.app-main {
 }
 .culture-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-3); }
 
-/* ---------- QUIZ ---------- */
+/* ---------- LEGACY QUIZ ---------- */
 .quiz-question-card {
   padding: var(--sp-8) var(--sp-5); text-align: center;
   background: var(--bg-elev); border: 1px solid var(--border);
@@ -932,42 +933,15 @@ main.app-main {
   border-radius: inherit; transition: width var(--t-slow);
 }
 
-/* ---------- QUIZ HUB ---------- */
+/* ---------- QUIZ HUB TIMER ---------- */
 .quiz-timer {
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: 0.9rem; font-weight: 800;
   padding: 7px 14px; border-radius: var(--r-md);
   background: var(--primary-soft); color: var(--primary); letter-spacing: 0.02em;
 }
-.quiz-timer.warn { background: var(--danger-soft); color: var(--danger); animation: pulseSoft 1.2s ease-in-out infinite; }
-@keyframes pulseSoft { 50% { opacity: 0.65; } }
 
-.audio-player {
-  display: flex; align-items: center; gap: var(--sp-4);
-  padding: var(--sp-5); background: linear-gradient(135deg, var(--primary), #7c3aed);
-  border-radius: var(--r-lg); color: #fff; margin: var(--sp-4) 0;
-}
-.audio-play-btn {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: rgba(255, 255, 255, 0.22);
-  display: grid; place-items: center; color: #fff;
-  flex-shrink: 0; transition: all var(--t-fast); border: none; cursor: pointer;
-}
-.audio-play-btn:hover { background: rgba(255, 255, 255, 0.35); transform: scale(1.08); }
-.audio-play-btn svg { width: 24px; height: 24px; }
-.audio-wave { display: flex; gap: 3px; align-items: center; flex: 1; height: 28px; }
-.audio-wave span {
-  flex: 1; background: rgba(255, 255, 255, 0.55);
-  border-radius: 2px; height: 30%;
-  animation: audioWave 1.2s ease-in-out infinite;
-}
-.audio-wave span:nth-child(2) { animation-delay: 0.1s; }
-.audio-wave span:nth-child(3) { animation-delay: 0.2s; }
-.audio-wave span:nth-child(4) { animation-delay: 0.3s; }
-.audio-wave span:nth-child(5) { animation-delay: 0.4s; }
-@keyframes audioWave { 0%, 100% { height: 20%; } 50% { height: 85%; } }
-.audio-label { font-size: 0.72rem; font-weight: 700; opacity: 0.9; letter-spacing: 0.03em; }
-
+/* ---------- QUIZ NAV DOTS ---------- */
 .quiz-nav-dot {
   width: 30px; height: 30px; border-radius: 7px;
   font-size: 0.72rem; font-weight: 700;
@@ -1328,7 +1302,7 @@ main.app-main {
   :where(.header-section) { padding: var(--sp-8); }
 }
 
-/* ---------- HEADER SECTION dengan ambient blobs ---------- */
+/* ---------- HEADER SECTION with ambient blobs ---------- */
 .header-section.glass-card {
   position: relative;
   overflow: hidden;
@@ -1692,7 +1666,6 @@ main.app-main {
   box-shadow: 0 6px 14px -4px rgba(99,102,241,0.45);
 }
 
-/* Legacy nav-link (masih dipakai beberapa tempat) */
 .nav-link {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 14px; border-radius: var(--r-full);
@@ -1902,29 +1875,9 @@ main.app-main {
   border: 1px solid var(--border);
 }
 
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 767px) {
-  .app-header .h-\[72px\] { height: 64px; }
-  .brand-title { font-size: 1.1rem; }
-  .brand-sub { font-size: 0.55rem; }
-  .logo-box { width: 40px; height: 40px; }
-  .theme-toggle-btn { width: 38px; height: 38px; }
-  .badge-btn { padding: 7px 10px; }
-}
-@media (max-width: 640px) {
-  h2 { font-size: 1.5rem; }
-  .setup-check-box { width: 20px; height: 20px; }
-  .setup-check { font-size: 0.88rem; padding: 12px; }
-}
-
-.perf-list > * {
-  content-visibility: auto;
-  contain-intrinsic-size: 80px;
-}
-
 /* ============================================================
    🎯 QUIZ HUB MODULE — Complete Styles v4.0
-   Untuk quiz.js yang menggunakan class berbeda dari legacy quiz
+   Untuk quiz.js (class berbeda dari legacy quiz)
    ============================================================ */
 
 /* --- Section badge (Reading / Listening label) --- */
@@ -2070,7 +2023,7 @@ main.app-main {
 .quiz-question-image img { width: 100%; display: block; }
 
 /* ============================================================
-   ✅ MAIN FIX: OPTIONS GRID
+   ✅ OPTIONS GRID (UTAMA — fix layout kacau)
    ============================================================ */
 .quiz-options-grid {
   display: flex;
@@ -2139,7 +2092,7 @@ main.app-main {
 
 .quiz-option-card[disabled] { cursor: default; }
 
-/* Huruf A/B/C/D bulat */
+/* Huruf A/B/C/D */
 .quiz-option-letter {
   width: 36px; height: 36px;
   border-radius: 10px;
@@ -2509,10 +2462,33 @@ main.app-main {
   50% { opacity: 0.65; }
 }
 
-/* --- Responsive untuk mobile --- */
+/* --- Quiz Hub responsive --- */
 @media (max-width: 640px) {
   .quiz-score-circle { width: 140px; height: 140px; }
   .quiz-score-num { font-size: 2rem; }
   .quiz-review-row { flex-direction: column; gap: 4px; }
   .quiz-review-label { min-width: 0; }
+  .quiz-options-grid { gap: 8px; }
+  .quiz-option-card { padding: 12px 14px; }
+  .quiz-option-letter { width: 32px; height: 32px; font-size: 0.78rem; }
+}
+
+/* ---------- RESPONSIVE GLOBAL ---------- */
+@media (max-width: 767px) {
+  .app-header .h-\[72px\] { height: 64px; }
+  .brand-title { font-size: 1.1rem; }
+  .brand-sub { font-size: 0.55rem; }
+  .logo-box { width: 40px; height: 40px; }
+  .theme-toggle-btn { width: 38px; height: 38px; }
+  .badge-btn { padding: 7px 10px; }
+}
+@media (max-width: 640px) {
+  h2 { font-size: 1.5rem; }
+  .setup-check-box { width: 20px; height: 20px; }
+  .setup-check { font-size: 0.88rem; padding: 12px; }
+}
+
+.perf-list > * {
+  content-visibility: auto;
+  contain-intrinsic-size: 80px;
 }
