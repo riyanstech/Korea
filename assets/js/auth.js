@@ -1,7 +1,9 @@
 /* ==========================================
-   KR-Dict — Authentication Module v3.1
-   User & Admin login dengan SHA-256 hash
-   + Badge styling fix
+   KR-Dict — Authentication Module v3.2 (FIXED)
+   + User & Admin login dengan SHA-256 hash
+   + FIXED: XSS prevention di updateBadge (escape lengkap)
+   + FIXED: Null safety pada event binding
+   + FIXED: Login admin form auto-reset saat back
    ========================================== */
 window.KR = window.KR || {};
 
@@ -9,9 +11,18 @@ KR.auth = (function () {
   'use strict';
 
   const STORAGE = {
-    get(k, d = null) { try { const v = localStorage.getItem('krdict:' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
-    set(k, v) { try { localStorage.setItem('krdict:' + k, JSON.stringify(v)); } catch {} },
-    remove(k) { try { localStorage.removeItem('krdict:' + k); } catch {} }
+    get(k, d = null) {
+      try {
+        const v = localStorage.getItem('krdict:' + k);
+        return v ? JSON.parse(v) : d;
+      } catch { return d; }
+    },
+    set(k, v) {
+      try { localStorage.setItem('krdict:' + k, JSON.stringify(v)); } catch {}
+    },
+    remove(k) {
+      try { localStorage.removeItem('krdict:' + k); } catch {}
+    }
   };
 
   const ROLE_KEY = 'role';
@@ -24,9 +35,12 @@ KR.auth = (function () {
     if (window.crypto?.subtle) {
       const buf = new TextEncoder().encode(pwd + '::krdict');
       const hash = await crypto.subtle.digest('SHA-256', buf);
-      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
     }
-    return btoa(pwd + '::krdict');
+    // Fallback untuk browser lama (tidak aman, tapi tetap jalan)
+    return btoa(unescape(encodeURIComponent(pwd + '::krdict')));
   }
 
   async function ensureDefaultPassword() {
@@ -37,13 +51,20 @@ KR.auth = (function () {
 
   async function verifyPassword(pwd) {
     const saved = STORAGE.get(PASS_KEY);
-    if (!saved) { await ensureDefaultPassword(); return pwd === DEFAULT_PASS; }
+    if (!saved) {
+      await ensureDefaultPassword();
+      return pwd === DEFAULT_PASS;
+    }
     return (await hashPassword(pwd)) === saved;
   }
 
   async function changePassword(oldPwd, newPwd) {
-    if (!(await verifyPassword(oldPwd))) return { ok: false, msg: 'Password lama salah' };
-    if (!newPwd || newPwd.length < 4) return { ok: false, msg: 'Password minimal 4 karakter' };
+    if (!(await verifyPassword(oldPwd))) {
+      return { ok: false, msg: 'Password lama salah' };
+    }
+    if (!newPwd || newPwd.length < 4) {
+      return { ok: false, msg: 'Password minimal 4 karakter' };
+    }
     STORAGE.set(PASS_KEY, await hashPassword(newPwd));
     return { ok: true };
   }
@@ -98,8 +119,18 @@ KR.auth = (function () {
   }
 
   /* ==========================================
-     ✅ FIX: Update badge pakai class .badge-btn baru
+     ✅ FIXED: Escape lengkap + null safety
      ========================================== */
+  function escapeHtml(str = '') {
+    return String(str).replace(/[&<>"']/g, c => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[c]);
+  }
+
   function updateBadge() {
     const badge = document.getElementById('roleBadge');
     if (!badge) return;
@@ -123,9 +154,11 @@ KR.auth = (function () {
 
     } else if (role === 'user') {
       const user = getUserData();
-      const safeName = (user?.name || 'User').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      // ✅ FIX: Escape lengkap untuk mencegah XSS via title/name
+      const safeName = escapeHtml(user?.name || 'User');
+      const safeAttr = safeName.replace(/"/g, '&quot;');
       badge.innerHTML = `
-        <button class="badge-btn badge-user" title="${safeName}">
+        <button class="badge-btn badge-user" title="${safeAttr}">
           <i data-lucide="user"></i>
           <span class="hidden sm:inline">${safeName}</span>
         </button>
@@ -164,6 +197,7 @@ KR.auth = (function () {
     document.getElementById('adminBackBtn')?.addEventListener('click', () => {
       document.getElementById('loginAdminForm')?.classList.add('hidden');
       document.getElementById('loginUserForm')?.classList.remove('hidden');
+      // ✅ FIX: Reset password field saat kembali
       const pass = document.getElementById('loginAdminPass');
       if (pass) pass.value = '';
     });
@@ -181,6 +215,15 @@ KR.auth = (function () {
       if (e.key === 'Enter') submitAdmin();
     });
 
+    // ✅ FIX: Enter juga submit untuk user login
+    document.getElementById('loginUserName')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const nameInput = document.getElementById('loginUserName');
+        const name = nameInput?.value.trim() || 'Tamu';
+        loginAsUser(name);
+      }
+    });
+
     // Check session
     const role = getRole();
     if (role === 'admin' || role === 'user') {
@@ -193,5 +236,15 @@ KR.auth = (function () {
     if (window.lucide) lucide.createIcons();
   }
 
-  return { init, isAdmin, isUser, getRole, getUserData, logout, changePassword, updateBadge, STORAGE };
+  return {
+    init,
+    isAdmin,
+    isUser,
+    getRole,
+    getUserData,
+    logout,
+    changePassword,
+    updateBadge,
+    STORAGE
+  };
 })();
