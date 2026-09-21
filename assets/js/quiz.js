@@ -1,6 +1,6 @@
 /* ==========================================
-   KR-Dict — Quiz Module v8.3 (FINAL)
-   + Multi-line via <br> (100% bulletproof)
+   KR-Dict — Quiz Module v8.4 (FINAL)
+   + Auto-split multi-line (detect sentence boundaries)
    + Tiered Certificates (Diamond/Gold/Silver)
    + Clean professional certificate design
    + Canvas-based (100% reliable)
@@ -11,7 +11,7 @@ window.KR = window.KR || {};
 KR.quiz = (function () {
   'use strict';
 
-  console.log('%c[KR-Dict Quiz] %cv8.3 — Bulletproof Multi-line',
+  console.log('%c[KR-Dict Quiz] %cv8.4 — Auto-split Multi-line',
     'color:#6366f1;font-weight:800',
     'color:#10b981;font-weight:700');
 
@@ -329,12 +329,21 @@ KR.quiz = (function () {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
-  /* ✅ NEW: Escape + convert newline to <br> (bulletproof multi-line) */
+  /* ✅ v8.4: Escape + convert newline to <br> + AUTO-SPLIT fallback */
   function escMultiline(s = '') {
-    return esc(s)
-      .replace(/\r\n/g, '\n')  // normalize Windows CRLF
-      .replace(/\r/g, '\n')    // normalize Mac CR
-      .replace(/\n/g, '<br>'); // convert to <br>
+    let text = String(s || '');
+
+    // 1. Normalize line endings
+    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    // 2. Auto-split fallback: kalau tidak ada \n, coba deteksi pattern kalimat
+    if (!text.includes('\n')) {
+      // Split setelah `.` `?` `!` diikuti spasi + karakter Korea/digit/[/(
+      text = text.replace(/([.?!])\s+(?=[가-힣ㄱ-ㅎㅏ-ㅣ\d\[(])/g, '$1\n');
+    }
+
+    // 3. Convert \n → <br>
+    return esc(text).replace(/\n/g, '<br>');
   }
 
   function speak(text, lang = 'ko-KR') {
@@ -495,7 +504,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     RENDER QUESTION — ✅ Multi-line via <br>
+     RENDER QUESTION
      ========================================== */
   function renderQuestion() {
     const { flatQuestions, currentIdx, answers, mode, revealed } = activeSession;
@@ -533,7 +542,6 @@ KR.quiz = (function () {
       }
     }
 
-    /* ✅ Multi-line question text */
     if (question.text) {
       qHtml += `<div class="quiz-question-text">${escMultiline(question.text)}</div>`;
     }
@@ -869,7 +877,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     BUILD PDF RESULT HTML — ✅ Multi-line via <br>
+     BUILD PDF RESULT HTML
      ========================================== */
   function buildResultHTML(r) {
     const user = (KR.auth?.getUserData?.()?.name) || 'KR-Dict Student';
@@ -1077,7 +1085,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     ✅ CANVAS CERTIFICATE — v8.3 CLEAN PRO
+     ✅ CANVAS CERTIFICATE — v8.4 CLEAN PRO
      ========================================== */
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -1100,7 +1108,6 @@ KR.quiz = (function () {
     ctx.strokeStyle = color;
     ctx.lineCap = 'square';
 
-    // Outer thick L
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(0, 60);
@@ -1108,7 +1115,6 @@ KR.quiz = (function () {
     ctx.lineTo(60, 0);
     ctx.stroke();
 
-    // Inner thin L
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(0, 40);
@@ -1118,7 +1124,6 @@ KR.quiz = (function () {
     ctx.lineTo(40, 0);
     ctx.stroke();
 
-    // Small diamond at inner corner
     ctx.save();
     ctx.translate(10, 10);
     ctx.rotate(Math.PI / 4);
@@ -1140,33 +1145,23 @@ KR.quiz = (function () {
     ctx.scale(SCALE, SCALE);
     ctx.textBaseline = 'middle';
 
-    /* ============================================
-       📐 LAYOUT GRID
-       ============================================ */
     const Y = {
       borderOuter: 24,
       borderInner: 36,
-
       tierBadge: 56,
-
       emblem: 118,
       emblemR: 40,
-
       brand: 182,
       brandLine: 200,
-
       title: 258,
       subtitle: 300,
-
       presented: 348,
       name: 400,
       nameUnderline: 430,
       completed: 472,
       pkg: 508,
-
       scoreLabel: 548,
       scoreY: 596,
-
       footerLine: 668,
       signatureY: 700,
       sealY: 700,
@@ -1176,16 +1171,13 @@ KR.quiz = (function () {
       metaY4: 744,
     };
 
-    /* ============================================
-       1. BACKGROUND
-       ============================================ */
+    // 1. Background
     const bgGrad = ctx.createLinearGradient(0, 0, W, H);
     bgGrad.addColorStop(0, tier.bg1);
     bgGrad.addColorStop(1, tier.bg2);
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // Subtle dot pattern
     ctx.save();
     ctx.globalAlpha = 0.025;
     ctx.fillStyle = tier.primary;
@@ -1198,9 +1190,7 @@ KR.quiz = (function () {
     }
     ctx.restore();
 
-    /* ============================================
-       2. WATERMARK
-       ============================================ */
+    // 2. Watermark
     ctx.save();
     ctx.font = '900 260px "Playfair Display", Georgia, serif';
     ctx.fillStyle = tier.primary;
@@ -1209,9 +1199,7 @@ KR.quiz = (function () {
     ctx.fillText('KR-DICT', W / 2, H / 2 + 20);
     ctx.restore();
 
-    /* ============================================
-       3. BORDERS
-       ============================================ */
+    // 3. Borders
     ctx.strokeStyle = tier.borderOuter;
     ctx.lineWidth = 3;
     ctx.strokeRect(Y.borderOuter, Y.borderOuter, W - Y.borderOuter * 2, H - Y.borderOuter * 2);
@@ -1219,18 +1207,14 @@ KR.quiz = (function () {
     ctx.lineWidth = 0.8;
     ctx.strokeRect(Y.borderInner, Y.borderInner, W - Y.borderInner * 2, H - Y.borderInner * 2);
 
-    /* ============================================
-       4. CORNERS
-       ============================================ */
+    // 4. Corners
     const cx = Y.borderOuter, cy = Y.borderOuter;
     drawMinimalCorner(ctx, cx, cy, 1, 1, tier.borderOuter);
     drawMinimalCorner(ctx, W - cx, cy, -1, 1, tier.borderOuter);
     drawMinimalCorner(ctx, cx, H - cy, 1, -1, tier.borderOuter);
     drawMinimalCorner(ctx, W - cx, H - cy, -1, -1, tier.borderOuter);
 
-    /* ============================================
-       5. TIER BADGE
-       ============================================ */
+    // 5. Tier badge
     const badgeW = 170, badgeH = 42;
     const badgeX = W - 70 - badgeW;
     const badgeY = Y.tierBadge;
@@ -1270,9 +1254,7 @@ KR.quiz = (function () {
     ctx.fillText('TIER CERTIFICATE', badgeX + 44, badgeY + badgeH / 2 + 8);
     ctx.letterSpacing = '0px';
 
-    /* ============================================
-       6. EMBLEM
-       ============================================ */
+    // 6. Emblem
     const emblemX = W / 2, emblemY = Y.emblem, emblemR = Y.emblemR;
 
     ctx.beginPath();
@@ -1312,9 +1294,7 @@ KR.quiz = (function () {
     ctx.fillStyle = '#ffffff';
     ctx.fillText(tier.icon, emblemX, emblemY + 2);
 
-    /* ============================================
-       7. BRAND
-       ============================================ */
+    // 7. Brand
     ctx.font = '800 11px "Plus Jakarta Sans", -apple-system, sans-serif';
     ctx.fillStyle = tier.primary;
     ctx.textAlign = 'center';
@@ -1329,9 +1309,7 @@ KR.quiz = (function () {
     ctx.lineTo(W / 2 + 40, Y.brandLine);
     ctx.stroke();
 
-    /* ============================================
-       8. TITLE
-       ============================================ */
+    // 8. Title
     ctx.font = '900 54px "Playfair Display", Georgia, serif';
     ctx.fillStyle = tier.primary;
     ctx.textAlign = 'center';
@@ -1340,9 +1318,7 @@ KR.quiz = (function () {
     ctx.fillText('CERTIFICATE', W / 2, Y.title);
     ctx.letterSpacing = '0px';
 
-    /* ============================================
-       9. SUBTITLE
-       ============================================ */
+    // 9. Subtitle
     const subtitle = tier.title.replace('Certificate of ', '').toUpperCase();
     ctx.font = '700 15px "Plus Jakarta Sans", -apple-system, sans-serif';
     ctx.fillStyle = tier.deep;
@@ -1351,17 +1327,13 @@ KR.quiz = (function () {
     ctx.fillText(subtitle, W / 2, Y.subtitle);
     ctx.letterSpacing = '0px';
 
-    /* ============================================
-       10. PRESENTED TO
-       ============================================ */
+    // 10. Presented to
     ctx.font = 'italic 15px Georgia, "Times New Roman", serif';
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'center';
     ctx.fillText('This is to certify that', W / 2, Y.presented);
 
-    /* ============================================
-       11. NAME
-       ============================================ */
+    // 11. Name
     const displayName = name.length > 34 ? name.slice(0, 32) + '…' : name;
     ctx.font = '700 52px "Playfair Display", Georgia, serif';
     ctx.fillStyle = '#1e293b';
@@ -1390,17 +1362,13 @@ KR.quiz = (function () {
       ctx.restore();
     });
 
-    /* ============================================
-       12. COMPLETED TEXT
-       ============================================ */
+    // 12. Completed
     ctx.font = '15px Georgia, "Times New Roman", serif';
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'center';
     ctx.fillText('has successfully completed the practice quiz', W / 2, Y.completed);
 
-    /* ============================================
-       13. PACKAGE NAME
-       ============================================ */
+    // 13. Package name
     const displayPkg = pkgName.length > 44 ? pkgName.slice(0, 42) + '…' : pkgName;
     ctx.font = '700 22px "Playfair Display", Georgia, serif';
     ctx.fillStyle = tier.primary;
@@ -1408,9 +1376,7 @@ KR.quiz = (function () {
     ctx.textBaseline = 'middle';
     ctx.fillText(`"${displayPkg}"`, W / 2, Y.pkg);
 
-    /* ============================================
-       14. SCORE ROW
-       ============================================ */
+    // 14. Score row
     ctx.font = 'italic 14px Georgia, "Times New Roman", serif';
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'center';
@@ -1436,7 +1402,6 @@ KR.quiz = (function () {
     const scoreX = medalCx + medalR + gap1;
     const gradeX = scoreX + scoreWidth + gap2;
 
-    // Ribbon tails
     ctx.fillStyle = tier.primary;
     ctx.beginPath();
     ctx.moveTo(medalCx - 12, medalCy + medalR - 2);
@@ -1457,7 +1422,6 @@ KR.quiz = (function () {
     ctx.closePath();
     ctx.fill();
 
-    // Medal circle
     const medalGrad = ctx.createRadialGradient(
       medalCx - 10, medalCy - 10, 4,
       medalCx, medalCy, medalR
@@ -1484,20 +1448,17 @@ KR.quiz = (function () {
     ctx.fillStyle = '#ffffff';
     ctx.fillText(tier.icon, medalCx, medalCy + 1);
 
-    // Score text
     ctx.font = '900 44px "Playfair Display", Georgia, serif';
     ctx.fillStyle = tier.primary;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
     ctx.fillText(scoreText, scoreX, medalCy + 2);
 
-    // Grade
     ctx.font = '800 16px "Plus Jakarta Sans", -apple-system, sans-serif';
     ctx.fillStyle = tier.deep;
     ctx.textAlign = 'left';
     ctx.fillText(gradeLabel, gradeX, medalCy + 3);
 
-    // FINAL SCORE caption
     ctx.font = '700 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
     ctx.letterSpacing = '3px';
@@ -1505,9 +1466,7 @@ KR.quiz = (function () {
     ctx.fillText('FINAL SCORE', scoreX, medalCy + 26);
     ctx.letterSpacing = '0px';
 
-    /* ============================================
-       15. FOOTER SEPARATOR
-       ============================================ */
+    // 15. Footer separator
     ctx.strokeStyle = tier.borderInner;
     ctx.lineWidth = 0.8;
     ctx.beginPath();
@@ -1522,9 +1481,7 @@ KR.quiz = (function () {
     ctx.fillRect(-3, -3, 6, 6);
     ctx.restore();
 
-    /* ============================================
-       16. SIGNATURE (LEFT)
-       ============================================ */
+    // 16. Signature
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
 
@@ -1545,9 +1502,7 @@ KR.quiz = (function () {
     ctx.fillText('FOUNDER & DIRECTOR', 220, Y.signatureY + 32);
     ctx.letterSpacing = '0px';
 
-    /* ============================================
-       17. OFFICIAL SEAL (CENTER)
-       ============================================ */
+    // 17. Seal
     const sealR = 46;
     const sealCx = W / 2;
     const sealCy = Y.sealY;
@@ -1604,9 +1559,7 @@ KR.quiz = (function () {
     ctx.fillText('SEAL', sealCx, sealCy + 20);
     ctx.letterSpacing = '0px';
 
-    /* ============================================
-       18. META (RIGHT)
-       ============================================ */
+    // 18. Meta
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
 
