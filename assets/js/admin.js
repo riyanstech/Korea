@@ -1,9 +1,9 @@
 /* ==========================================
-   KR-Dict — Admin Dashboard v8.4
+   KR-Dict — Admin Dashboard v8.5 (FIXED)
+   + FIXED: collect() race condition
+   + FIXED: null safety pada form binding
    + Image upload for question & options
    + Multi-line question with live preview
-   + Line counter for textarea
-   + Complete CRUD for all modules
    ========================================== */
 window.KR = window.KR || {};
 
@@ -78,7 +78,7 @@ KR.admin = (function () {
      ========================================== */
   function getVocab() {
     const override = STORAGE.get(KEYS.vocab);
-    if (override && Array.isArray(override) && override.length) return override;
+    if (override && Array.isArray(override)) return override.slice();
     if (window.vocabTextbookData && window.vocabTextbookData.length) return window.vocabTextbookData.slice();
     return [];
   }
@@ -105,7 +105,8 @@ KR.admin = (function () {
 
   function getGrammar() {
     const override = STORAGE.get(KEYS.grammar);
-    return (override && Array.isArray(override)) ? override : (window.grammarData || []).slice();
+    if (override && Array.isArray(override)) return override.slice();
+    return (window.grammarData || []).slice();
   }
   function saveGrammar(data) {
     STORAGE.set(KEYS.grammar, data);
@@ -116,7 +117,8 @@ KR.admin = (function () {
 
   function getCulture() {
     const override = STORAGE.get(KEYS.culture);
-    return (override && override.babs) ? override : JSON.parse(JSON.stringify(window.CULTURE_DATA || { babs: [] }));
+    if (override && override.babs) return override;
+    return JSON.parse(JSON.stringify(window.CULTURE_DATA || { babs: [] }));
   }
   function saveCulture(data) {
     STORAGE.set(KEYS.culture, data);
@@ -127,7 +129,8 @@ KR.admin = (function () {
 
   function getDownloads() {
     const override = STORAGE.get(KEYS.downloads);
-    return (override && Array.isArray(override)) ? override : (window.downloadsData || []).slice();
+    if (override && Array.isArray(override)) return override.slice();
+    return (window.downloadsData || []).slice();
   }
   function saveDownloads(data) {
     STORAGE.set(KEYS.downloads, data);
@@ -295,7 +298,7 @@ KR.admin = (function () {
     els.qzBreadcrumb.querySelectorAll('[data-nav]').forEach(btn => {
       btn.addEventListener('click', () => {
         if (btn.dataset.nav === 'list') state.quiz = { view: 'list', pkgId: null, secId: null };
-        if (btn.dataset.nav === 'pkg') state.quiz.view = 'pkg';
+        if (btn.dataset.nav === 'pkg') { state.quiz.view = 'pkg'; state.quiz.secId = null; }
         renderQuiz();
       });
     });
@@ -331,9 +334,9 @@ KR.admin = (function () {
     }
     els.qzContainer.querySelectorAll('.admin-row').forEach(row => {
       const id = row.dataset.id;
-      row.querySelector('[data-act="open"]').addEventListener('click', () => { state.quiz = { view: 'pkg', pkgId: id, secId: null }; renderQuiz(); });
-      row.querySelector('[data-act="edit"]').addEventListener('click', () => editPackage(id));
-      row.querySelector('[data-act="del"]').addEventListener('click', () => deletePackage(id));
+      row.querySelector('[data-act="open"]')?.addEventListener('click', () => { state.quiz = { view: 'pkg', pkgId: id, secId: null }; renderQuiz(); });
+      row.querySelector('[data-act="edit"]')?.addEventListener('click', () => editPackage(id));
+      row.querySelector('[data-act="del"]')?.addEventListener('click', () => deletePackage(id));
     });
     if (window.lucide) lucide.createIcons();
   }
@@ -369,9 +372,9 @@ KR.admin = (function () {
     }
     els.qzContainer.querySelectorAll('.admin-row').forEach(row => {
       const id = row.dataset.id;
-      row.querySelector('[data-act="open"]').addEventListener('click', () => { state.quiz.view = 'sec'; state.quiz.secId = id; renderQuiz(); });
-      row.querySelector('[data-act="edit"]').addEventListener('click', () => editSection(id));
-      row.querySelector('[data-act="del"]').addEventListener('click', () => deleteSection(id));
+      row.querySelector('[data-act="open"]')?.addEventListener('click', () => { state.quiz.view = 'sec'; state.quiz.secId = id; renderQuiz(); });
+      row.querySelector('[data-act="edit"]')?.addEventListener('click', () => editSection(id));
+      row.querySelector('[data-act="del"]')?.addEventListener('click', () => deleteSection(id));
     });
     if (window.lucide) lucide.createIcons();
   }
@@ -410,9 +413,9 @@ KR.admin = (function () {
     }
     els.qzContainer.querySelectorAll('.admin-row').forEach(row => {
       const i = Number(row.dataset.id);
-      row.querySelector('[data-act="edit"]').addEventListener('click', () => editQuestion(i));
-      row.querySelector('[data-act="dup"]').addEventListener('click', () => dupQuestion(i));
-      row.querySelector('[data-act="del"]').addEventListener('click', () => deleteQuestion(i));
+      row.querySelector('[data-act="edit"]')?.addEventListener('click', () => editQuestion(i));
+      row.querySelector('[data-act="dup"]')?.addEventListener('click', () => dupQuestion(i));
+      row.querySelector('[data-act="del"]')?.addEventListener('click', () => deleteQuestion(i));
     });
     if (window.lucide) lucide.createIcons();
   }
@@ -491,6 +494,7 @@ KR.admin = (function () {
         if (!name) return KR.toast?.error('Nama wajib');
         const list = KR.quiz.getQuizzes();
         const pkg = list.find(p => p.id === state.quiz.pkgId);
+        if (!pkg) return KR.toast?.error('Paket tidak ditemukan');
         pkg.sections = pkg.sections || [];
         pkg.sections.push({ id: uid('sec'), name, type: document.getElementById('secType').value, duration: parseInt(document.getElementById('secDur').value) || 10, questions: [] });
         KR.quiz.setQuizzes(list);
@@ -527,15 +531,16 @@ KR.admin = (function () {
   function deleteSection(id) {
     const pkg = KR.quiz.getQuizzes().find(p => p.id === state.quiz.pkgId);
     const sec = pkg?.sections?.find(s => s.id === id);
+    if (!sec) return;
     showConfirm({
-      title: 'Hapus Section?', subtitle: sec?.name,
-      message: `Section <strong>${esc(sec?.name)}</strong> dan ${sec?.questions?.length || 0} soal akan dihapus.`,
+      title: 'Hapus Section?', subtitle: sec.name,
+      message: `Section <strong>${esc(sec.name)}</strong> dan ${sec.questions?.length || 0} soal akan dihapus.`,
       onOk: () => { pkg.sections = pkg.sections.filter(s => s.id !== id); KR.quiz.setQuizzes(KR.quiz.getQuizzes()); renderQuiz(); },
     });
   }
 
   /* ==========================================
-     ✅ v8.4: LIVE PREVIEW untuk Textarea Pertanyaan
+     LIVE PREVIEW untuk Textarea Pertanyaan
      ========================================== */
   function updateQTextPreview() {
     const textarea = document.getElementById('qText');
@@ -547,7 +552,6 @@ KR.admin = (function () {
     const lines = text.split(/\r?\n/);
     const lineCount = lines.length;
 
-    // Update counter
     if (lineCount <= 1) {
       countEl.textContent = '1 baris';
       countEl.style.color = '#94a3b8';
@@ -556,7 +560,6 @@ KR.admin = (function () {
       countEl.style.color = '#059669';
     }
 
-    // Update preview
     if (!text.trim()) {
       previewContent.innerHTML = '<span style="font-style:italic;color:#94a3b8;">Ketik pertanyaan untuk melihat preview...</span>';
     } else {
@@ -570,7 +573,7 @@ KR.admin = (function () {
   }
 
   /* ==========================================
-     ✅ QUESTION FORM — WITH IMAGE UPLOAD + MULTI-LINE PREVIEW
+     QUESTION FORM
      ========================================== */
   function questionFormHtml(q = {}) {
     const type = q.type || 'reading';
@@ -603,7 +606,6 @@ KR.admin = (function () {
         </div>
       </div>
 
-      <!-- ✅ GAMBAR PERTANYAAN -->
       <div class="field">
         <label class="field-label"><i data-lucide="image" style="width:12px;height:12px;display:inline"></i> Gambar Pertanyaan (opsional)</label>
         <div id="qImageArea"></div>
@@ -645,7 +647,6 @@ KR.admin = (function () {
     options.forEach(o => { if (o.image === undefined) o.image = ''; });
     let questionImage = q.image || '';
 
-    // ----- Question image UI -----
     function renderQuestionImage() {
       const area = document.getElementById('qImageArea');
       if (!area) return;
@@ -676,6 +677,7 @@ KR.admin = (function () {
 
     document.getElementById('qImageInput')?.addEventListener('change', async (e) => {
       const file = e.target.files?.[0];
+      e.target.value = '';
       if (!file) return;
       try {
         if (KR.toast) KR.toast.info('Memproses gambar...', 1200);
@@ -686,15 +688,11 @@ KR.admin = (function () {
         console.error(err);
         if (KR.toast) KR.toast.error('Gagal memproses gambar');
       }
-      e.target.value = '';
     });
 
     renderQuestionImage();
-
-    // ✅ v8.4: initial preview
     setTimeout(() => updateQTextPreview(), 50);
 
-    // ----- Options UI -----
     function renderOpts() {
       const list = document.getElementById('qOptionsList');
       if (!list) return;
@@ -773,6 +771,7 @@ KR.admin = (function () {
         inp.addEventListener('change', async (e) => {
           const idx = Number(inp.dataset.imgInput);
           const file = e.target.files?.[0];
+          e.target.value = '';
           if (!file) return;
           try {
             if (KR.toast) KR.toast.info('Memproses gambar...', 1200);
@@ -783,7 +782,6 @@ KR.admin = (function () {
             console.error(err);
             if (KR.toast) KR.toast.error('Gagal memproses gambar');
           }
-          e.target.value = '';
         });
       });
 
@@ -822,14 +820,18 @@ KR.admin = (function () {
     });
   }
 
+  /* ==========================================
+     ✅ FIXED: collect() sekarang synchronous
+     ========================================== */
   function addQuestion() {
     const pkg = KR.quiz.getQuizzes().find(p => p.id === state.quiz.pkgId);
     const sec = pkg?.sections?.find(s => s.id === state.quiz.secId);
     if (!sec) return;
-    let collect;
+    const qType = sec.type === 'listening' ? 'listening' : 'reading';
+
     openModal({
       icon: 'plus', title: 'Soal Baru', subtitle: sec.name,
-      body: questionFormHtml({ type: sec.type === 'listening' ? 'listening' : 'reading' }),
+      body: questionFormHtml({ type: qType }),
       onSubmit: () => {
         const v = collect();
         if (!v.text && !v.audioText && !v.image) return KR.toast?.error('Isi pertanyaan minimal teks/gambar/audio');
@@ -840,14 +842,16 @@ KR.admin = (function () {
         KR.toast?.success('Soal ditambahkan');
       },
     });
-    setTimeout(() => { collect = bindQuestionForm({ type: sec.type === 'listening' ? 'listening' : 'reading' }); }, 60);
+    // ✅ FIX: bind synchronously (DOM sudah siap setelah openModal)
+    const collect = bindQuestionForm({ type: qType });
   }
+
   function editQuestion(i) {
     const pkg = KR.quiz.getQuizzes().find(p => p.id === state.quiz.pkgId);
     const sec = pkg?.sections?.find(s => s.id === state.quiz.secId);
     const q = sec?.questions?.[i];
     if (!q) return;
-    let collect;
+
     openModal({
       icon: 'pencil', title: 'Edit Soal', subtitle: sec.name,
       body: questionFormHtml(q),
@@ -860,8 +864,9 @@ KR.admin = (function () {
         KR.toast?.success('Soal diperbarui');
       },
     });
-    setTimeout(() => { collect = bindQuestionForm(q); }, 60);
+    const collect = bindQuestionForm(q);
   }
+
   function dupQuestion(i) {
     const pkg = KR.quiz.getQuizzes().find(p => p.id === state.quiz.pkgId);
     const sec = pkg?.sections?.find(s => s.id === state.quiz.secId);
@@ -876,6 +881,7 @@ KR.admin = (function () {
   function deleteQuestion(i) {
     const pkg = KR.quiz.getQuizzes().find(p => p.id === state.quiz.pkgId);
     const sec = pkg?.sections?.find(s => s.id === state.quiz.secId);
+    if (!sec) return;
     showConfirm({
       title: 'Hapus Soal?', message: 'Soal akan dihapus.',
       onOk: () => { sec.questions.splice(i, 1); KR.quiz.setQuizzes(KR.quiz.getQuizzes()); renderQuiz(); },
@@ -953,9 +959,9 @@ KR.admin = (function () {
 
     container.querySelectorAll('.admin-row').forEach(row => {
       const i = Number(row.dataset.idx);
-      row.querySelector('[data-act="edit"]').addEventListener('click', () => editVocab(i));
-      row.querySelector('[data-act="dup"]').addEventListener('click', () => dupVocab(i));
-      row.querySelector('[data-act="del"]').addEventListener('click', () => deleteVocab(i));
+      row.querySelector('[data-act="edit"]')?.addEventListener('click', () => editVocab(i));
+      row.querySelector('[data-act="dup"]')?.addEventListener('click', () => dupVocab(i));
+      row.querySelector('[data-act="del"]')?.addEventListener('click', () => deleteVocab(i));
     });
     container.querySelectorAll('[data-page]').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1135,9 +1141,9 @@ KR.admin = (function () {
     document.getElementById('admGramReset')?.addEventListener('click', () => resetCategory('grammar'));
     container.querySelectorAll('.admin-row').forEach(row => {
       const i = Number(row.dataset.idx);
-      row.querySelector('[data-act="edit"]').addEventListener('click', () => editGrammar(i));
-      row.querySelector('[data-act="dup"]').addEventListener('click', () => dupGrammar(i));
-      row.querySelector('[data-act="del"]').addEventListener('click', () => deleteGrammar(i));
+      row.querySelector('[data-act="edit"]')?.addEventListener('click', () => editGrammar(i));
+      row.querySelector('[data-act="dup"]')?.addEventListener('click', () => dupGrammar(i));
+      row.querySelector('[data-act="del"]')?.addEventListener('click', () => deleteGrammar(i));
     });
     if (window.lucide) lucide.createIcons();
   }
@@ -1162,9 +1168,10 @@ KR.admin = (function () {
   }
 
   function bindGrammarForm(initial) {
-    let contohs = (initial && initial.length) ? initial : [{ kalimat: '', arti: '' }];
+    let contohs = (initial && initial.length) ? JSON.parse(JSON.stringify(initial)) : [{ kalimat: '', arti: '' }];
     const renderContoh = () => {
       const list = document.getElementById('gContohList');
+      if (!list) return;
       list.innerHTML = contohs.map((c, i) => `
         <div class="opt-item">
           <div class="opt-head">
@@ -1196,8 +1203,8 @@ KR.admin = (function () {
     });
   }
 
+  /* ✅ FIXED: collect synchronous */
   function addGrammar() {
-    let collect;
     openModal({
       icon: 'plus', title: 'Grammar Baru',
       body: grammarFormHtml(),
@@ -1211,14 +1218,13 @@ KR.admin = (function () {
         KR.toast?.success('Grammar ditambahkan');
       },
     });
-    setTimeout(() => { collect = bindGrammarForm(); }, 60);
+    const collect = bindGrammarForm();
   }
 
   function editGrammar(idx) {
     const list = getGrammar();
     const g = list[idx];
     if (!g) return;
-    let collect;
     openModal({
       icon: 'pencil', title: 'Edit Grammar', subtitle: g.struktur,
       body: grammarFormHtml(g),
@@ -1229,7 +1235,7 @@ KR.admin = (function () {
         saveGrammar(list); closeModal(); renderGrammar();
       },
     });
-    setTimeout(() => { collect = bindGrammarForm(g.contoh); }, 60);
+    const collect = bindGrammarForm(g.contoh);
   }
 
   function dupGrammar(idx) {
@@ -1309,9 +1315,9 @@ KR.admin = (function () {
     document.getElementById('admCulReset')?.addEventListener('click', () => resetCategory('culture'));
     container.querySelectorAll('.admin-row').forEach(row => {
       const i = Number(row.dataset.idx);
-      row.querySelector('[data-act="open"]').addEventListener('click', () => editCulturePages(i));
-      row.querySelector('[data-act="edit"]').addEventListener('click', () => editCultureBab(i));
-      row.querySelector('[data-act="del"]').addEventListener('click', () => deleteCultureBab(i));
+      row.querySelector('[data-act="open"]')?.addEventListener('click', () => editCulturePages(i));
+      row.querySelector('[data-act="edit"]')?.addEventListener('click', () => editCultureBab(i));
+      row.querySelector('[data-act="del"]')?.addEventListener('click', () => deleteCultureBab(i));
     });
     if (window.lucide) lucide.createIcons();
   }
@@ -1382,6 +1388,7 @@ KR.admin = (function () {
   function renderCulturePagesView(bab, babIdx) {
     const container = document.getElementById('cultureAdminContainer');
     const toolbar = document.getElementById('cultureAdminToolbar');
+    if (!container || !toolbar) return;
     const pages = bab.pages || [];
 
     toolbar.innerHTML = `
@@ -1417,9 +1424,9 @@ KR.admin = (function () {
     document.getElementById('admCulPageAdd')?.addEventListener('click', () => addCulturePage(babIdx));
     container.querySelectorAll('.admin-row').forEach(row => {
       const i = Number(row.dataset.idx);
-      row.querySelector('[data-act="edit"]').addEventListener('click', () => editCulturePage(babIdx, i));
-      row.querySelector('[data-act="dup"]').addEventListener('click', () => dupCulturePage(babIdx, i));
-      row.querySelector('[data-act="del"]').addEventListener('click', () => deleteCulturePage(babIdx, i));
+      row.querySelector('[data-act="edit"]')?.addEventListener('click', () => editCulturePage(babIdx, i));
+      row.querySelector('[data-act="dup"]')?.addEventListener('click', () => dupCulturePage(babIdx, i));
+      row.querySelector('[data-act="del"]')?.addEventListener('click', () => deleteCulturePage(babIdx, i));
     });
     if (window.lucide) lucide.createIcons();
   }
@@ -1441,9 +1448,10 @@ KR.admin = (function () {
   }
 
   function bindCulturePageForm(initial) {
-    let details = (initial && initial.length) ? initial : [{ bagian: '', fungsi: '', arti: '' }];
+    let details = (initial && initial.length) ? JSON.parse(JSON.stringify(initial)) : [{ bagian: '', fungsi: '', arti: '' }];
     const render = () => {
       const list = document.getElementById('cpDetailsList');
+      if (!list) return;
       list.innerHTML = details.map((d, i) => `
         <div class="opt-item">
           <div class="opt-head">
@@ -1476,8 +1484,8 @@ KR.admin = (function () {
     });
   }
 
+  /* ✅ FIXED: collect synchronous */
   function addCulturePage(babIdx) {
-    let collect;
     openModal({
       icon: 'plus', title: 'Halaman Baru', subtitle: 'Bab ' + getCulture().babs[babIdx].id,
       body: culturePageFormHtml(),
@@ -1491,14 +1499,13 @@ KR.admin = (function () {
         renderCulturePagesView(data.babs[babIdx], babIdx);
       },
     });
-    setTimeout(() => { collect = bindCulturePageForm(); }, 60);
+    const collect = bindCulturePageForm();
   }
 
   function editCulturePage(babIdx, pageIdx) {
     const data = getCulture();
     const p = data.babs[babIdx].pages[pageIdx];
     if (!p) return;
-    let collect;
     openModal({
       icon: 'pencil', title: 'Edit Halaman', subtitle: 'Bab ' + data.babs[babIdx].id,
       body: culturePageFormHtml(p),
@@ -1510,7 +1517,7 @@ KR.admin = (function () {
         renderCulturePagesView(data.babs[babIdx], babIdx);
       },
     });
-    setTimeout(() => { collect = bindCulturePageForm(p.arti_per_kata); }, 60);
+    const collect = bindCulturePageForm(p.arti_per_kata);
   }
 
   function dupCulturePage(babIdx, pageIdx) {
@@ -1602,9 +1609,9 @@ KR.admin = (function () {
     document.getElementById('admDlReset')?.addEventListener('click', () => resetCategory('downloads'));
     container.querySelectorAll('.admin-row').forEach(row => {
       const i = Number(row.dataset.idx);
-      row.querySelector('[data-act="edit"]').addEventListener('click', () => editDownload(i));
-      row.querySelector('[data-act="dup"]').addEventListener('click', () => dupDownload(i));
-      row.querySelector('[data-act="del"]').addEventListener('click', () => deleteDownload(i));
+      row.querySelector('[data-act="edit"]')?.addEventListener('click', () => editDownload(i));
+      row.querySelector('[data-act="dup"]')?.addEventListener('click', () => dupDownload(i));
+      row.querySelector('[data-act="del"]')?.addEventListener('click', () => deleteDownload(i));
     });
     if (window.lucide) lucide.createIcons();
   }
