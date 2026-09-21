@@ -1,8 +1,8 @@
 /* ==========================================
-   KR-Dict — Quiz Module v8.1 (FINAL)
+   KR-Dict — Quiz Module v8.2 (FINAL)
    + Tiered Certificates (Diamond/Gold/Silver)
+   + Multi-line question support (white-space: pre-line)
    + Clean professional certificate design
-   + Fixed footer meta alignment
    + Canvas-based (100% reliable)
    + Submit tanpa konfirmasi
    ========================================== */
@@ -11,7 +11,7 @@ window.KR = window.KR || {};
 KR.quiz = (function () {
   'use strict';
 
-  console.log('%c[KR-Dict Quiz] %cv8.1 — Fixed Meta Alignment',
+  console.log('%c[KR-Dict Quiz] %cv8.2 — Multi-line Support',
     'color:#6366f1;font-weight:800',
     'color:#10b981;font-weight:700');
 
@@ -925,7 +925,7 @@ KR.quiz = (function () {
           </div>
           ${imgHTML}
           ${d.questionText ? `
-            <div style="font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; color: #1e293b; padding: 12px 14px; background: #f8fafc; border-radius: 8px; margin-bottom: 12px; line-height: 1.55; word-break: break-word;">${esc(d.questionText)}</div>
+            <div style="font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; color: #1e293b; padding: 12px 14px; background: #f8fafc; border-radius: 8px; margin-bottom: 12px; line-height: 1.55; word-break: break-word; white-space: pre-line;">${esc(d.questionText)}</div>
           ` : ''}
           <div style="font-size: 12px; line-height: 1.6; color: #475569;">
             <div style="margin-bottom: 4px;">
@@ -1068,7 +1068,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     ✅ CANVAS CERTIFICATE — v8.1 CLEAN PRO
+     ✅ CANVAS CERTIFICATE — v8.2 CLEAN PRO
      ========================================== */
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -1132,7 +1132,7 @@ KR.quiz = (function () {
     ctx.textBaseline = 'middle';
 
     /* ============================================
-       📐 LAYOUT GRID (Y-positions) — FIXED v8.1
+       📐 LAYOUT GRID (Y-positions)
        ============================================ */
     const Y = {
       borderOuter: 24,
@@ -1158,14 +1158,13 @@ KR.quiz = (function () {
       scoreLabel: 548,
       scoreY: 596,
 
-      // ✅ FIXED: Footer meta alignment
       footerLine: 668,
-      signatureY: 700,   // signature center
-      sealY: 700,        // seal center
-      metaY1: 686,       // ISSUED DATE label
-      metaY2: 706,       // Date value
-      metaY3: 726,       // CERTIFICATE ID label
-      metaY4: 744,       // Cert ID value
+      signatureY: 700,
+      sealY: 700,
+      metaY1: 686,
+      metaY2: 706,
+      metaY3: 726,
+      metaY4: 744,
     };
 
     /* ============================================
@@ -1597,7 +1596,7 @@ KR.quiz = (function () {
     ctx.letterSpacing = '0px';
 
     /* ============================================
-       18. META (RIGHT) — FIXED ALIGNMENT
+       18. META (RIGHT) — ALIGNED
        ============================================ */
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
@@ -1623,15 +1622,6 @@ KR.quiz = (function () {
     ctx.font = '700 11px ui-monospace, "SF Mono", Menlo, monospace';
     ctx.fillStyle = '#1e293b';
     ctx.fillText(certId, W - 130, Y.metaY4);
-
-    /* ============================================
-       19. VERSION MARKER (bottom-left)
-       ============================================ */
-    ctx.font = '700 11px ui-monospace, "SF Mono", Menlo, monospace';
-    ctx.fillStyle = '#1e293b';
-    ctx.fillText(certId, W - 130, Y.metaY4);
-
-    // ← sebelumnya ada version marker di sini, sekarang sudah dihapus
 
     return cvs;
   }
