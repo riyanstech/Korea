@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KR-Dict | Learning Hub</title>
 
-    <!-- Load Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,34 +18,29 @@
                     fontFamily: {
                         sans: ['Plus Jakarta Sans', 'sans-serif'],
                         korean: ['Noto Sans KR', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
                     }
                 }
             }
         }
     </script>
 
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="antialiased">
 
-    <!-- Ambient Background -->
     <div class="ambient-bg"></div>
     <div class="ambient-orb orb-1"></div>
     <div class="ambient-orb orb-2"></div>
 
     <div id="app" class="main-layout transition-colors duration-500">
 
-        <!-- ================= HEADER (MODERN v4.0) ================= -->
+        <!-- ================= HEADER ================= -->
         <header class="app-header">
             <div class="header-glow"></div>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                 <div class="flex justify-between items-center h-[72px] gap-3">
-
-                    <!-- Logo + Burger -->
                     <div class="flex items-center gap-3">
                         <button id="burger-btn" onclick="toggleMenu()" class="md:hidden icon-btn-glass" aria-label="Menu">
                             <i data-lucide="menu" class="w-6 h-6"></i>
@@ -63,7 +56,6 @@
                         </div>
                     </div>
 
-                    <!-- Desktop Nav -->
                     <nav class="nav-pill-modern" aria-label="Navigasi utama">
                         <button class="nav-chip nav-chip-indigo active" onclick="showTab('vocab-container', this)">
                             <i data-lucide="book-open-text"></i><span>Kosakata</span>
@@ -88,7 +80,6 @@
                         </button>
                     </nav>
 
-                    <!-- Right actions -->
                     <div class="flex items-center gap-2">
                         <div id="roleBadge" class="flex items-center gap-2"></div>
                         <button onclick="toggleDarkMode()" class="theme-toggle-btn" aria-label="Ganti tema">
@@ -98,7 +89,6 @@
                 </div>
             </div>
 
-            <!-- Mobile Menu -->
             <div id="mobile-menu" class="md:hidden glass-mobile-menu">
                 <div class="p-4 space-y-2">
                     <button class="nav-link-mobile active" onclick="showTab('vocab-container', this)"><i data-lucide="book-open-text"></i>Kosakata Textbook</button>
@@ -111,10 +101,9 @@
                 </div>
             </div>
         </header>
-        <!-- ================= END HEADER ================= -->
 
-        <!-- Main Content -->
-        <main class="flex-grow overflow-y-auto custom-scroll relative z-10 p-4 md:p-8">
+        <!-- ================= MAIN ================= -->
+        <main class="app-main flex-grow min-h-0 overflow-y-auto custom-scroll relative z-10 p-4 md:p-8">
             <div class="max-w-7xl mx-auto h-full">
 
                 <!-- 1. KOSAKATA TAB -->
@@ -170,13 +159,9 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4">
-                            <!-- JS Generated Content -->
-                        </div>
+                        <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4"></div>
                     </div>
 
-                    <!-- Selection -->
                     <div id="vocab-selection" class="vocab-sub-tab hidden space-y-6">
                         <div class="flex justify-between items-center mb-2">
                             <h2 class="text-2xl font-bold dark:text-white">Persiapan Kuis</h2>
@@ -230,7 +215,6 @@
                                 </select>
                                 <div id="vocab-selection-list" class="space-y-2 max-h-[400px] overflow-y-auto custom-scroll pr-2"></div>
                             </div>
-
                             <div class="md:col-span-4 glass-card p-6 flex flex-col h-fit sticky top-24">
                                 <h3 class="text-lg font-semibold mb-4 text-pink-600 dark:text-pink-400 flex items-center">
                                     <i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i> Ringkasan
@@ -247,12 +231,10 @@
                         </div>
                     </div>
 
-                    <!-- Quiz Mode -->
                     <div id="quiz-mode" class="vocab-sub-tab hidden h-full flex flex-col relative overflow-y-auto">
                         <div class="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full mb-8 overflow-hidden relative">
                             <div id="quiz-progress-bar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-700 ease-out" style="width: 0%"></div>
                         </div>
-
                         <div class="flex justify-between items-center mb-6">
                             <div class="glass-badge px-4 py-2">
                                 <span class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold mr-2">Soal</span>
@@ -262,22 +244,18 @@
                             </div>
                             <button onclick="showVocabSubTab('vocab-selection')" class="btn-icon-danger"><i data-lucide="x" class="w-5 h-5"></i></button>
                         </div>
-
                         <div class="flex-grow flex flex-col items-center justify-start w-full max-w-2xl mx-auto">
                             <div class="w-full glass-card p-10 mb-8 text-center relative overflow-hidden group hover-lift">
                                 <div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
                                 <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
-
                                 <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-4 block">Terjemahkan ke Indonesia</span>
                                 <div id="quiz-question" class="text-6xl font-black text-gray-800 dark:text-white font-korean mb-6 tracking-tight">...</div>
                                 <button id="quiz-speaker-btn" onclick="speak(document.getElementById('quiz-question').innerText)" class="btn-circle-soft mx-auto">
                                     <i data-lucide="volume-2" class="w-6 h-6"></i>
                                 </button>
                             </div>
-
                             <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-24 md:mb-0"></div>
                         </div>
-
                         <div class="fixed bottom-6 left-0 right-0 px-4 flex flex-col items-center pointer-events-none">
                             <div class="pointer-events-auto max-w-xl w-full glass-panel-solid p-4 rounded-2xl shadow-2xl flex flex-col items-center transform transition-all duration-300 translate-y-20 opacity-0" id="quiz-footer-container">
                                 <div id="quiz-feedback" class="text-base font-bold text-center mb-3"></div>
@@ -322,7 +300,6 @@
                         <h2 class="text-3xl font-bold dark:text-white mb-2">Pustaka Digital</h2>
                         <p class="text-gray-500 dark:text-gray-400">Unduh materi PDF & Audio berkualitas tinggi</p>
                     </div>
-
                     <div class="flex justify-center flex-wrap gap-3">
                         <button onclick="filterDownloads('all', this)" class="filter-chip active">Semua</button>
                         <button onclick="filterDownloads('textbook', this)" class="filter-chip">Buku Paket</button>
@@ -330,13 +307,14 @@
                         <button onclick="filterDownloads('vocab', this)" class="filter-chip">Kosakata</button>
                         <button onclick="filterDownloads('exam', this)" class="filter-chip">Latihan Soal</button>
                     </div>
-
                     <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12"></div>
                 </div>
 
-                <!-- 6. QUIZ HUB -->
+                <!-- 6. QUIZ HUB (RESTRUCTURED) -->
                 <div id="quiz-hub" class="tab-content hidden animate-slide-up">
-                    <div class="text-center mb-8">
+
+                    <!-- List Mode -->
+                    <div id="quizHubHeader" class="text-center mb-8">
                         <h2 class="text-3xl font-bold dark:text-white mb-2">Latihan Soal</h2>
                         <p class="text-gray-500 dark:text-gray-400">Practice Reading & Listening — siap untuk EPS-TOPIK</p>
                     </div>
@@ -354,44 +332,56 @@
                         <div id="quizPackGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
                     </div>
 
-                    <!-- Test Wrap -->
-                    <div id="quizTestWrap" class="hidden flex-col h-[calc(100vh-180px)] relative">
-                        <div class="shrink-0 flex items-center gap-3 p-3 mb-4 glass-card">
-                            <button id="quizTestExit" class="btn-icon-glass"><i data-lucide="arrow-left"></i></button>
-                            <div class="flex-1 min-w-0">
-                                <div id="quizTestTitle" class="font-bold text-sm truncate"></div>
-                                <div id="quizTestSection"></div>
+                    <!-- Test Mode (NEW LAYOUT: sticky top+bottom) -->
+                    <div id="quizTestWrap" class="hidden flex-col relative">
+                        <!-- Sticky Header -->
+                        <div class="quiz-test-sticky-top">
+                            <div class="flex items-center gap-3">
+                                <button id="quizTestExit" class="btn-icon-glass" title="Keluar">
+                                    <i data-lucide="arrow-left"></i>
+                                </button>
+                                <div class="flex-1 min-w-0">
+                                    <div id="quizTestTitle" class="font-bold text-sm truncate"></div>
+                                    <div id="quizTestSection"></div>
+                                </div>
+                                <div id="quizTestTimer" class="quiz-timer">00:00</div>
                             </div>
-                            <div id="quizTestTimer" class="quiz-timer">00:00</div>
+                            <div class="mt-3">
+                                <div class="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div id="quizTestProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-pink-500 transition-all duration-500" style="width:0%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span id="quizTestProgress">0 / 0</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="shrink-0 mb-4">
-                            <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                                <div id="quizTestProgressBar" class="h-full bg-gradient-to-r from-indigo-500 to-pink-500 transition-all duration-500" style="width:0%"></div>
-                            </div>
-                            <div class="flex justify-between text-xs text-gray-500 mt-1">
-                                <span id="quizTestProgress">0 / 0</span>
-                            </div>
-                        </div>
-                        <div id="quizTestQuestion" class="flex-1 min-h-0 overflow-y-auto custom-scroll pb-24"></div>
-                        <div class="shrink-0 mt-4 space-y-3">
-                            <div id="quizTestNav" class="flex flex-wrap gap-1.5 justify-center max-h-[80px] overflow-y-auto"></div>
+
+                        <!-- Question Area (natural page scroll) -->
+                        <div id="quizTestQuestion" class="quiz-test-question-area"></div>
+
+                        <!-- Sticky Footer -->
+                        <div class="quiz-test-sticky-bottom">
+                            <div id="quizTestNav" class="quiz-test-nav-dots"></div>
                             <div class="flex gap-2">
                                 <button id="quizTestPrev" class="quiz-nav-btn secondary flex-1">
-                                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Sebelumnya
+                                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline">Sebelumnya</span>
                                 </button>
                                 <button id="quizTestNext" class="quiz-nav-btn primary flex-1">
-                                    Selanjutnya <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline">Selanjutnya</span>
+                                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
                                 </button>
                                 <button id="quizTestSubmit" class="quiz-nav-btn success flex-1 hidden">
-                                    <i data-lucide="send" class="w-4 h-4"></i> Kirim
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                    <span class="hidden sm:inline">Kirim Jawaban</span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Result Wrap -->
+                    <!-- Result Mode -->
                     <div id="quizResultWrap" class="hidden">
-                        <div class="max-w-3xl mx-auto">
+                        <div class="max-w-3xl mx-auto pb-8">
                             <div class="text-center mb-6">
                                 <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-3 shadow-lg">
                                     <i data-lucide="trophy" class="w-8 h-8 text-white"></i>
@@ -399,9 +389,18 @@
                                 <h2 class="text-2xl font-bold dark:text-white">Hasil Latihan</h2>
                                 <p id="quizResultTitle" class="text-sm text-gray-500 mt-1"></p>
                             </div>
+
                             <div id="quizResultScore" class="mb-6"></div>
                             <div id="quizResultStats" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"></div>
-                            <div id="quizResultReview"></div>
+
+                            <!-- ACTION BUTTONS -->
+                            <div id="quizResultActions" class="quiz-result-actions"></div>
+
+                            <!-- Review Section -->
+                            <div id="quizResultReviewWrap" class="mt-8">
+                                <div id="quizResultReview"></div>
+                            </div>
+
                             <button id="quizResultClose" class="btn-primary-gradient w-full mt-6 py-4 justify-center">
                                 <i data-lucide="check" class="w-5 h-5 mr-2"></i> Selesai
                             </button>
@@ -411,8 +410,6 @@
 
                 <!-- 7. CHAT AI TAB -->
                 <div id="chat-ai" class="tab-content hidden h-[calc(100vh-140px)] md:h-[calc(100vh-120px)] flex flex-col relative rounded-3xl overflow-hidden glass-panel-solid shadow-2xl border border-white/20">
-
-                    <!-- Chat Header -->
                     <div class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md p-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center z-20">
                         <div class="flex items-center gap-4">
                             <button onclick="showTab('vocab-container')" class="md:hidden btn-icon-glass"><i data-lucide="arrow-left"></i></button>
@@ -429,7 +426,6 @@
                                 <span id="ai-status" class="text-xs text-indigo-500 font-medium">Online • Siap membantu</span>
                             </div>
                         </div>
-
                         <div class="flex gap-2">
                             <button onclick="startCall()" class="btn-icon-glass text-green-500 bg-green-50 dark:bg-green-900/20"><i data-lucide="phone"></i></button>
                             <button onclick="toggleChatSettings()" class="btn-icon-glass"><i data-lucide="sliders-horizontal"></i></button>
@@ -437,7 +433,6 @@
                         </div>
                     </div>
 
-                    <!-- Settings Panel -->
                     <div id="chat-settings" class="absolute top-[72px] left-0 right-0 bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl border-b border-gray-100 dark:border-gray-700 p-4 z-10 shadow-lg transform -translate-y-full transition-transform duration-300">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -468,29 +463,24 @@
                         </div>
                     </div>
 
-                    <!-- Chat Messages -->
                     <div id="chat-box" class="flex-grow overflow-y-auto custom-scroll p-4 space-y-4 bg-gray-50/50 dark:bg-black/20"></div>
 
-                    <!-- Input Area -->
                     <div class="p-4 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-100 dark:border-gray-800">
                         <div class="flex items-end gap-2 max-w-4xl mx-auto">
                             <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
                             <button onclick="document.getElementById('image-upload').click()" class="btn-icon-glass shrink-0 text-indigo-500">
                                 <i data-lucide="image-plus"></i>
                             </button>
-
                             <div class="flex-grow relative">
                                 <input type="text" id="user-input" class="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-2xl px-5 py-3 pr-12 text-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500/50 transition-all" placeholder="Ketik pesan..." onkeydown="handleChatEnter(event)" autocomplete="off">
                                 <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-500 transition"><i data-lucide="smile"></i></button>
                             </div>
-
                             <button id="action-btn" onclick="toggleVoiceRecording()" class="w-12 h-12 rounded-full bg-gradient-to-r from-indigo-600 to-pink-600 text-white shadow-lg hover:shadow-indigo-500/30 flex items-center justify-center transform active:scale-95 transition-all">
                                 <i data-lucide="mic" class="w-5 h-5"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Image Preview -->
                     <div id="image-preview-modal" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex flex-col justify-center items-center p-6 animate-fade-in">
                         <div class="glass-card p-2 w-full max-w-sm">
                             <div class="relative rounded-lg overflow-hidden bg-black">
@@ -544,15 +534,13 @@
             <h2 class="text-3xl font-bold text-white mb-2 tracking-tight">Tutor AI</h2>
             <p id="call-status" class="text-indigo-400 font-mono text-sm tracking-widest uppercase">MENGHUBUNGKAN...</p>
         </div>
-
         <div id="wave-container" class="flex items-center justify-center gap-2 h-16 w-full opacity-80">
-            <span class="w-2 h-6 bg-white rounded-full animate-wave-1 transition-colors duration-300"></span>
-            <span class="w-2 h-10 bg-white rounded-full animate-wave-2 transition-colors duration-300"></span>
-            <span class="w-2 h-14 bg-white rounded-full animate-wave-3 transition-colors duration-300"></span>
-            <span class="w-2 h-10 bg-white rounded-full animate-wave-2 transition-colors duration-300"></span>
-            <span class="w-2 h-6 bg-white rounded-full animate-wave-1 transition-colors duration-300"></span>
+            <span class="w-2 h-6 bg-white rounded-full animate-wave-1"></span>
+            <span class="w-2 h-10 bg-white rounded-full animate-wave-2"></span>
+            <span class="w-2 h-14 bg-white rounded-full animate-wave-3"></span>
+            <span class="w-2 h-10 bg-white rounded-full animate-wave-2"></span>
+            <span class="w-2 h-6 bg-white rounded-full animate-wave-1"></span>
         </div>
-
         <div class="flex gap-8 items-center pb-10">
             <button id="mute-btn" onclick="toggleMute()" class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md">
                 <i data-lucide="mic"></i>
@@ -566,7 +554,7 @@
         </div>
     </div>
 
-    <!-- Quiz Finish Modal -->
+    <!-- Quiz Finish Modal (legacy) -->
     <div id="quiz-finish-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideQuizFinishModal()"></div>
         <div class="glass-card p-8 w-full max-w-sm text-center relative z-10 animate-scale-in border-t-4 border-indigo-500">
@@ -575,16 +563,13 @@
                     <i data-lucide="trophy" class="w-12 h-12 text-white fill-current"></i>
                 </div>
             </div>
-
             <h3 class="text-2xl font-bold mt-10 text-gray-800 dark:text-white">Latihan Selesai!</h3>
             <p id="final-score-message" class="text-gray-500 dark:text-gray-400 text-sm mb-6">Kerja bagus, terus tingkatkan!</p>
-
             <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 mb-6 border border-gray-100 dark:border-gray-700">
                 <div class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Skor Akhir</div>
                 <div class="text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400" id="final-score-number">0</div>
                 <div class="text-sm font-medium text-gray-600 dark:text-gray-300 mt-2" id="final-score-detail">0 / 0 Benar</div>
             </div>
-
             <div class="space-y-3">
                 <button onclick="restartQuiz()" class="btn-primary-gradient w-full justify-center">
                     <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Ulangi Latihan
@@ -593,6 +578,36 @@
                     <i data-lucide="layout-grid" class="w-4 h-4 mr-2"></i> Pilih Materi Lain
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- ✅ CERTIFICATE MODAL (preview) -->
+    <div id="certModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="KR.quiz.closeCertModal()"></div>
+        <div class="relative z-10 max-w-5xl w-full max-h-[92vh] overflow-y-auto custom-scroll glass-panel-solid rounded-3xl p-4">
+            <div class="flex items-center justify-between mb-3 px-2">
+                <h3 class="font-bold text-lg text-gray-800 dark:text-white flex items-center gap-2">
+                    <i data-lucide="award" class="w-5 h-5 text-amber-500"></i> Sertifikat Anda
+                </h3>
+                <button onclick="KR.quiz.closeCertModal()" class="btn-icon-glass"><i data-lucide="x"></i></button>
+            </div>
+            <div id="certPreviewContainer" class="rounded-2xl overflow-hidden"></div>
+            <div class="flex flex-wrap gap-3 mt-4">
+                <button onclick="KR.quiz.downloadCertificatePDF()" class="btn-primary-gradient flex-1 justify-center">
+                    <i data-lucide="file-down" class="w-5 h-5 mr-2"></i> Download PDF
+                </button>
+                <button onclick="KR.quiz.downloadCertificatePNG()" class="btn-ghost flex-1 justify-center border border-gray-200 dark:border-gray-700">
+                    <i data-lucide="image-down" class="w-5 h-5 mr-2"></i> Download PNG
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 z-[400] hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="glass-panel-solid p-6 rounded-2xl flex flex-col items-center gap-3">
+            <div class="loader-kr"></div>
+            <p id="loadingText" class="text-sm font-semibold text-gray-700 dark:text-gray-200">Memproses...</p>
         </div>
     </div>
 
@@ -606,7 +621,6 @@
                 <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600">KR-Dict</h1>
                 <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">Learning Hub</p>
             </div>
-
             <div id="loginUserForm">
                 <label class="text-xs font-bold uppercase text-gray-400 mb-2 block">Nama (opsional)</label>
                 <input id="loginUserName" type="text" class="login-input" placeholder="Masukkan nama Anda">
@@ -617,7 +631,6 @@
                     <i data-lucide="shield" class="w-4 h-4 mr-2"></i> Login Admin
                 </button>
             </div>
-
             <div id="loginAdminForm" class="hidden">
                 <button id="adminBackBtn" class="text-xs text-gray-500 hover:text-indigo-500 mb-3 flex items-center">
                     <i data-lucide="arrow-left" class="w-3 h-3 mr-1"></i> Kembali
@@ -642,7 +655,6 @@
             </div>
             <button id="adminCloseBtn" class="admin-header-btn"><i data-lucide="x"></i></button>
         </header>
-
         <nav class="admin-tabs shrink-0">
             <button class="admin-tab active" data-admin-tab="overview"><i data-lucide="layout-dashboard"></i> Overview</button>
             <button class="admin-tab" data-admin-tab="quiz"><i data-lucide="pencil-ruler"></i> Quiz</button>
@@ -652,35 +664,19 @@
             <button class="admin-tab" data-admin-tab="downloads"><i data-lucide="cloud-download"></i> Materi</button>
             <button class="admin-tab" data-admin-tab="settings"><i data-lucide="settings"></i> Pengaturan</button>
         </nav>
-
         <main class="admin-body">
-            <!-- OVERVIEW -->
             <div data-admin-panel="overview" class="admin-panel">
                 <div class="admin-stats-grid">
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon stat-blue"><i data-lucide="package"></i></div>
-                        <div><div class="admin-stat-num" id="statQuizCount">0</div><div class="admin-stat-label">Paket Quiz</div></div>
-                    </div>
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon stat-purple"><i data-lucide="help-circle"></i></div>
-                        <div><div class="admin-stat-num" id="statQuestionCount">0</div><div class="admin-stat-label">Total Soal</div></div>
-                    </div>
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon stat-green"><i data-lucide="book"></i></div>
-                        <div><div class="admin-stat-num" id="statVocabCount">0</div><div class="admin-stat-label">Kosakata</div></div>
-                    </div>
-                    <div class="admin-stat-card">
-                        <div class="admin-stat-icon stat-amber"><i data-lucide="github"></i></div>
-                        <div><div class="admin-stat-num text-base" id="statGhStatus">—</div><div class="admin-stat-label">GitHub</div></div>
-                    </div>
+                    <div class="admin-stat-card"><div class="admin-stat-icon stat-blue"><i data-lucide="package"></i></div><div><div class="admin-stat-num" id="statQuizCount">0</div><div class="admin-stat-label">Paket Quiz</div></div></div>
+                    <div class="admin-stat-card"><div class="admin-stat-icon stat-purple"><i data-lucide="help-circle"></i></div><div><div class="admin-stat-num" id="statQuestionCount">0</div><div class="admin-stat-label">Total Soal</div></div></div>
+                    <div class="admin-stat-card"><div class="admin-stat-icon stat-green"><i data-lucide="book"></i></div><div><div class="admin-stat-num" id="statVocabCount">0</div><div class="admin-stat-label">Kosakata</div></div></div>
+                    <div class="admin-stat-card"><div class="admin-stat-icon stat-amber"><i data-lucide="github"></i></div><div><div class="admin-stat-num text-base" id="statGhStatus">—</div><div class="admin-stat-label">GitHub</div></div></div>
                 </div>
                 <div class="admin-info-box">
                     <h3><i data-lucide="sparkles"></i> Selamat datang, Admin!</h3>
-                    <p>Kelola semua data aplikasi: Quiz, Kosakata, Grammar, Budaya, dan Materi. Semua perubahan otomatis disimpan dan disinkronkan ke GitHub jika sudah dikonfigurasi.</p>
+                    <p>Kelola semua data aplikasi: Quiz, Kosakata, Grammar, Budaya, dan Materi.</p>
                 </div>
             </div>
-
-            <!-- QUIZ -->
             <div data-admin-panel="quiz" class="admin-panel hidden">
                 <div class="admin-toolbar">
                     <div id="qzBreadcrumb" class="apk-breadcrumb"></div>
@@ -690,106 +686,58 @@
                 </div>
                 <div id="qzContainer" class="admin-list"></div>
             </div>
-
-            <!-- KOSAKATA -->
             <div data-admin-panel="vocab" class="admin-panel hidden">
-                <div class="admin-info-box mb-4">
-                    <h3><i data-lucide="info"></i> Kelola Kosakata</h3>
-                    <p>Perubahan otomatis tersimpan di browser. Gunakan tombol reset untuk kembali ke data awal.</p>
-                </div>
+                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Kosakata</h3><p>Perubahan otomatis tersimpan di browser.</p></div>
                 <div id="vocabAdminToolbar" class="admin-toolbar"></div>
                 <div id="vocabAdminContainer" class="admin-list"></div>
             </div>
-
-            <!-- GRAMMAR -->
             <div data-admin-panel="grammar" class="admin-panel hidden">
-                <div class="admin-info-box mb-4">
-                    <h3><i data-lucide="info"></i> Kelola Tata Bahasa</h3>
-                    <p>Kelola pola tata bahasa beserta contoh kalimatnya.</p>
-                </div>
+                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Tata Bahasa</h3><p>Kelola pola tata bahasa beserta contohnya.</p></div>
                 <div id="grammarAdminToolbar" class="admin-toolbar"></div>
                 <div id="grammarAdminContainer" class="admin-list"></div>
             </div>
-
-            <!-- BUDAYA -->
             <div data-admin-panel="culture" class="admin-panel hidden">
-                <div class="admin-info-box mb-4">
-                    <h3><i data-lucide="info"></i> Kelola Budaya & Informasi</h3>
-                    <p>Setiap bab bisa memiliki banyak halaman dengan rincian per kata.</p>
-                </div>
+                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Budaya</h3><p>Setiap bab bisa memiliki banyak halaman.</p></div>
                 <div id="cultureAdminToolbar" class="admin-toolbar"></div>
                 <div id="cultureAdminContainer" class="admin-list"></div>
             </div>
-
-            <!-- MATERI -->
             <div data-admin-panel="downloads" class="admin-panel hidden">
-                <div class="admin-info-box mb-4">
-                    <h3><i data-lucide="info"></i> Kelola Pustaka Materi</h3>
-                    <p>Link download PDF, audio, atau materi belajar lainnya.</p>
-                </div>
+                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Pustaka Materi</h3><p>Link download PDF, audio, atau materi belajar.</p></div>
                 <div id="downloadsAdminToolbar" class="admin-toolbar"></div>
                 <div id="downloadsAdminContainer" class="admin-list"></div>
             </div>
-
-            <!-- SETTINGS -->
             <div data-admin-panel="settings" class="admin-panel hidden">
                 <div class="admin-section">
                     <h3 class="admin-section-title"><i data-lucide="github"></i> Konfigurasi GitHub</h3>
                     <p class="admin-section-desc">Diperlukan untuk sync data antar device.</p>
-                    <div id="ghStatus" class="gh-status warn">
-                        <i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Belum dikonfigurasi</span>
-                    </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">GitHub Username</label>
-                        <input type="text" id="ghOwner" class="admin-input-field" placeholder="username">
-                    </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Repository</label>
-                        <input type="text" id="ghRepo" class="admin-input-field" placeholder="repo-name">
-                    </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Branch</label>
-                        <input type="text" id="ghBranch" class="admin-input-field" value="main">
-                    </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Personal Access Token</label>
-                        <input type="password" id="ghToken" class="admin-input-field" placeholder="ghp_xxxxxx">
-                        <p class="admin-help">Token dari github.com/settings/tokens (scope: <code>repo</code>)</p>
-                    </div>
+                    <div id="ghStatus" class="gh-status warn"><i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Belum dikonfigurasi</span></div>
+                    <div class="admin-form-group"><label class="admin-label">GitHub Username</label><input type="text" id="ghOwner" class="admin-input-field" placeholder="username"></div>
+                    <div class="admin-form-group"><label class="admin-label">Repository</label><input type="text" id="ghRepo" class="admin-input-field" placeholder="repo-name"></div>
+                    <div class="admin-form-group"><label class="admin-label">Branch</label><input type="text" id="ghBranch" class="admin-input-field" value="main"></div>
+                    <div class="admin-form-group"><label class="admin-label">Personal Access Token</label><input type="password" id="ghToken" class="admin-input-field" placeholder="ghp_xxxxxx"><p class="admin-help">Token dari github.com/settings/tokens (scope: <code>repo</code>)</p></div>
                     <div class="flex gap-2 flex-wrap">
                         <button id="ghSaveBtn" class="admin-btn primary"><i data-lucide="save"></i> Simpan & Test</button>
                         <button id="ghTestBtn" class="admin-btn secondary"><i data-lucide="plug"></i> Test</button>
                         <button id="ghClearBtn" class="admin-btn danger"><i data-lucide="trash-2"></i> Hapus</button>
                     </div>
                 </div>
-
                 <div class="admin-section">
                     <h3 class="admin-section-title"><i data-lucide="key"></i> Ganti Password Admin</h3>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Password Lama</label>
-                        <input type="password" id="adminPassOld" class="admin-input-field" placeholder="••••••">
-                    </div>
-                    <div class="admin-form-group">
-                        <label class="admin-label">Password Baru (min 4 karakter)</label>
-                        <input type="password" id="adminPassNew" class="admin-input-field" placeholder="••••••">
-                    </div>
+                    <div class="admin-form-group"><label class="admin-label">Password Lama</label><input type="password" id="adminPassOld" class="admin-input-field" placeholder="••••••"></div>
+                    <div class="admin-form-group"><label class="admin-label">Password Baru (min 4 karakter)</label><input type="password" id="adminPassNew" class="admin-input-field" placeholder="••••••"></div>
                     <button id="adminPassChangeBtn" class="admin-btn primary"><i data-lucide="save"></i> Ganti Password</button>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- ============== ADMIN MODAL ============== -->
     <div id="adminModal" class="admin-modal hidden">
         <div class="admin-modal-backdrop" data-admin-close></div>
         <div class="admin-modal-card">
             <div class="admin-modal-head">
                 <div class="flex items-center gap-3 min-w-0">
                     <div class="admin-modal-icon" id="adminModalIcon"><i data-lucide="pencil"></i></div>
-                    <div class="min-w-0">
-                        <h3 id="adminModalTitle">Edit</h3>
-                        <p id="adminModalSubtitle" class="text-xs text-gray-500"></p>
-                    </div>
+                    <div class="min-w-0"><h3 id="adminModalTitle">Edit</h3><p id="adminModalSubtitle" class="text-xs text-gray-500"></p></div>
                 </div>
                 <button class="admin-btn-icon" data-admin-close><i data-lucide="x"></i></button>
             </div>
@@ -807,10 +755,7 @@
             <div class="admin-modal-head">
                 <div class="flex items-center gap-3">
                     <div class="admin-modal-icon warn"><i data-lucide="alert-triangle"></i></div>
-                    <div>
-                        <h3 id="adminConfirmTitle">Konfirmasi</h3>
-                        <p id="adminConfirmSubtitle" class="text-xs text-gray-500"></p>
-                    </div>
+                    <div><h3 id="adminConfirmTitle">Konfirmasi</h3><p id="adminConfirmSubtitle" class="text-xs text-gray-500"></p></div>
                 </div>
             </div>
             <div class="admin-modal-body"><p id="adminConfirmMessage"></p></div>
@@ -821,7 +766,6 @@
         </div>
     </div>
 
-    <!-- Toast Container -->
     <div id="toastContainer" class="fixed top-20 right-4 z-[2000] flex flex-col gap-2 pointer-events-none max-w-sm"></div>
 
     <!-- Scripts -->
