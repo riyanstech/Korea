@@ -1,6 +1,8 @@
 /* ==========================================
-   KR-Dict — Admin Dashboard v4.0
+   KR-Dict — Admin Dashboard v8.2
    + Image upload for question & options
+   + Multi-line question support
+   + Complete CRUD for all modules
    ========================================== */
 window.KR = window.KR || {};
 
@@ -382,25 +384,29 @@ KR.admin = (function () {
     if (!sec.questions?.length) {
       els.qzContainer.innerHTML = `<div class="admin-empty"><i data-lucide="file-question"></i><div>Belum ada soal</div></div>`;
     } else {
-      els.qzContainer.innerHTML = sec.questions.map((q, i) => `
-        <div class="admin-row" data-id="${i}">
-          <div class="admin-row-icon" style="background: var(--bg-subtle); color: var(--text); font-weight: 800; font-size: 0.85rem;">${i + 1}</div>
-          <div class="admin-row-body">
-            <div class="admin-row-title">${esc(q.text || q.audioText || '(tanpa teks)')}</div>
-            <div class="admin-row-chips">
-              <span class="chip neutral">${(q.options || []).length} opsi</span>
-              ${q.correct ? `<span class="chip success">✓ ${q.correct}</span>` : ''}
-              ${q.image ? `<span class="chip accent"><i data-lucide="image" style="width:10px;height:10px"></i> Gambar</span>` : ''}
-              ${(q.options || []).some(o => o.image) ? `<span class="chip warning"><i data-lucide="image-plus" style="width:10px;height:10px"></i> Gambar opsi</span>` : ''}
-              ${isL ? `<span class="chip accent">🎧 ${q.audioTarget || 'question'}</span>` : ''}
+      els.qzContainer.innerHTML = sec.questions.map((q, i) => {
+        // Preview text: replace newline with " · " for single-line
+        const previewText = (q.text || q.audioText || '(tanpa teks)').replace(/\n+/g, ' · ').slice(0, 100);
+        return `
+          <div class="admin-row" data-id="${i}">
+            <div class="admin-row-icon" style="background: var(--bg-subtle); color: var(--text); font-weight: 800; font-size: 0.85rem;">${i + 1}</div>
+            <div class="admin-row-body">
+              <div class="admin-row-title">${esc(previewText)}</div>
+              <div class="admin-row-chips">
+                <span class="chip neutral">${(q.options || []).length} opsi</span>
+                ${q.correct ? `<span class="chip success">✓ ${q.correct}</span>` : ''}
+                ${q.image ? `<span class="chip accent"><i data-lucide="image" style="width:10px;height:10px"></i> Gambar</span>` : ''}
+                ${(q.options || []).some(o => o.image) ? `<span class="chip warning"><i data-lucide="image-plus" style="width:10px;height:10px"></i> Gambar opsi</span>` : ''}
+                ${isL ? `<span class="chip accent">🎧 ${q.audioTarget || 'question'}</span>` : ''}
+              </div>
             </div>
-          </div>
-          <div class="admin-row-actions">
-            <button class="btn-icon-xs" data-act="edit"><i data-lucide="pencil"></i></button>
-            <button class="btn-icon-xs warn" data-act="dup"><i data-lucide="copy"></i></button>
-            <button class="btn-icon-xs danger" data-act="del"><i data-lucide="trash-2"></i></button>
-          </div>
-        </div>`).join('');
+            <div class="admin-row-actions">
+              <button class="btn-icon-xs" data-act="edit"><i data-lucide="pencil"></i></button>
+              <button class="btn-icon-xs warn" data-act="dup"><i data-lucide="copy"></i></button>
+              <button class="btn-icon-xs danger" data-act="del"><i data-lucide="trash-2"></i></button>
+            </div>
+          </div>`;
+      }).join('');
     }
     els.qzContainer.querySelectorAll('.admin-row').forEach(row => {
       const i = Number(row.dataset.id);
@@ -529,7 +535,7 @@ KR.admin = (function () {
   }
 
   /* ==========================================
-     ✅ QUESTION FORM — WITH IMAGE UPLOAD
+     ✅ QUESTION FORM — WITH IMAGE UPLOAD + MULTI-LINE
      ========================================== */
   function questionFormHtml(q = {}) {
     const type = q.type || 'reading';
@@ -550,7 +556,11 @@ KR.admin = (function () {
 
       <div class="field">
         <label class="field-label">Teks Pertanyaan</label>
-        <textarea id="qText" class="textarea" rows="2" placeholder="Pertanyaan yang ditampilkan">${esc(q.text || '')}</textarea>
+        <textarea id="qText" class="textarea" rows="4" placeholder="Pertanyaan yang ditampilkan&#10;Tekan Enter untuk baris baru&#10;&#10;Contoh:&#10;[3-4] 다음 질문에 답하십시오.&#10;3. 다음 단어와 관계있는 것은 고르십시오.&#10;조사료">${esc(q.text || '')}</textarea>
+        <p style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">
+          <i data-lucide="corner-down-left" style="width:11px;height:11px;display:inline;vertical-align:middle"></i>
+          Tekan <strong>Enter</strong> untuk membuat baris baru (multi-line)
+        </p>
       </div>
 
       <!-- ✅ GAMBAR PERTANYAAN -->
