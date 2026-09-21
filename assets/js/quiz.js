@@ -1,8 +1,7 @@
 /* ==========================================
-   KR-Dict — Quiz Module v4.0
-   + Responsive layout fix
-   + PDF result download
-   + Certificate generation
+   KR-Dict — Quiz Module v4.2
+   + PDF Result (HTML-based, English, beautiful)
+   + Certificate (max 3 wrong to unlock)
    ========================================== */
 window.KR = window.KR || {};
 
@@ -12,12 +11,15 @@ KR.quiz = (function () {
   const STORAGE = KR.auth.STORAGE;
   const DATA_KEY = 'quizzes';
   const RESULT_KEY = 'quizResults';
+  const CERT_MAX_WRONG = 3; // 👈 syarat sertifikat
 
   let quizzes = [];
   let activeSession = null;
-  let lastResult = null; // simpan hasil terakhir untuk PDF & certificate
+  let lastResult = null;
   let timerInterval = null;
   let els = {};
+  let _certHTML = null;
+  let _certFilenameBase = 'Sertifikat';
 
   /* ==========================================
      INIT
@@ -264,8 +266,12 @@ KR.quiz = (function () {
     return m > 0 ? `${m}m ${s}s` : `${s}s`;
   }
 
-  function escapeHtml(s = '') {
-    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  function getGrade(score) {
+    if (score >= 90) return { letter: 'A', label: 'Excellent', color: '#059669' };
+    if (score >= 80) return { letter: 'B', label: 'Very Good', color: '#10b981' };
+    if (score >= 70) return { letter: 'C', label: 'Good', color: '#6366f1' };
+    if (score >= 60) return { letter: 'D', label: 'Pass', color: '#f59e0b' };
+    return { letter: 'E', label: 'Keep Learning', color: '#ef4444' };
   }
 
   /* ==========================================
@@ -278,7 +284,7 @@ KR.quiz = (function () {
         const s = document.createElement('script');
         s.src = src;
         s.onload = res;
-        s.onerror = () => rej(new Error('Gagal memuat: ' + src));
+        s.onerror = () => rej(new Error('Failed to load: ' + src));
         document.head.appendChild(s);
       });
       Promise.all([
@@ -288,7 +294,13 @@ KR.quiz = (function () {
     });
   }
 
-  function showLoading(text = 'Memproses...') {
+  async function waitFonts() {
+    if (document.fonts && document.fonts.ready) {
+      try { await document.fonts.ready; } catch {}
+    }
+  }
+
+  function showLoading(text = 'Processing...') {
     if (els.loadingText) els.loadingText.textContent = text;
     els.loadingOverlay?.classList.remove('hidden');
     els.loadingOverlay?.classList.add('flex');
@@ -351,11 +363,10 @@ KR.quiz = (function () {
   function showTestUI() {
     els.listWrap.classList.add('hidden');
     els.resultWrap.classList.add('hidden');
-    els.hubHeader?.classList.add('hidden'); // hide page title
+    els.hubHeader?.classList.add('hidden');
     els.testWrap.classList.remove('hidden');
     els.testWrap.classList.add('flex');
     els.testTitle.textContent = activeSession.pkg.name;
-    // Scroll main to top
     document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'auto' });
   }
 
@@ -481,7 +492,6 @@ KR.quiz = (function () {
     els.testSubmit.classList.toggle('hidden', !isLast);
 
     renderNav();
-    // Scroll question area to top
     document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (isListening && !isRevealed && (question.audioTarget === 'question' || question.audioTarget === 'both') && question.audioText) {
@@ -607,25 +617,64 @@ KR.quiz = (function () {
       <div class="quiz-stat"><i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i><div><div class="quiz-stat-num">${r.wrong}</div><div class="quiz-stat-label">Salah</div></div></div>
       <div class="quiz-stat"><i data-lucide="list" class="w-5 h-5 text-purple-500"></i><div><div class="quiz-stat-num">${r.total}</div><div class="quiz-stat-label">Total</div></div></div>`;
 
-    // ACTION BUTTONS
-    els.resultActions.innerHTML = `
+    // ============ ACTION BUTTONS with CERTIFICATE ELIGIBILITY ============
+    const canGetCert = r.wrong <= CERT_MAX_WRONG;
+    const remaining = Math.max(0, CERT_MAX_WRONG - r.wrong);
+
+    let actionsHTML = `
       <button class="quiz-action-btn primary" onclick="KR.quiz.downloadResultPDF()">
         <i data-lucide="file-down"></i>
         <div>
-          <div class="quiz-action-btn-title">Download PDF</div>
-          <div class="quiz-action-btn-sub">Rincian jawaban & skor</div>
-        </div>
-      </button>
-      <button class="quiz-action-btn gold" onclick="KR.quiz.generateCertificate()">
-        <i data-lucide="award"></i>
-        <div>
-          <div class="quiz-action-btn-title">Sertifikat</div>
-          <div class="quiz-action-btn-sub">Bukti kelulusan resmi</div>
+          <div class="quiz-action-btn-title">Download PDF Report</div>
+          <div class="quiz-action-btn-sub">Full report with answer review</div>
         </div>
       </button>
     `;
 
-    // REVIEW — pisahkan benar/salah
+    if (canGetCert) {
+      actionsHTML += `
+        <button class="quiz-action-btn gold" onclick="KR.quiz.generateCertificate()">
+          <i data-lucide="award"></i>
+          <div>
+            <div class="quiz-action-btn-title">Get Certificate</div>
+            <div class="quiz-action-btn-sub">Official proof of achievement</div>
+          </div>
+        </button>
+      `;
+    } else {
+      actionsHTML += `
+        <button class="quiz-action-btn locked" disabled>
+          <i data-lucide="lock"></i>
+          <div>
+            <div class="quiz-action-btn-title">Certificate Locked</div>
+            <div class="quiz-action-btn-sub">Max ${CERT_MAX_WRONG} wrong to unlock · You had ${r.wrong}</div>
+          </div>
+        </button>
+      `;
+    }
+
+    els.resultActions.innerHTML = actionsHTML;
+
+    // Locked message if not eligible
+    if (!canGetCert) {
+      els.resultActions.insertAdjacentHTML('afterend', `
+        <div class="quiz-cert-locked-info">
+          <i data-lucide="info"></i>
+          <div>
+            <div class="quiz-cert-locked-title">Certificate Not Available</div>
+            <div class="quiz-cert-locked-desc">
+              To receive the official certificate, you must complete the quiz with a maximum of <strong>${CERT_MAX_WRONG} wrong answers</strong>.
+              You currently have <strong>${r.wrong} wrong answer${r.wrong > 1 ? 's' : ''}</strong>. Keep practicing!
+            </div>
+          </div>
+        </div>
+      `);
+    } else {
+      const old = document.querySelector('.quiz-cert-locked-info');
+      if (old) old.remove();
+    }
+
+    // ============ REVIEW TABS ============
     const wrongItems = r.details.filter(d => !d.isCorrect);
     const correctItems = r.details.filter(d => d.isCorrect);
 
@@ -659,7 +708,7 @@ KR.quiz = (function () {
       }
 
       let html = '';
-      items.forEach((d, idx) => {
+      items.forEach((d) => {
         const origIdx = r.details.indexOf(d);
         const isListening = d.questionType === 'listening';
         const cls = d.isCorrect ? 'correct' : (d.userAns ? 'incorrect' : 'skipped');
@@ -695,9 +744,7 @@ KR.quiz = (function () {
       });
     });
 
-    renderReviewTab('wrong'); // default tampilkan yang salah
-
-    // Scroll top
+    renderReviewTab('wrong');
     document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'auto' });
     if (window.lucide) lucide.createIcons();
   }
@@ -708,219 +755,347 @@ KR.quiz = (function () {
     els.resultWrap.classList.add('hidden');
     els.listWrap.classList.remove('hidden');
     els.hubHeader?.classList.remove('hidden');
+    const old = document.querySelector('.quiz-cert-locked-info');
+    if (old) old.remove();
     activeSession = null;
     if (window.lucide) lucide.createIcons();
   }
 
   /* ==========================================
-     ✅ DOWNLOAD PDF HASIL
+     ✅ BUILD PDF RESULT HTML (English, beautiful)
+     ========================================== */
+  function buildResultHTML(r) {
+    const user = (KR.auth?.getUserData?.()?.name) || 'KR-Dict Student';
+    const dateStr = new Date(r.at).toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    const grade = getGrade(r.score);
+    const unanswered = r.total - r.correct - r.wrong;
+    const canGetCert = r.wrong <= CERT_MAX_WRONG;
+
+    // Info cards
+    const infoItems = [
+      { label: 'Student Name', value: user },
+      { label: 'Quiz Package', value: r.pkg.name },
+      { label: 'Mode', value: r.mode === 'exam' ? 'Exam (Timed)' : 'Practice (Instant Feedback)' },
+      { label: 'Date', value: dateStr },
+      { label: 'Duration', value: formatDur(r.duration) },
+      { label: 'Grade', value: `${grade.letter} · ${grade.label}` },
+    ];
+    const infoCardsHTML = infoItems.map(item => `
+      <div style="
+        background: #f8fafc;
+        padding: 14px 18px;
+        border-radius: 10px;
+        border-left: 3px solid #6366f1;
+      ">
+        <div style="font-size: 9px; font-weight: 800; letter-spacing: 0.12em; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px;">
+          ${item.label}
+        </div>
+        <div style="font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.35;">
+          ${esc(String(item.value))}
+        </div>
+      </div>
+    `).join('');
+
+    // Stat cards
+    const stats = [
+      { label: 'Total Questions', value: r.total, color: '#6366f1', bg: '#eef2ff' },
+      { label: 'Correct', value: r.correct, color: '#059669', bg: '#ecfdf5' },
+      { label: 'Incorrect', value: r.wrong, color: '#dc2626', bg: '#fef2f2' },
+      { label: 'Unanswered', value: unanswered, color: '#64748b', bg: '#f1f5f9' },
+    ];
+    const statsHTML = stats.map(s => `
+      <div style="
+        background: ${s.bg};
+        padding: 16px 12px;
+        border-radius: 12px;
+        text-align: center;
+        border: 1px solid rgba(15,23,42,0.06);
+      ">
+        <div style="font-size: 26px; font-weight: 900; color: ${s.color}; line-height: 1;">${s.value}</div>
+        <div style="font-size: 9px; font-weight: 800; letter-spacing: 0.1em; color: #64748b; text-transform: uppercase; margin-top: 6px;">
+          ${s.label}
+        </div>
+      </div>
+    `).join('');
+
+    // Review items
+    const reviewHTML = r.details.map((d, i) => {
+      const isCorrect = d.isCorrect;
+      const skipped = !d.userAns;
+      const userOpt = (d.options || []).find(o => o.id === d.userAns);
+      const correctOpt = (d.options || []).find(o => o.id === d.correct);
+
+      const statusColor = isCorrect ? '#059669' : (skipped ? '#64748b' : '#dc2626');
+      const statusBg = isCorrect ? '#ecfdf5' : (skipped ? '#f1f5f9' : '#fef2f2');
+      const statusBorder = isCorrect ? '#10b981' : (skipped ? '#94a3b8' : '#ef4444');
+      const statusLabel = isCorrect ? '✓ Correct' : (skipped ? '○ Unanswered' : '✗ Incorrect');
+      const sectionLabel = d.sectionType === 'listening' ? '🎧 Listening' : '📖 Reading';
+
+      return `
+        <div style="
+          padding: 16px 18px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-left: 4px solid ${statusBorder};
+          border-radius: 10px;
+          margin-bottom: 10px;
+        ">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+            <div style="font-size: 12px; font-weight: 800; color: #475569;">
+              Question ${i + 1}
+            </div>
+            <div style="
+              padding: 3px 10px;
+              border-radius: 99px;
+              font-size: 10px;
+              font-weight: 800;
+              background: ${statusBg};
+              color: ${statusColor};
+            ">${statusLabel}</div>
+            <div style="
+              padding: 3px 10px;
+              border-radius: 99px;
+              font-size: 10px;
+              font-weight: 700;
+              background: #f1f5f9;
+              color: #64748b;
+            ">${sectionLabel}</div>
+          </div>
+
+          ${d.questionText ? `
+            <div style="
+              font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif;
+              font-size: 14px;
+              font-weight: 600;
+              color: #1e293b;
+              padding: 12px 14px;
+              background: #f8fafc;
+              border-radius: 8px;
+              margin-bottom: 12px;
+              line-height: 1.55;
+              word-break: break-word;
+            ">${esc(d.questionText)}</div>
+          ` : ''}
+
+          <div style="font-size: 12px; line-height: 1.6; color: #475569;">
+            <div style="margin-bottom: 4px;">
+              <span style="color: #94a3b8; font-weight: 700;">Your answer:</span>
+              <span style="font-weight: 700; color: ${isCorrect ? '#059669' : (skipped ? '#94a3b8' : '#dc2626')};">
+                ${d.userAns ? d.userAns + '. ' + esc(userOpt?.text || '') : '(not answered)'}
+              </span>
+            </div>
+            ${!isCorrect && d.correct ? `
+              <div>
+                <span style="color: #94a3b8; font-weight: 700;">Correct answer:</span>
+                <span style="font-weight: 700; color: #059669;">
+                  ${d.correct}. ${esc(correctOpt?.text || '')}
+                </span>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Certificate status text
+    const certStatusText = canGetCert
+      ? 'Eligible for Certificate ✓'
+      : `Certificate requires max ${CERT_MAX_WRONG} wrong answers`;
+
+    return `
+      <div id="pdfRender" style="
+        width: 900px;
+        background: #ffffff;
+        font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+        color: #1e293b;
+        font-size: 13px;
+        line-height: 1.5;
+      ">
+
+        <!-- HEADER -->
+        <div style="
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+          padding: 36px 44px;
+          color: #ffffff;
+        ">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px;">
+            <div>
+              <div style="font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1;">KR-Dict</div>
+              <div style="font-size: 10px; font-weight: 800; letter-spacing: 0.3em; opacity: 0.92; margin-top: 4px;">LEARNING HUB</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 22px; font-weight: 800; letter-spacing: -0.01em;">Quiz Result Report</div>
+              <div style="font-size: 11px; opacity: 0.9; margin-top: 6px;">Generated ${dateStr}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BODY -->
+        <div style="padding: 36px 44px;">
+
+          <!-- Student Info -->
+          <div style="font-size: 11px; font-weight: 800; color: #6366f1; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px;">
+            Student Information
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px;">
+            ${infoCardsHTML}
+          </div>
+
+          <!-- Score Highlight -->
+          <div style="
+            background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 100%);
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            border: 1px solid rgba(99,102,241,0.15);
+          ">
+            <div style="
+              width: 140px;
+              height: 140px;
+              border-radius: 50%;
+              background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              color: #ffffff;
+              flex-shrink: 0;
+              box-shadow: 0 12px 28px -10px rgba(99,102,241,0.55);
+            ">
+              <div style="font-size: 44px; font-weight: 900; line-height: 1;">${r.score}<span style="font-size: 22px;">%</span></div>
+              <div style="font-size: 10px; font-weight: 800; letter-spacing: 0.18em; opacity: 0.92; margin-top: 6px;">SCORE</div>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-size: 24px; font-weight: 800; color: ${grade.color}; margin-bottom: 8px; line-height: 1.1;">
+                Grade ${grade.letter} · ${grade.label}
+              </div>
+              <div style="font-size: 13px; color: #475569; line-height: 1.65;">
+                You completed <strong style="color: #1e293b;">${esc(r.pkg.name)}</strong> with
+                <strong style="color: #059669;">${r.correct} correct</strong> out of
+                <strong>${r.total}</strong> questions in
+                <strong>${formatDur(r.duration)}</strong>.
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div style="font-size: 11px; font-weight: 800; color: #6366f1; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px;">
+            Statistics
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px;">
+            ${statsHTML}
+          </div>
+
+          <!-- Review -->
+          <div style="font-size: 11px; font-weight: 800; color: #6366f1; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px;">
+            Answer Review
+          </div>
+          <div>
+            ${reviewHTML}
+          </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div style="
+          padding: 20px 44px;
+          border-top: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 10px;
+          color: #94a3b8;
+          font-weight: 600;
+        ">
+          <div>KR-Dict Learning Hub · © ${new Date().getFullYear()}</div>
+          <div>${certStatusText}</div>
+        </div>
+
+      </div>
+    `;
+  }
+
+  /* ==========================================
+     ✅ DOWNLOAD PDF (via html2canvas → jsPDF)
      ========================================== */
   async function downloadResultPDF() {
-    if (!lastResult) { KR.toast?.error('Tidak ada hasil'); return; }
-    showLoading('Membuat PDF...');
+    if (!lastResult) { KR.toast?.error('No result available'); return; }
+    showLoading('Generating PDF Report...');
     try {
       await ensurePdfLibs();
+      await waitFonts();
       const { jsPDF } = window.jspdf;
       const r = lastResult;
-      const user = (KR.auth?.getUserData?.()?.name) || 'Siswa KR-Dict';
-      const dateStr = new Date(r.at).toLocaleString('id-ID', {
-        day: '2-digit', month: 'long', year: 'numeric',
-        hour: '2-digit', minute: '2-digit'
+
+      // Build HTML & insert into hidden container
+      const container = document.createElement('div');
+      container.style.cssText = 'position:fixed;left:-99999px;top:0;width:900px;background:#fff;z-index:-1;';
+      container.innerHTML = buildResultHTML(r);
+      document.body.appendChild(container);
+
+      const target = container.querySelector('#pdfRender');
+
+      // Capture with html2canvas
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        windowWidth: 900,
+        windowHeight: target.scrollHeight,
       });
 
-      const doc = new jsPDF('p', 'mm', 'a4');
-      const pageW = doc.internal.pageSize.getWidth();
-      const pageH = doc.internal.pageSize.getHeight();
-      const margin = 15;
-      let y = margin;
+      document.body.removeChild(container);
 
-      // HEADER
-      doc.setFillColor(99, 102, 241);
-      doc.rect(0, 0, pageW, 30, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(20);
-      doc.text('KR-Dict Learning Hub', margin, 14);
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Laporan Hasil Latihan Soal', margin, 22);
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
 
-      y = 45;
+      // Create PDF A4 portrait
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pdfW = pdf.internal.pageSize.getWidth();   // 210
+      const pdfH = pdf.internal.pageSize.getHeight();  // 297
 
-      // INFO SISWA
-      doc.setTextColor(15, 23, 42);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.text('Informasi Peserta', margin, y);
-      y += 2;
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.3);
-      doc.line(margin, y, pageW - margin, y);
-      y += 8;
+      const imgW = pdfW;
+      const imgH = (canvas.height * pdfW) / canvas.width;
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-      const info = [
-        ['Nama Peserta', user],
-        ['Paket Latihan', r.pkg.name],
-        ['Mode', r.mode === 'exam' ? 'Ujian (dengan waktu)' : 'Latihan (feedback instan)'],
-        ['Tanggal', dateStr],
-      ];
-      info.forEach(([k, v]) => {
-        doc.setTextColor(100, 116, 139);
-        doc.text(k + ':', margin, y);
-        doc.setTextColor(15, 23, 42);
-        doc.setFont('helvetica', 'bold');
-        doc.text(String(v), margin + 45, y);
-        doc.setFont('helvetica', 'normal');
-        y += 7;
-      });
+      // Slice image across pages
+      let heightLeft = imgH;
+      let position = 0;
 
-      y += 5;
+      pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+      heightLeft -= pdfH;
 
-      // SKOR BOX
-      doc.setFillColor(238, 242, 255);
-      doc.roundedRect(margin, y, pageW - margin * 2, 30, 3, 3, 'F');
-      doc.setTextColor(79, 70, 229);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.text('SKOR AKHIR', margin + 5, y + 8);
-      doc.setFontSize(26);
-      doc.text(`${r.score}%`, margin + 5, y + 22);
-      doc.setFontSize(11);
-      doc.setTextColor(71, 85, 105);
-      doc.text(`${r.correct} benar / ${r.total} soal`, margin + 60, y + 15);
-      doc.text(`Waktu: ${formatDur(r.duration)}`, margin + 60, y + 22);
-      y += 40;
+      while (heightLeft > 0) {
+        position -= pdfH;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+        heightLeft -= pdfH;
+      }
 
-      // STATISTIK
-      doc.setTextColor(15, 23, 42);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.text('Statistik', margin, y);
-      y += 2;
-      doc.setDrawColor(226, 232, 240);
-      doc.line(margin, y, pageW - margin, y);
-      y += 8;
-
-      const stats = [
-        ['Total Soal', String(r.total)],
-        ['Jawaban Benar', String(r.correct)],
-        ['Jawaban Salah', String(r.wrong)],
-        ['Tidak Dijawab', String(r.total - r.correct - r.wrong)],
-      ];
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-      stats.forEach(([k, v]) => {
-        doc.setTextColor(100, 116, 139);
-        doc.text(k, margin, y);
-        doc.setTextColor(15, 23, 42);
-        doc.setFont('helvetica', 'bold');
-        doc.text(v, margin + 60, y);
-        doc.setFont('helvetica', 'normal');
-        y += 7;
-      });
-
-      y += 10;
-
-      // REVIEW SOAL
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(15, 23, 42);
-      doc.text('Rincian Jawaban', margin, y);
-      y += 2;
-      doc.line(margin, y, pageW - margin, y);
-      y += 8;
-
-      doc.setFontSize(10);
-      r.details.forEach((d, i) => {
-        if (y > pageH - 40) {
-          doc.addPage();
-          y = margin;
-        }
-        const isCorrect = d.isCorrect;
-        const userOpt = (d.options || []).find(o => o.id === d.userAns);
-        const correctOpt = (d.options || []).find(o => o.id === d.correct);
-
-        // Nomor + status
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(isCorrect ? 5 : (d.userAns ? 220 : 148), isCorrect ? 150 : (38), isCorrect ? 105 : (38));
-        doc.text(`Soal ${i + 1}`, margin, y);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(100, 116, 139);
-        doc.text(isCorrect ? '✓ Benar' : d.userAns ? '✗ Salah' : '○ Kosong', margin + 20, y);
-        doc.setFontSize(10);
-        y += 5;
-
-        // Pertanyaan
-        if (d.questionText) {
-          doc.setTextColor(15, 23, 42);
-          const qLines = doc.splitTextToSize(d.questionText, pageW - margin * 2);
-          qLines.forEach(line => {
-            if (y > pageH - 20) { doc.addPage(); y = margin; }
-            doc.text(line, margin, y);
-            y += 5;
-          });
-        }
-
-        // Jawaban user & benar
-        doc.setFontSize(9);
-        if (!isCorrect) {
-          doc.setTextColor(220, 38, 38);
-          const uLine = `Jawaban Anda: ${d.userAns || '(kosong)'}. ${userOpt?.text || ''}`;
-          const uLines = doc.splitTextToSize(uLine, pageW - margin * 2);
-          uLines.forEach(line => {
-            if (y > pageH - 20) { doc.addPage(); y = margin; }
-            doc.text(line, margin + 4, y);
-            y += 5;
-          });
-          doc.setTextColor(5, 150, 105);
-          const cLine = `Jawaban Benar: ${d.correct}. ${correctOpt?.text || ''}`;
-          const cLines = doc.splitTextToSize(cLine, pageW - margin * 2);
-          cLines.forEach(line => {
-            if (y > pageH - 20) { doc.addPage(); y = margin; }
-            doc.text(line, margin + 4, y);
-            y += 5;
-          });
-        } else {
-          doc.setTextColor(100, 116, 139);
-          const line = `Jawaban: ${d.userAns}. ${userOpt?.text || ''}`;
-          const lines = doc.splitTextToSize(line, pageW - margin * 2);
-          lines.forEach(l => {
-            if (y > pageH - 20) { doc.addPage(); y = margin; }
-            doc.text(l, margin + 4, y);
-            y += 5;
-          });
-        }
-
-        // Garis pemisah
-        y += 3;
-        if (y > pageH - 15) { doc.addPage(); y = margin; }
-        doc.setDrawColor(241, 245, 249);
-        doc.line(margin, y, pageW - margin, y);
-        y += 6;
-      });
-
-      // FOOTER setiap halaman
-      const totalPages = doc.internal.getNumberOfPages();
+      // Add page numbers to footer of each page
+      const totalPages = pdf.internal.getNumberOfPages();
       for (let p = 1; p <= totalPages; p++) {
-        doc.setPage(p);
-        doc.setFontSize(8);
-        doc.setTextColor(148, 163, 184);
-        doc.text(
-          `KR-Dict Learning Hub — Halaman ${p}/${totalPages}`,
-          pageW / 2, pageH - 8,
+        pdf.setPage(p);
+        pdf.setFontSize(8);
+        pdf.setTextColor(148, 163, 184);
+        pdf.text(
+          `Page ${p} of ${totalPages}`,
+          pdfW / 2, pdfH - 6,
           { align: 'center' }
         );
       }
 
-      const filename = `Hasil-Latihan_${r.pkg.name.replace(/[^a-z0-9]/gi, '_')}_${new Date(r.at).toISOString().slice(0, 10)}.pdf`;
-      doc.save(filename);
-      KR.toast?.success('✅ PDF berhasil di-download!');
+      const filename = `Quiz_Report_${r.pkg.name.replace(/[^a-z0-9]/gi, '_')}_${new Date(r.at).toISOString().slice(0, 10)}.pdf`;
+      pdf.save(filename);
+      KR.toast?.success('✅ PDF report downloaded!');
     } catch (err) {
       console.error(err);
-      KR.toast?.error('Gagal membuat PDF: ' + err.message);
+      KR.toast?.error('Failed to generate PDF: ' + err.message);
     } finally {
       hideLoading();
     }
@@ -929,8 +1104,7 @@ KR.quiz = (function () {
   /* ==========================================
      ✅ CERTIFICATE
      ========================================== */
-  function buildCertificateHTML({ name, pkgName, score, dateStr, certId, grade }) {
-    // A4 landscape ~ 1123 x 794 px
+  function buildCertificateHTML({ name, pkgName, score, dateStr, certId, gradeText }) {
     return `
       <div id="certRender" style="
         width: 1123px; height: 794px;
@@ -940,25 +1114,19 @@ KR.quiz = (function () {
         position: relative; overflow: hidden;
         color: #1e293b;
       ">
-        <!-- Outer decorative border -->
         <div style="position:absolute; inset:24px; border:3px double #b8860b; border-radius:6px; pointer-events:none;"></div>
         <div style="position:absolute; inset:32px; border:1px solid #d4af37; border-radius:4px; pointer-events:none;"></div>
 
-        <!-- Corner ornaments -->
         <div style="position:absolute; top:16px; left:16px; width:60px; height:60px; border-top:4px solid #b8860b; border-left:4px solid #b8860b; border-top-left-radius:8px;"></div>
         <div style="position:absolute; top:16px; right:16px; width:60px; height:60px; border-top:4px solid #b8860b; border-right:4px solid #b8860b; border-top-right-radius:8px;"></div>
         <div style="position:absolute; bottom:16px; left:16px; width:60px; height:60px; border-bottom:4px solid #b8860b; border-left:4px solid #b8860b; border-bottom-left-radius:8px;"></div>
         <div style="position:absolute; bottom:16px; right:16px; width:60px; height:60px; border-bottom:4px solid #b8860b; border-right:4px solid #b8860b; border-bottom-right-radius:8px;"></div>
 
-        <!-- Watermark -->
         <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); font-size:180px; font-weight:900; color:rgba(184,134,11,0.05); font-family:'Playfair Display',serif; letter-spacing:0.1em; pointer-events:none; user-select:none;">KR-DICT</div>
 
-        <!-- Content -->
         <div style="position:relative; padding:70px 90px; text-align:center; height:100%; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between;">
 
-          <!-- Top -->
           <div>
-            <!-- Crest / Emblem -->
             <div style="
               width: 88px; height: 88px; margin: 0 auto 12px;
               border-radius: 50%;
@@ -971,11 +1139,9 @@ KR.quiz = (function () {
               <div style="font-size:44px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">🏆</div>
             </div>
 
-            <!-- Brand -->
             <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:800; letter-spacing:0.4em; color:#b8860b; text-transform:uppercase; margin-bottom:4px;">KR-DICT LEARNING HUB</div>
             <div style="width:100px; height:2px; background:#b8860b; margin:0 auto 20px;"></div>
 
-            <!-- Main Title -->
             <h1 style="
               font-size: 58px; font-weight: 900; letter-spacing: 0.02em;
               margin: 0; line-height: 1;
@@ -986,7 +1152,6 @@ KR.quiz = (function () {
             <p style="font-size:16px; letter-spacing:0.5em; color:#64748b; margin:6px 0 0; font-weight:600; font-family:'Plus Jakarta Sans',sans-serif;">OF ACHIEVEMENT</p>
           </div>
 
-          <!-- Middle -->
           <div>
             <p style="font-size:15px; color:#64748b; margin:0 0 12px; font-style:italic; font-family:Georgia,serif;">This certificate is proudly presented to</p>
 
@@ -998,13 +1163,13 @@ KR.quiz = (function () {
               border-bottom: 2px solid #d4af37;
               letter-spacing: 0.02em;
               line-height: 1.15;
-            ">${escapeHtml(name)}</div>
+            ">${esc(name)}</div>
 
             <p style="font-size:15px; color:#64748b; margin:20px auto 0; max-width:640px; line-height:1.7; font-family:Georgia,serif;">
               for successfully completing the practice quiz
             </p>
             <p style="font-size:22px; font-weight:700; color:#4f46e5; margin:8px 0 0; font-family:'Playfair Display',serif;">
-              "${escapeHtml(pkgName)}"
+              "${esc(pkgName)}"
             </p>
             <p style="font-size:15px; color:#64748b; margin:12px 0 0; font-family:Georgia,serif;">
               with an outstanding score of
@@ -1015,18 +1180,15 @@ KR.quiz = (function () {
               background: linear-gradient(135deg, #b8860b, #d4af37);
               -webkit-background-clip: text; background-clip: text;
               color: transparent;
-            ">${score}<span style="font-size:24px;">%</span> · ${grade}</div>
+            ">${score}<span style="font-size:24px;">%</span> · ${gradeText}</div>
           </div>
 
-          <!-- Bottom -->
           <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:20px;">
-            <!-- Signature -->
             <div style="text-align:center; min-width:200px;">
               <div style="font-family:'Playfair Display',serif; font-size:22px; font-style:italic; color:#1e293b; border-bottom:1px solid #94a3b8; padding-bottom:4px; margin-bottom:6px;">KR-Dict</div>
               <div style="font-size:11px; font-weight:800; letter-spacing:0.15em; color:#64748b; text-transform:uppercase; font-family:'Plus Jakarta Sans',sans-serif;">Founder & Director</div>
             </div>
 
-            <!-- Gold seal -->
             <div style="
               width: 90px; height: 90px; border-radius: 50%;
               background: radial-gradient(circle, #d4af37 0%, #b8860b 70%, #8b6508 100%);
@@ -1043,7 +1205,6 @@ KR.quiz = (function () {
               </div>
             </div>
 
-            <!-- Meta -->
             <div style="text-align:right; min-width:200px; font-family:'Plus Jakarta Sans',sans-serif;">
               <div style="font-size:10px; font-weight:800; letter-spacing:0.15em; color:#94a3b8; text-transform:uppercase;">Issued Date</div>
               <div style="font-size:13px; font-weight:700; color:#1e293b; margin-bottom:8px;">${dateStr}</div>
@@ -1057,61 +1218,54 @@ KR.quiz = (function () {
     `;
   }
 
-  function getGrade(score) {
-    if (score >= 90) return 'A · EXCELLENT';
-    if (score >= 80) return 'B · VERY GOOD';
-    if (score >= 70) return 'C · GOOD';
-    if (score >= 60) return 'D · PASS';
-    return 'E · KEEP LEARNING';
-  }
-
   async function generateCertificate() {
-    if (!lastResult) { KR.toast?.error('Kerjakan latihan dulu'); return; }
-    showLoading('Membuat sertifikat...');
+    if (!lastResult) { KR.toast?.error('Complete a quiz first'); return; }
+
+    // ✅ CHECK ELIGIBILITY
+    if (lastResult.wrong > CERT_MAX_WRONG) {
+      KR.toast?.error(`Certificate requires max ${CERT_MAX_WRONG} wrong answers. You have ${lastResult.wrong}.`);
+      return;
+    }
+
+    showLoading('Generating Certificate...');
     try {
       await ensurePdfLibs();
+      await waitFonts();
       const r = lastResult;
-      const user = (KR.auth?.getUserData?.()?.name) || 'Siswa KR-Dict';
-      const dateStr = new Date(r.at).toLocaleDateString('id-ID', {
+      const user = (KR.auth?.getUserData?.()?.name) || 'KR-Dict Student';
+      const dateStr = new Date(r.at).toLocaleDateString('en-GB', {
         day: '2-digit', month: 'long', year: 'numeric'
       });
       const certId = 'KRD-' + r.at.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
       const grade = getGrade(r.score);
+      const gradeText = `${grade.letter} · ${grade.label.toUpperCase()}`;
 
-      const html = buildCertificateHTML({
+      _certHTML = buildCertificateHTML({
         name: user, pkgName: r.pkg.name, score: r.score,
-        dateStr, certId, grade
+        dateStr, certId, gradeText
       });
+      _certFilenameBase = `Certificate_${r.pkg.name.replace(/[^a-z0-9]/gi, '_')}_${user.replace(/[^a-z0-9]/gi, '_')}`;
 
-      // Show in modal
-      els.certPreview.innerHTML = html;
+      els.certPreview.innerHTML = _certHTML;
       els.certModal.classList.remove('hidden');
       els.certModal.classList.add('flex');
-
-      // Store for download
-      _certHTML = html;
-      _certFilenameBase = `Sertifikat_${r.pkg.name.replace(/[^a-z0-9]/gi, '_')}_${user.replace(/[^a-z0-9]/gi, '_')}`;
     } catch (err) {
       console.error(err);
-      KR.toast?.error('Gagal membuat sertifikat');
+      KR.toast?.error('Failed to generate certificate');
     } finally {
       hideLoading();
     }
   }
 
-  let _certHTML = null;
-  let _certFilenameBase = 'Sertifikat';
-
   async function downloadCertificatePDF() {
     if (!_certHTML) return;
-    showLoading('Menyiapkan PDF...');
+    showLoading('Preparing PDF...');
     try {
       await ensurePdfLibs();
+      await waitFonts();
       const { jsPDF } = window.jspdf;
       const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.left = '-9999px';
-      container.style.top = '0';
+      container.style.cssText = 'position:fixed;left:-99999px;top:0;';
       container.innerHTML = _certHTML;
       document.body.appendChild(container);
 
@@ -1121,23 +1275,21 @@ KR.quiz = (function () {
         useCORS: true,
         backgroundColor: '#fdfcf7',
         logging: false,
+        windowWidth: 1123,
+        windowHeight: 794,
       });
       document.body.removeChild(container);
 
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4'
-      });
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pdfW = pdf.internal.pageSize.getWidth();
       const pdfH = pdf.internal.pageSize.getHeight();
       pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
       pdf.save(`${_certFilenameBase}.pdf`);
-      KR.toast?.success('🎉 Sertifikat PDF berhasil di-download!');
+      KR.toast?.success('🎉 Certificate PDF downloaded!');
     } catch (err) {
       console.error(err);
-      KR.toast?.error('Gagal membuat PDF sertifikat');
+      KR.toast?.error('Failed to create certificate PDF');
     } finally {
       hideLoading();
     }
@@ -1145,13 +1297,12 @@ KR.quiz = (function () {
 
   async function downloadCertificatePNG() {
     if (!_certHTML) return;
-    showLoading('Menyiapkan PNG...');
+    showLoading('Preparing PNG...');
     try {
       await ensurePdfLibs();
+      await waitFonts();
       const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.left = '-9999px';
-      container.style.top = '0';
+      container.style.cssText = 'position:fixed;left:-99999px;top:0;';
       container.innerHTML = _certHTML;
       document.body.appendChild(container);
 
@@ -1161,6 +1312,8 @@ KR.quiz = (function () {
         useCORS: true,
         backgroundColor: '#fdfcf7',
         logging: false,
+        windowWidth: 1123,
+        windowHeight: 794,
       });
       document.body.removeChild(container);
 
@@ -1168,10 +1321,10 @@ KR.quiz = (function () {
       link.download = `${_certFilenameBase}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
-      KR.toast?.success('🎉 Sertifikat PNG berhasil di-download!');
+      KR.toast?.success('🎉 Certificate PNG downloaded!');
     } catch (err) {
       console.error(err);
-      KR.toast?.error('Gagal membuat PNG');
+      KR.toast?.error('Failed to create PNG');
     } finally {
       hideLoading();
     }
@@ -1216,7 +1369,6 @@ KR.quiz = (function () {
     });
     els.resultClose?.addEventListener('click', closeResults);
 
-    // Escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !els.certModal.classList.contains('hidden')) {
         closeCertModal();
