@@ -229,6 +229,41 @@
               ],
               "correct": "B",
               "image": ""
+            },
+            {
+              "id": "q-mubead5rbxq0",
+              "type": "listening",
+              "text": "오늘은 복숭아부터______.",
+              "image": "",
+              "audioText": "복숭아부터 땁시다",
+              "audioTarget": "question",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "땁시다",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "삽시다",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "포장합시다",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "캡시다",
+                  "audioText": "",
+                  "image": ""
+                }
+              ],
+              "correct": "A"
             }
           ]
         }
