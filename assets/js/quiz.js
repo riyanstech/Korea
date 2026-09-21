@@ -1,7 +1,7 @@
 /* ==========================================
-   KR-Dict — Quiz Module v8.2 (FINAL)
+   KR-Dict — Quiz Module v8.3 (FINAL)
+   + Multi-line via <br> (100% bulletproof)
    + Tiered Certificates (Diamond/Gold/Silver)
-   + Multi-line question support (white-space: pre-line)
    + Clean professional certificate design
    + Canvas-based (100% reliable)
    + Submit tanpa konfirmasi
@@ -11,7 +11,7 @@ window.KR = window.KR || {};
 KR.quiz = (function () {
   'use strict';
 
-  console.log('%c[KR-Dict Quiz] %cv8.2 — Multi-line Support',
+  console.log('%c[KR-Dict Quiz] %cv8.3 — Bulletproof Multi-line',
     'color:#6366f1;font-weight:800',
     'color:#10b981;font-weight:700');
 
@@ -329,6 +329,14 @@ KR.quiz = (function () {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
+  /* ✅ NEW: Escape + convert newline to <br> (bulletproof multi-line) */
+  function escMultiline(s = '') {
+    return esc(s)
+      .replace(/\r\n/g, '\n')  // normalize Windows CRLF
+      .replace(/\r/g, '\n')    // normalize Mac CR
+      .replace(/\n/g, '<br>'); // convert to <br>
+  }
+
   function speak(text, lang = 'ko-KR') {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
@@ -487,7 +495,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     RENDER QUESTION
+     RENDER QUESTION — ✅ Multi-line via <br>
      ========================================== */
   function renderQuestion() {
     const { flatQuestions, currentIdx, answers, mode, revealed } = activeSession;
@@ -525,8 +533,9 @@ KR.quiz = (function () {
       }
     }
 
+    /* ✅ Multi-line question text */
     if (question.text) {
-      qHtml += `<div class="quiz-question-text">${esc(question.text)}</div>`;
+      qHtml += `<div class="quiz-question-text">${escMultiline(question.text)}</div>`;
     }
     if (question.image) {
       qHtml += `<div class="quiz-question-image"><img src="${question.image}" alt=""></div>`;
@@ -542,7 +551,7 @@ KR.quiz = (function () {
         else if (selected) cls += ' incorrect';
       }
       const optImg = opt.image ? `<div class="quiz-option-image"><img src="${opt.image}"></div>` : '';
-      const optText = opt.text ? `<div class="quiz-option-text">${esc(opt.text)}</div>` : '';
+      const optText = opt.text ? `<div class="quiz-option-text">${escMultiline(opt.text)}</div>` : '';
       const optAudioBtn = (isListening && (question.audioTarget === 'options' || question.audioTarget === 'both') && opt.audioText)
         ? `<button class="quiz-opt-audio-btn" onclick="event.stopPropagation(); KR.quiz.playAudio(${currentIdx}, 'opt-${opt.id}')"><i data-lucide="volume-2" class="w-4 h-4"></i></button>`
         : '';
@@ -821,12 +830,12 @@ KR.quiz = (function () {
               </span>
               ${isListening ? '<span class="quiz-review-tag pink"><i data-lucide="headphones" class="w-3 h-3"></i>Listening</span>' : ''}
             </div>
-            ${d.questionText ? `<div class="quiz-review-q">${esc(d.questionText)}</div>` : ''}
+            ${d.questionText ? `<div class="quiz-review-q">${escMultiline(d.questionText)}</div>` : ''}
             ${d.questionImage ? `<div class="quiz-review-image"><img src="${d.questionImage}" alt=""></div>` : ''}
             ${isListening && d.audioText ? `<div class="quiz-review-audio"><button class="quiz-audio-replay" onclick="KR.quiz.speakText('${d.audioText.replace(/'/g, "\\'")}')"><i data-lucide="play" class="w-4 h-4"></i></button><span class="text-xs text-gray-500 italic">Audio: ${esc(d.audioText)}</span></div>` : ''}
             <div class="quiz-review-answers">
-              <div class="quiz-review-row"><span class="quiz-review-label">Jawaban Anda:</span><span class="quiz-review-val ${cls}">${d.userAns ? d.userAns + '. ' + esc(userOpt?.text || '') : '(kosong)'}</span></div>
-              ${!d.isCorrect ? `<div class="quiz-review-row"><span class="quiz-review-label">Jawaban Benar:</span><span class="quiz-review-val correct">${d.correct}. ${esc(correctOpt?.text || '')}</span></div>` : ''}
+              <div class="quiz-review-row"><span class="quiz-review-label">Jawaban Anda:</span><span class="quiz-review-val ${cls}">${d.userAns ? d.userAns + '. ' + escMultiline(userOpt?.text || '') : '(kosong)'}</span></div>
+              ${!d.isCorrect ? `<div class="quiz-review-row"><span class="quiz-review-label">Jawaban Benar:</span><span class="quiz-review-val correct">${d.correct}. ${escMultiline(correctOpt?.text || '')}</span></div>` : ''}
             </div>
           </div>`;
       });
@@ -860,7 +869,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     BUILD PDF RESULT HTML
+     BUILD PDF RESULT HTML — ✅ Multi-line via <br>
      ========================================== */
   function buildResultHTML(r) {
     const user = (KR.auth?.getUserData?.()?.name) || 'KR-Dict Student';
@@ -925,17 +934,17 @@ KR.quiz = (function () {
           </div>
           ${imgHTML}
           ${d.questionText ? `
-            <div style="font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; color: #1e293b; padding: 12px 14px; background: #f8fafc; border-radius: 8px; margin-bottom: 12px; line-height: 1.55; word-break: break-word; white-space: pre-line;">${esc(d.questionText)}</div>
+            <div style="font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; color: #1e293b; padding: 12px 14px; background: #f8fafc; border-radius: 8px; margin-bottom: 12px; line-height: 1.55; word-break: break-word;">${escMultiline(d.questionText)}</div>
           ` : ''}
           <div style="font-size: 12px; line-height: 1.6; color: #475569;">
             <div style="margin-bottom: 4px;">
               <span style="color: #94a3b8; font-weight: 700;">Your answer:</span>
-              <span style="font-weight: 700; color: ${isCorrect ? '#059669' : (skipped ? '#94a3b8' : '#dc2626')};">${d.userAns ? d.userAns + '. ' + esc(userOpt?.text || '') : '(not answered)'}</span>
+              <span style="font-weight: 700; color: ${isCorrect ? '#059669' : (skipped ? '#94a3b8' : '#dc2626')};">${d.userAns ? d.userAns + '. ' + escMultiline(userOpt?.text || '') : '(not answered)'}</span>
             </div>
             ${!isCorrect && d.correct ? `
               <div>
                 <span style="color: #94a3b8; font-weight: 700;">Correct answer:</span>
-                <span style="font-weight: 700; color: #059669;">${d.correct}. ${esc(correctOpt?.text || '')}</span>
+                <span style="font-weight: 700; color: #059669;">${d.correct}. ${escMultiline(correctOpt?.text || '')}</span>
               </div>
             ` : ''}
           </div>
@@ -1068,7 +1077,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     ✅ CANVAS CERTIFICATE — v8.2 CLEAN PRO
+     ✅ CANVAS CERTIFICATE — v8.3 CLEAN PRO
      ========================================== */
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -1132,7 +1141,7 @@ KR.quiz = (function () {
     ctx.textBaseline = 'middle';
 
     /* ============================================
-       📐 LAYOUT GRID (Y-positions)
+       📐 LAYOUT GRID
        ============================================ */
     const Y = {
       borderOuter: 24,
@@ -1596,12 +1605,11 @@ KR.quiz = (function () {
     ctx.letterSpacing = '0px';
 
     /* ============================================
-       18. META (RIGHT) — ALIGNED
+       18. META (RIGHT)
        ============================================ */
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
 
-    // --- ISSUED DATE ---
     ctx.font = '800 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
     ctx.letterSpacing = '2px';
@@ -1612,7 +1620,6 @@ KR.quiz = (function () {
     ctx.fillStyle = '#1e293b';
     ctx.fillText(dateStr, W - 130, Y.metaY2);
 
-    // --- CERTIFICATE ID ---
     ctx.font = '800 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
     ctx.letterSpacing = '2px';
@@ -1768,7 +1775,6 @@ KR.quiz = (function () {
       renderQuestion();
     });
     els.testSubmit?.addEventListener('click', () => {
-      // ✅ Submit langsung tanpa konfirmasi
       submitTest();
     });
     els.testExit?.addEventListener('click', () => {
