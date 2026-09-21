@@ -1,7 +1,9 @@
 /* ==========================================
-   KR-Dict — Quiz Module v4.2
-   + PDF Result (HTML-based, English, beautiful)
-   + Certificate (max 3 wrong to unlock)
+   KR-Dict — Quiz Module v5.0 (FINAL)
+   + Responsive sticky layout
+   + PDF Result Report (HTML-based, English)
+   + Certificate with eligibility check (max 3 wrong)
+   + Fixed certificate rendering (solid colors, high-res)
    ========================================== */
 window.KR = window.KR || {};
 
@@ -294,9 +296,20 @@ KR.quiz = (function () {
     });
   }
 
+  /* ✅ Preload fonts (khususnya Playfair Display untuk sertifikat) */
   async function waitFonts() {
     if (document.fonts && document.fonts.ready) {
       try { await document.fonts.ready; } catch {}
+      try {
+        await Promise.all([
+          document.fonts.load('400 15px "Playfair Display"'),
+          document.fonts.load('700 48px "Playfair Display"'),
+          document.fonts.load('900 58px "Playfair Display"'),
+          document.fonts.load('italic 22px "Playfair Display"'),
+          document.fonts.load('400 13px "Plus Jakarta Sans"'),
+          document.fonts.load('800 12px "Plus Jakarta Sans"'),
+        ]);
+      } catch {}
     }
   }
 
@@ -564,9 +577,15 @@ KR.quiz = (function () {
         sectionType: item.section.type,
         questionText: item.question.text || '',
         questionType: item.question.type,
+        questionImage: item.question.image || null,
         audioText: item.question.audioText || null,
         audioTarget: item.question.audioTarget || null,
-        options: (item.question.options || []).map(o => ({ id: o.id, text: o.text || '', audioText: o.audioText || null })),
+        options: (item.question.options || []).map(o => ({
+          id: o.id,
+          text: o.text || '',
+          audioText: o.audioText || null,
+          image: o.image || null,
+        })),
         correct: item.question.correct,
         userAns,
         isCorrect,
@@ -619,7 +638,6 @@ KR.quiz = (function () {
 
     // ============ ACTION BUTTONS with CERTIFICATE ELIGIBILITY ============
     const canGetCert = r.wrong <= CERT_MAX_WRONG;
-    const remaining = Math.max(0, CERT_MAX_WRONG - r.wrong);
 
     let actionsHTML = `
       <button class="quiz-action-btn primary" onclick="KR.quiz.downloadResultPDF()">
@@ -655,7 +673,10 @@ KR.quiz = (function () {
 
     els.resultActions.innerHTML = actionsHTML;
 
-    // Locked message if not eligible
+    // Locked info message if not eligible
+    const existingLocked = document.querySelector('.quiz-cert-locked-info');
+    if (existingLocked) existingLocked.remove();
+
     if (!canGetCert) {
       els.resultActions.insertAdjacentHTML('afterend', `
         <div class="quiz-cert-locked-info">
@@ -669,9 +690,6 @@ KR.quiz = (function () {
           </div>
         </div>
       `);
-    } else {
-      const old = document.querySelector('.quiz-cert-locked-info');
-      if (old) old.remove();
     }
 
     // ============ REVIEW TABS ============
@@ -725,6 +743,7 @@ KR.quiz = (function () {
               ${isListening ? '<span class="quiz-review-tag pink"><i data-lucide="headphones" class="w-3 h-3"></i>Listening</span>' : ''}
             </div>
             ${d.questionText ? `<div class="quiz-review-q">${esc(d.questionText)}</div>` : ''}
+            ${d.questionImage ? `<div class="quiz-review-image"><img src="${d.questionImage}" alt=""></div>` : ''}
             ${isListening && d.audioText ? `<div class="quiz-review-audio"><button class="quiz-audio-replay" onclick="KR.quiz.speakText('${d.audioText.replace(/'/g, "\\'")}')"><i data-lucide="play" class="w-4 h-4"></i></button><span class="text-xs text-gray-500 italic">Audio: ${esc(d.audioText)}</span></div>` : ''}
             <div class="quiz-review-answers">
               <div class="quiz-review-row"><span class="quiz-review-label">Jawaban Anda:</span><span class="quiz-review-val ${cls}">${d.userAns ? d.userAns + '. ' + esc(userOpt?.text || '') : '(kosong)'}</span></div>
@@ -762,7 +781,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     ✅ BUILD PDF RESULT HTML (English, beautiful)
+     ✅ BUILD PDF RESULT HTML (English)
      ========================================== */
   function buildResultHTML(r) {
     const user = (KR.auth?.getUserData?.()?.name) || 'KR-Dict Student';
@@ -774,7 +793,6 @@ KR.quiz = (function () {
     const unanswered = r.total - r.correct - r.wrong;
     const canGetCert = r.wrong <= CERT_MAX_WRONG;
 
-    // Info cards
     const infoItems = [
       { label: 'Student Name', value: user },
       { label: 'Quiz Package', value: r.pkg.name },
@@ -799,7 +817,6 @@ KR.quiz = (function () {
       </div>
     `).join('');
 
-    // Stat cards
     const stats = [
       { label: 'Total Questions', value: r.total, color: '#6366f1', bg: '#eef2ff' },
       { label: 'Correct', value: r.correct, color: '#059669', bg: '#ecfdf5' },
@@ -821,7 +838,6 @@ KR.quiz = (function () {
       </div>
     `).join('');
 
-    // Review items
     const reviewHTML = r.details.map((d, i) => {
       const isCorrect = d.isCorrect;
       const skipped = !d.userAns;
@@ -833,6 +849,12 @@ KR.quiz = (function () {
       const statusBorder = isCorrect ? '#10b981' : (skipped ? '#94a3b8' : '#ef4444');
       const statusLabel = isCorrect ? '✓ Correct' : (skipped ? '○ Unanswered' : '✗ Incorrect');
       const sectionLabel = d.sectionType === 'listening' ? '🎧 Listening' : '📖 Reading';
+
+      const imgHTML = d.questionImage
+        ? `<div style="margin-bottom:12px; text-align:center;">
+             <img src="${d.questionImage}" style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid #e2e8f0;" />
+           </div>`
+        : '';
 
       return `
         <div style="
@@ -864,6 +886,8 @@ KR.quiz = (function () {
               color: #64748b;
             ">${sectionLabel}</div>
           </div>
+
+          ${imgHTML}
 
           ${d.questionText ? `
             <div style="
@@ -900,7 +924,6 @@ KR.quiz = (function () {
       `;
     }).join('');
 
-    // Certificate status text
     const certStatusText = canGetCert
       ? 'Eligible for Certificate ✓'
       : `Certificate requires max ${CERT_MAX_WRONG} wrong answers`;
@@ -914,8 +937,6 @@ KR.quiz = (function () {
         font-size: 13px;
         line-height: 1.5;
       ">
-
-        <!-- HEADER -->
         <div style="
           background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
           padding: 36px 44px;
@@ -933,10 +954,7 @@ KR.quiz = (function () {
           </div>
         </div>
 
-        <!-- BODY -->
         <div style="padding: 36px 44px;">
-
-          <!-- Student Info -->
           <div style="font-size: 11px; font-weight: 800; color: #6366f1; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px;">
             Student Information
           </div>
@@ -944,7 +962,6 @@ KR.quiz = (function () {
             ${infoCardsHTML}
           </div>
 
-          <!-- Score Highlight -->
           <div style="
             background: linear-gradient(135deg, #eef2ff 0%, #fdf2f8 100%);
             border-radius: 16px;
@@ -984,7 +1001,6 @@ KR.quiz = (function () {
             </div>
           </div>
 
-          <!-- Stats -->
           <div style="font-size: 11px; font-weight: 800; color: #6366f1; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px;">
             Statistics
           </div>
@@ -992,17 +1008,14 @@ KR.quiz = (function () {
             ${statsHTML}
           </div>
 
-          <!-- Review -->
           <div style="font-size: 11px; font-weight: 800; color: #6366f1; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px;">
             Answer Review
           </div>
           <div>
             ${reviewHTML}
           </div>
-
         </div>
 
-        <!-- FOOTER -->
         <div style="
           padding: 20px 44px;
           border-top: 1px solid #e2e8f0;
@@ -1016,13 +1029,12 @@ KR.quiz = (function () {
           <div>KR-Dict Learning Hub · © ${new Date().getFullYear()}</div>
           <div>${certStatusText}</div>
         </div>
-
       </div>
     `;
   }
 
   /* ==========================================
-     ✅ DOWNLOAD PDF (via html2canvas → jsPDF)
+     ✅ DOWNLOAD PDF RESULT
      ========================================== */
   async function downloadResultPDF() {
     if (!lastResult) { KR.toast?.error('No result available'); return; }
@@ -1033,15 +1045,15 @@ KR.quiz = (function () {
       const { jsPDF } = window.jspdf;
       const r = lastResult;
 
-      // Build HTML & insert into hidden container
       const container = document.createElement('div');
       container.style.cssText = 'position:fixed;left:-99999px;top:0;width:900px;background:#fff;z-index:-1;';
       container.innerHTML = buildResultHTML(r);
       document.body.appendChild(container);
 
+      await new Promise(res => setTimeout(res, 120));
+
       const target = container.querySelector('#pdfRender');
 
-      // Capture with html2canvas
       const canvas = await html2canvas(target, {
         scale: 2,
         useCORS: true,
@@ -1055,15 +1067,13 @@ KR.quiz = (function () {
 
       const imgData = canvas.toDataURL('image/jpeg', 0.92);
 
-      // Create PDF A4 portrait
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pdfW = pdf.internal.pageSize.getWidth();   // 210
-      const pdfH = pdf.internal.pageSize.getHeight();  // 297
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
 
       const imgW = pdfW;
       const imgH = (canvas.height * pdfW) / canvas.width;
 
-      // Slice image across pages
       let heightLeft = imgH;
       let position = 0;
 
@@ -1077,7 +1087,6 @@ KR.quiz = (function () {
         heightLeft -= pdfH;
       }
 
-      // Add page numbers to footer of each page
       const totalPages = pdf.internal.getNumberOfPages();
       for (let p = 1; p <= totalPages; p++) {
         pdf.setPage(p);
@@ -1102,7 +1111,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     ✅ CERTIFICATE
+     ✅ BUILD CERTIFICATE HTML (FIXED v5.0)
      ========================================== */
   function buildCertificateHTML({ name, pkgName, score, dateStr, certId, gradeText }) {
     return `
@@ -1124,83 +1133,86 @@ KR.quiz = (function () {
 
         <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); font-size:180px; font-weight:900; color:rgba(184,134,11,0.05); font-family:'Playfair Display',serif; letter-spacing:0.1em; pointer-events:none; user-select:none;">KR-DICT</div>
 
-        <div style="position:relative; padding:70px 90px; text-align:center; height:100%; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="position:relative; padding:60px 90px; text-align:center; height:100%; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between;">
 
+          <!-- TOP -->
           <div>
             <div style="
-              width: 88px; height: 88px; margin: 0 auto 12px;
+              width: 84px; height: 84px; margin: 0 auto 10px;
               border-radius: 50%;
               background: radial-gradient(circle at 30% 30%, #f5d67b 0%, #d4af37 40%, #b8860b 100%);
               box-shadow: 0 6px 20px rgba(184,134,11,0.4), inset 0 -4px 8px rgba(0,0,0,0.15);
               display: grid; place-items: center;
               border: 3px solid #fff8e1;
-              position: relative;
             ">
-              <div style="font-size:44px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">🏆</div>
+              <div style="font-size:42px; line-height:1;">🏆</div>
             </div>
 
-            <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:800; letter-spacing:0.4em; color:#b8860b; text-transform:uppercase; margin-bottom:4px;">KR-DICT LEARNING HUB</div>
-            <div style="width:100px; height:2px; background:#b8860b; margin:0 auto 20px;"></div>
+            <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.4em; color:#b8860b; text-transform:uppercase; margin-bottom:4px;">KR-DICT LEARNING HUB</div>
+            <div style="width:100px; height:2px; background:#b8860b; margin:0 auto 18px;"></div>
 
+            <!-- ✅ FIX: Solid color, no gradient text -->
             <h1 style="
-              font-size: 58px; font-weight: 900; letter-spacing: 0.02em;
+              font-size: 56px; font-weight: 900; letter-spacing: 0.04em;
               margin: 0; line-height: 1;
-              background: linear-gradient(135deg, #1e293b 0%, #4f46e5 50%, #b8860b 100%);
-              -webkit-background-clip: text; background-clip: text;
-              color: transparent;
+              color: #4f46e5;
+              text-shadow: 0 1px 0 #ffffff, 0 3px 6px rgba(79,70,229,0.18);
             ">CERTIFICATE</h1>
-            <p style="font-size:16px; letter-spacing:0.5em; color:#64748b; margin:6px 0 0; font-weight:600; font-family:'Plus Jakarta Sans',sans-serif;">OF ACHIEVEMENT</p>
+            <p style="font-size:14px; letter-spacing:0.5em; color:#64748b; margin:8px 0 0; font-weight:600; font-family:'Plus Jakarta Sans',sans-serif;">OF ACHIEVEMENT</p>
           </div>
 
-          <div>
-            <p style="font-size:15px; color:#64748b; margin:0 0 12px; font-style:italic; font-family:Georgia,serif;">This certificate is proudly presented to</p>
+          <!-- MIDDLE -->
+          <div style="margin-top:12px;">
+            <p style="font-size:14px; color:#64748b; margin:0 0 12px; font-style:italic; font-family:Georgia,serif;">This certificate is proudly presented to</p>
 
             <div style="
               font-family: 'Playfair Display', Georgia, serif;
-              font-size: 48px; font-weight: 700; color: #1e293b;
-              padding: 8px 40px; margin: 0 auto 4px;
+              font-size: 44px; font-weight: 700; color: #1e293b;
+              padding: 6px 40px; margin: 0 auto 4px;
               display: inline-block;
               border-bottom: 2px solid #d4af37;
               letter-spacing: 0.02em;
               line-height: 1.15;
             ">${esc(name)}</div>
 
-            <p style="font-size:15px; color:#64748b; margin:20px auto 0; max-width:640px; line-height:1.7; font-family:Georgia,serif;">
+            <p style="font-size:14px; color:#64748b; margin:18px auto 0; max-width:640px; line-height:1.7; font-family:Georgia,serif;">
               for successfully completing the practice quiz
             </p>
-            <p style="font-size:22px; font-weight:700; color:#4f46e5; margin:8px 0 0; font-family:'Playfair Display',serif;">
+            <p style="font-size:20px; font-weight:700; color:#4f46e5; margin:6px 0 0; font-family:'Playfair Display',serif;">
               "${esc(pkgName)}"
             </p>
-            <p style="font-size:15px; color:#64748b; margin:12px 0 0; font-family:Georgia,serif;">
+            <p style="font-size:14px; color:#64748b; margin:12px 0 0; font-family:Georgia,serif;">
               with an outstanding score of
             </p>
+            <!-- ✅ FIX: Solid gold color, no gradient text -->
             <div style="
-              font-family: 'Playfair Display', serif;
-              font-size: 42px; font-weight: 900; margin: 6px 0 0;
-              background: linear-gradient(135deg, #b8860b, #d4af37);
-              -webkit-background-clip: text; background-clip: text;
-              color: transparent;
-            ">${score}<span style="font-size:24px;">%</span> · ${gradeText}</div>
+              font-family: 'Playfair Display', Georgia, serif;
+              font-size: 40px; font-weight: 900; margin: 6px 0 0;
+              color: #b8860b;
+              line-height: 1;
+              text-shadow: 0 1px 0 #ffffff, 0 3px 6px rgba(184,134,11,0.2);
+            ">${score}<span style="font-size:24px;">%</span> <span style="color:#d4af37;">·</span> ${esc(gradeText)}</div>
           </div>
 
-          <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:20px;">
+          <!-- BOTTOM -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:14px;">
             <div style="text-align:center; min-width:200px;">
               <div style="font-family:'Playfair Display',serif; font-size:22px; font-style:italic; color:#1e293b; border-bottom:1px solid #94a3b8; padding-bottom:4px; margin-bottom:6px;">KR-Dict</div>
-              <div style="font-size:11px; font-weight:800; letter-spacing:0.15em; color:#64748b; text-transform:uppercase; font-family:'Plus Jakarta Sans',sans-serif;">Founder & Director</div>
+              <div style="font-size:11px; font-weight:800; letter-spacing:0.15em; color:#64748b; text-transform:uppercase; font-family:'Plus Jakarta Sans',sans-serif;">Founder &amp; Director</div>
             </div>
 
             <div style="
-              width: 90px; height: 90px; border-radius: 50%;
-              background: radial-gradient(circle, #d4af37 0%, #b8860b 70%, #8b6508 100%);
+              width: 84px; height: 84px; border-radius: 50%;
+              background: radial-gradient(circle at 35% 30%, #f5d67b 0%, #d4af37 45%, #b8860b 80%, #8b6508 100%);
               display: grid; place-items: center;
-              color: #fff8e1; font-family: 'Playfair Display',serif; font-weight:900; font-size:11px;
+              color: #fff8e1; font-family: 'Playfair Display',serif; font-weight:900; font-size:10px;
               box-shadow: 0 6px 16px rgba(184,134,11,0.5), inset 0 0 0 3px #fff8e1, inset 0 0 0 5px #d4af37;
-              text-align: center; line-height:1.2; padding: 8px;
-              letter-spacing: 0.05em;
+              text-align: center; line-height:1.2; padding: 6px;
+              letter-spacing: 0.06em;
             ">
               <div>
                 OFFICIAL<br>
-                <span style="font-size:18px;">★</span><br>
+                <span style="font-size:16px; display:block; line-height:1;">★</span>
                 SEAL
               </div>
             </div>
@@ -1218,10 +1230,12 @@ KR.quiz = (function () {
     `;
   }
 
+  /* ==========================================
+     ✅ GENERATE CERTIFICATE
+     ========================================== */
   async function generateCertificate() {
     if (!lastResult) { KR.toast?.error('Complete a quiz first'); return; }
 
-    // ✅ CHECK ELIGIBILITY
     if (lastResult.wrong > CERT_MAX_WRONG) {
       KR.toast?.error(`Certificate requires max ${CERT_MAX_WRONG} wrong answers. You have ${lastResult.wrong}.`);
       return;
@@ -1257,6 +1271,9 @@ KR.quiz = (function () {
     }
   }
 
+  /* ==========================================
+     ✅ DOWNLOAD CERTIFICATE PDF (High-res)
+     ========================================== */
   async function downloadCertificatePDF() {
     if (!_certHTML) return;
     showLoading('Preparing PDF...');
@@ -1265,26 +1282,30 @@ KR.quiz = (function () {
       await waitFonts();
       const { jsPDF } = window.jspdf;
       const container = document.createElement('div');
-      container.style.cssText = 'position:fixed;left:-99999px;top:0;';
+      container.style.cssText = 'position:fixed;left:-99999px;top:0;width:1123px;';
       container.innerHTML = _certHTML;
       document.body.appendChild(container);
 
+      await new Promise(r => setTimeout(r, 150));
+
       const target = container.querySelector('#certRender');
       const canvas = await html2canvas(target, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         backgroundColor: '#fdfcf7',
         logging: false,
+        width: 1123,
+        height: 794,
         windowWidth: 1123,
         windowHeight: 794,
       });
       document.body.removeChild(container);
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pdfW = pdf.internal.pageSize.getWidth();
       const pdfH = pdf.internal.pageSize.getHeight();
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
       pdf.save(`${_certFilenameBase}.pdf`);
       KR.toast?.success('🎉 Certificate PDF downloaded!');
     } catch (err) {
@@ -1295,6 +1316,9 @@ KR.quiz = (function () {
     }
   }
 
+  /* ==========================================
+     ✅ DOWNLOAD CERTIFICATE PNG (High-res)
+     ========================================== */
   async function downloadCertificatePNG() {
     if (!_certHTML) return;
     showLoading('Preparing PNG...');
@@ -1302,16 +1326,20 @@ KR.quiz = (function () {
       await ensurePdfLibs();
       await waitFonts();
       const container = document.createElement('div');
-      container.style.cssText = 'position:fixed;left:-99999px;top:0;';
+      container.style.cssText = 'position:fixed;left:-99999px;top:0;width:1123px;';
       container.innerHTML = _certHTML;
       document.body.appendChild(container);
 
+      await new Promise(r => setTimeout(r, 150));
+
       const target = container.querySelector('#certRender');
       const canvas = await html2canvas(target, {
-        scale: 2,
+        scale: 3,
         useCORS: true,
         backgroundColor: '#fdfcf7',
         logging: false,
+        width: 1123,
+        height: 794,
         windowWidth: 1123,
         windowHeight: 794,
       });
@@ -1342,6 +1370,7 @@ KR.quiz = (function () {
     els.setupClose?.addEventListener('click', closeSetup);
     els.setupCancel?.addEventListener('click', closeSetup);
     els.setupBackdrop?.addEventListener('click', closeSetup);
+
     els.testPrev?.addEventListener('click', () => {
       if (!activeSession || activeSession.currentIdx <= 0) return;
       activeSession.currentIdx--;
