@@ -116,6 +116,41 @@
                 }
               ],
               "correct": "A"
+            },
+            {
+              "id": "q-mubdhq3qcc2t",
+              "type": "reading",
+              "text": "다음 단어의 비슷말은 무엇입니까 ?\n\n일정하다",
+              "image": "",
+              "audioText": "",
+              "audioTarget": "question",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "수정하다",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "변화하다",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "한결같다",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "달라지다",
+                  "audioText": "",
+                  "image": ""
+                }
+              ],
+              "correct": "C"
             }
           ]
         },
