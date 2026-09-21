@@ -1,5 +1,6 @@
 /* ==========================================
-   KR-Dict — Admin Dashboard v3 (FIXED BAB BUG)
+   KR-Dict — Admin Dashboard v4.0
+   + Image upload for question & options
    ========================================== */
 window.KR = window.KR || {};
 
@@ -24,11 +25,6 @@ KR.admin = (function () {
     downloads: 'downloadsOverride',
   };
 
-  /* ==========================================
-     🔧 FIX: DEFAULT BABS LIST
-     Kalau data vocab belum di-override atau kosong,
-     selalu sediakan daftar BAB default
-     ========================================== */
   const DEFAULT_BABS = [
     'BAB 1','BAB 2','BAB 3','BAB 4','BAB 5','BAB 6','BAB 7','BAB 8',
     'BAB 9','BAB 10','BAB 11','BAB 12','BAB 13','BAB 14','BAB 15',
@@ -36,6 +32,47 @@ KR.admin = (function () {
     'BAB 23','BAB 24','BAB 25','BAB 26','BAB 27','BAB 28','BAB 29','BAB 30'
   ];
 
+  /* ==========================================
+     IMAGE COMPRESS HELPER
+     ========================================== */
+  function compressImage(file, maxDim = 900, quality = 0.78) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+          try {
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          } catch (err) { reject(err); }
+        };
+        img.onerror = reject;
+        img.src = e.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* ==========================================
+     DATA GETTERS
+     ========================================== */
   function getVocab() {
     const override = STORAGE.get(KEYS.vocab);
     if (override && Array.isArray(override) && override.length) return override;
@@ -43,10 +80,6 @@ KR.admin = (function () {
     return [];
   }
 
-  /**
-   * Ambil daftar bab — SELALU ada isinya
-   * Prioritas: dari data → dari default
-   */
   function getBabList() {
     const vocab = getVocab();
     const fromData = [...new Set(vocab.map(v => v.bab).filter(Boolean))];
@@ -233,7 +266,7 @@ KR.admin = (function () {
   function closeConfirm() { els.confirmModal.classList.add('hidden'); }
 
   /* ==========================================
-     QUIZ
+     QUIZ CRUD
      ========================================== */
   function renderQuiz() {
     renderBreadcrumb();
@@ -357,6 +390,8 @@ KR.admin = (function () {
             <div class="admin-row-chips">
               <span class="chip neutral">${(q.options || []).length} opsi</span>
               ${q.correct ? `<span class="chip success">✓ ${q.correct}</span>` : ''}
+              ${q.image ? `<span class="chip accent"><i data-lucide="image" style="width:10px;height:10px"></i> Gambar</span>` : ''}
+              ${(q.options || []).some(o => o.image) ? `<span class="chip warning"><i data-lucide="image-plus" style="width:10px;height:10px"></i> Gambar opsi</span>` : ''}
               ${isL ? `<span class="chip accent">🎧 ${q.audioTarget || 'question'}</span>` : ''}
             </div>
           </div>
@@ -376,7 +411,7 @@ KR.admin = (function () {
     if (window.lucide) lucide.createIcons();
   }
 
-  /* ---------- QUIZ CRUD ---------- */
+  /* ---------- QUIZ PACKAGE / SECTION CRUD ---------- */
   function addPackage() {
     openModal({
       icon: 'plus', title: 'Paket Baru', subtitle: 'Buat paket latihan',
@@ -493,6 +528,9 @@ KR.admin = (function () {
     });
   }
 
+  /* ==========================================
+     ✅ QUESTION FORM — WITH IMAGE UPLOAD
+     ========================================== */
   function questionFormHtml(q = {}) {
     const type = q.type || 'reading';
     const audioTarget = q.audioTarget || 'question';
@@ -509,9 +547,19 @@ KR.admin = (function () {
         </div>
         <input type="hidden" id="qType" value="${type}">
       </div>
-      <div class="field"><label class="field-label">Teks Pertanyaan</label>
+
+      <div class="field">
+        <label class="field-label">Teks Pertanyaan</label>
         <textarea id="qText" class="textarea" rows="2" placeholder="Pertanyaan yang ditampilkan">${esc(q.text || '')}</textarea>
       </div>
+
+      <!-- ✅ GAMBAR PERTANYAAN -->
+      <div class="field">
+        <label class="field-label"><i data-lucide="image" style="width:12px;height:12px;display:inline"></i> Gambar Pertanyaan (opsional)</label>
+        <div id="qImageArea"></div>
+        <input type="file" id="qImageInput" accept="image/*" class="hidden">
+      </div>
+
       <div id="qAudioWrap" class="${type === 'listening' ? '' : 'hidden'}">
         <div class="field"><label class="field-label"><i data-lucide="volume-2" style="width:12px;height:12px;display:inline"></i> Teks Audio (TTS)</label>
           <textarea id="qAudioText" class="textarea" rows="2" placeholder="Contoh: 안녕하세요">${esc(q.audioText || '')}</textarea>
@@ -525,6 +573,7 @@ KR.admin = (function () {
           </select>
         </div>
       </div>
+
       <div class="field">
         <label class="field-label">Pilihan Jawaban</label>
         <div id="qOptionsList"></div>
@@ -540,11 +589,62 @@ KR.admin = (function () {
 
   function bindQuestionForm(q) {
     let options = q.options ? JSON.parse(JSON.stringify(q.options)) : [
-      { id: 'A', text: '', audioText: '' }, { id: 'B', text: '', audioText: '' },
-      { id: 'C', text: '', audioText: '' }, { id: 'D', text: '', audioText: '' },
+      { id: 'A', text: '', audioText: '', image: '' }, { id: 'B', text: '', audioText: '', image: '' },
+      { id: 'C', text: '', audioText: '', image: '' }, { id: 'D', text: '', audioText: '', image: '' },
     ];
+    options.forEach(o => { if (o.image === undefined) o.image = ''; });
+    let questionImage = q.image || '';
+
+    // ----- Question image UI -----
+    function renderQuestionImage() {
+      const area = document.getElementById('qImageArea');
+      if (!area) return;
+      if (questionImage) {
+        area.innerHTML = `
+          <div class="img-preview-card">
+            <img src="${questionImage}" alt="preview">
+            <button type="button" class="img-preview-remove" data-act="remove-q-img" title="Hapus gambar">
+              <i data-lucide="x"></i>
+            </button>
+          </div>`;
+      } else {
+        area.innerHTML = `
+          <button type="button" class="img-upload-btn" data-act="add-q-img">
+            <i data-lucide="image-plus"></i>
+            <span>Upload Gambar</span>
+          </button>`;
+      }
+      area.querySelector('[data-act="add-q-img"]')?.addEventListener('click', () => {
+        document.getElementById('qImageInput').click();
+      });
+      area.querySelector('[data-act="remove-q-img"]')?.addEventListener('click', () => {
+        questionImage = '';
+        renderQuestionImage();
+      });
+      if (window.lucide) lucide.createIcons();
+    }
+
+    document.getElementById('qImageInput')?.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        if (KR.toast) KR.toast.info('Memproses gambar...', 1200);
+        questionImage = await compressImage(file);
+        renderQuestionImage();
+        if (KR.toast) KR.toast.success('Gambar ditambahkan');
+      } catch (err) {
+        console.error(err);
+        if (KR.toast) KR.toast.error('Gagal memproses gambar');
+      }
+      e.target.value = '';
+    });
+
+    renderQuestionImage();
+
+    // ----- Options UI -----
     function renderOpts() {
       const list = document.getElementById('qOptionsList');
+      if (!list) return;
       const showAudio = document.getElementById('qType')?.value === 'listening' &&
         ['options', 'both'].includes(document.getElementById('qAudioTarget')?.value);
       list.innerHTML = options.map((o, i) => `
@@ -554,7 +654,9 @@ KR.admin = (function () {
             <button type="button" class="btn-icon-xs danger" data-del="${i}"><i data-lucide="x"></i></button>
           </div>
           <input type="text" class="input" data-i="${i}" value="${esc(o.text || '')}" placeholder="Teks pilihan" style="margin-bottom:6px">
-          ${showAudio ? `<input type="text" class="input" data-audio="${i}" value="${esc(o.audioText || '')}" placeholder="🎧 Teks audio (opsional)">` : ''}
+          ${showAudio ? `<input type="text" class="input" data-audio="${i}" value="${esc(o.audioText || '')}" placeholder="🎧 Teks audio (opsional)" style="margin-bottom:6px">` : ''}
+          <div class="opt-img-area" data-img="${i}"></div>
+          <input type="file" class="hidden opt-img-input" data-img-input="${i}" accept="image/*">
         </div>
       `).join('');
       const sel = document.getElementById('qCorrect');
@@ -562,15 +664,40 @@ KR.admin = (function () {
         const cur = q.correct || 'A';
         sel.innerHTML = options.map((o, i) => {
           const L = String.fromCharCode(65 + i);
-          return `<option value="${L}" ${cur === L ? 'selected' : ''}>${L}. ${esc((o.text || '').slice(0, 50) || '(kosong)')}</option>`;
+          const preview = (o.text || '').slice(0, 40) || (o.image ? '[gambar]' : '(kosong)');
+          return `<option value="${L}" ${cur === L ? 'selected' : ''}>${L}. ${esc(preview)}</option>`;
         }).join('');
       }
+
+      // Render option images
+      options.forEach((o, i) => {
+        const area = list.querySelector(`[data-img="${i}"]`);
+        if (!area) return;
+        if (o.image) {
+          area.innerHTML = `
+            <div class="img-preview-card img-preview-sm">
+              <img src="${o.image}" alt="preview">
+              <button type="button" class="img-preview-remove" data-act="remove-opt-img" data-idx="${i}">
+                <i data-lucide="x"></i>
+              </button>
+            </div>`;
+        } else {
+          area.innerHTML = `
+            <button type="button" class="img-upload-btn img-upload-btn-sm" data-act="add-opt-img" data-idx="${i}">
+              <i data-lucide="image-plus"></i>
+              <span>Upload Gambar Opsi</span>
+            </button>`;
+        }
+      });
+
+      // Bind text inputs
       list.querySelectorAll('input[data-i]').forEach(inp => {
         inp.addEventListener('input', e => { options[Number(e.target.dataset.i)].text = e.target.value; });
       });
       list.querySelectorAll('input[data-audio]').forEach(inp => {
         inp.addEventListener('input', e => { options[Number(e.target.dataset.audio)].audioText = e.target.value; });
       });
+      // Bind delete option
       list.querySelectorAll('[data-del]').forEach(btn => {
         btn.addEventListener('click', () => {
           if (options.length <= 2) return KR.toast?.warn('Min 2 opsi');
@@ -579,14 +706,50 @@ KR.admin = (function () {
           renderOpts();
         });
       });
+      // Bind image add
+      list.querySelectorAll('[data-act="add-opt-img"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.idx);
+          list.querySelector(`[data-img-input="${idx}"]`)?.click();
+        });
+      });
+      // Bind image remove
+      list.querySelectorAll('[data-act="remove-opt-img"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.dataset.idx);
+          options[idx].image = '';
+          renderOpts();
+        });
+      });
+      // Bind file inputs
+      list.querySelectorAll('input[data-img-input]').forEach(inp => {
+        inp.addEventListener('change', async (e) => {
+          const idx = Number(inp.dataset.imgInput);
+          const file = e.target.files?.[0];
+          if (!file) return;
+          try {
+            if (KR.toast) KR.toast.info('Memproses gambar...', 1200);
+            options[idx].image = await compressImage(file);
+            renderOpts();
+            if (KR.toast) KR.toast.success('Gambar opsi ditambahkan');
+          } catch (err) {
+            console.error(err);
+            if (KR.toast) KR.toast.error('Gagal memproses gambar');
+          }
+          e.target.value = '';
+        });
+      });
+
       if (window.lucide) lucide.createIcons();
     }
     renderOpts();
+
     document.getElementById('qAddOpt')?.addEventListener('click', () => {
       if (options.length >= 6) return KR.toast?.warn('Maks 6 opsi');
-      options.push({ id: String.fromCharCode(65 + options.length), text: '', audioText: '' });
+      options.push({ id: String.fromCharCode(65 + options.length), text: '', audioText: '', image: '' });
       renderOpts();
     });
+
     document.querySelectorAll('.adm-type-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const t = btn.dataset.qtype;
@@ -600,12 +763,14 @@ KR.admin = (function () {
       });
     });
     document.getElementById('qAudioTarget')?.addEventListener('change', renderOpts);
+
     return () => ({
       type: document.getElementById('qType').value,
       text: document.getElementById('qText').value.trim(),
+      image: questionImage || '',
       audioText: document.getElementById('qAudioText')?.value.trim() || '',
       audioTarget: document.getElementById('qAudioTarget')?.value || 'question',
-      options,
+      options: options.map(o => ({ id: o.id, text: o.text || '', audioText: o.audioText || '', image: o.image || '' })),
       correct: document.getElementById('qCorrect')?.value || 'A',
     });
   }
@@ -620,11 +785,12 @@ KR.admin = (function () {
       body: questionFormHtml({ type: sec.type === 'listening' ? 'listening' : 'reading' }),
       onSubmit: () => {
         const v = collect();
-        if (!v.text && !v.audioText) return KR.toast?.error('Isi pertanyaan');
+        if (!v.text && !v.audioText && !v.image) return KR.toast?.error('Isi pertanyaan minimal teks/gambar/audio');
         sec.questions = sec.questions || [];
         sec.questions.push({ id: uid('q'), ...v });
         KR.quiz.setQuizzes(KR.quiz.getQuizzes());
         closeModal(); renderQuiz();
+        KR.toast?.success('Soal ditambahkan');
       },
     });
     setTimeout(() => { collect = bindQuestionForm({ type: sec.type === 'listening' ? 'listening' : 'reading' }); }, 60);
@@ -640,10 +806,11 @@ KR.admin = (function () {
       body: questionFormHtml(q),
       onSubmit: () => {
         const v = collect();
-        if (!v.text && !v.audioText) return KR.toast?.error('Isi pertanyaan');
+        if (!v.text && !v.audioText && !v.image) return KR.toast?.error('Isi pertanyaan minimal teks/gambar/audio');
         Object.assign(q, v);
         KR.quiz.setQuizzes(KR.quiz.getQuizzes());
         closeModal(); renderQuiz();
+        KR.toast?.success('Soal diperbarui');
       },
     });
     setTimeout(() => { collect = bindQuestionForm(q); }, 60);
@@ -669,7 +836,7 @@ KR.admin = (function () {
   }
 
   /* ==========================================
-     🔧 KOSAKATA CRUD — FIX BUG BAB
+     VOCAB CRUD
      ========================================== */
   function renderVocab() {
     const container = document.getElementById('vocabAdminContainer');
@@ -770,7 +937,7 @@ KR.admin = (function () {
   }
 
   function vocabFormHtml(v = {}) {
-    const babs = getBabList(); // 🔧 FIX: SELALU ada bab
+    const babs = getBabList();
     const currentBab = v.bab || (state.vocab.bab || babs[0] || 'BAB 1');
     return `
       <div class="field"><label class="field-label">Hangeul <span class="req">*</span></label>
@@ -930,7 +1097,6 @@ KR.admin = (function () {
 
   function grammarFormHtml(g = {}) {
     const fungsiStr = Array.isArray(g.fungsi) ? g.fungsi.join('\n') : (g.fungsi || '');
-    const contoh = g.contoh || [{ kalimat: '', arti: '' }];
     return `
       <div class="field"><label class="field-label">Struktur / Pola <span class="req">*</span></label>
         <input id="gStruktur" class="input" value="${esc(g.struktur || '')}" placeholder="~입니다 / ~입니까?" style="font-family:'Noto Sans KR',sans-serif"></div>
