@@ -1,6 +1,7 @@
 /* ==========================================
-   KR-Dict — Authentication Module
+   KR-Dict — Authentication Module v3.1
    User & Admin login dengan SHA-256 hash
+   + Badge styling fix
    ========================================== */
 window.KR = window.KR || {};
 
@@ -96,37 +97,50 @@ KR.auth = (function () {
     if (app) app.style.visibility = 'visible';
   }
 
+  /* ==========================================
+     ✅ FIX: Update badge pakai class .badge-btn baru
+     ========================================== */
   function updateBadge() {
     const badge = document.getElementById('roleBadge');
     if (!badge) return;
+
     const role = getRole();
+
     if (role === 'admin') {
       badge.innerHTML = `
         <button id="openAdminBtn" class="badge-btn badge-admin" title="Dashboard Admin">
-          <i data-lucide="shield-check"></i><span>Admin</span>
+          <i data-lucide="shield-check"></i>
+          <span class="hidden sm:inline">Admin</span>
         </button>
         <button id="logoutBtn" class="badge-btn badge-logout" title="Logout">
           <i data-lucide="log-out"></i>
         </button>`;
+
       document.getElementById('openAdminBtn')?.addEventListener('click', () => KR.admin?.open());
       document.getElementById('logoutBtn')?.addEventListener('click', () => {
         if (confirm('Logout dari sesi?')) logout();
       });
+
     } else if (role === 'user') {
       const user = getUserData();
+      const safeName = (user?.name || 'User').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       badge.innerHTML = `
-        <button class="badge-btn badge-user" title="${user?.name || 'User'}">
-          <i data-lucide="user"></i><span class="hidden sm:inline">${user?.name || 'User'}</span>
+        <button class="badge-btn badge-user" title="${safeName}">
+          <i data-lucide="user"></i>
+          <span class="hidden sm:inline">${safeName}</span>
         </button>
         <button id="logoutBtn" class="badge-btn badge-logout" title="Logout">
           <i data-lucide="log-out"></i>
         </button>`;
+
       document.getElementById('logoutBtn')?.addEventListener('click', () => {
         if (confirm('Logout dari sesi?')) logout();
       });
+
     } else {
       badge.innerHTML = '';
     }
+
     if (window.lucide) lucide.createIcons();
   }
 
