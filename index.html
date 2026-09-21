@@ -41,56 +41,56 @@
 
     <div id="app" class="main-layout transition-colors duration-500">
 
-        <!-- Header -->
+        <!-- ================= HEADER (FIXED) ================= -->
         <header class="glass-nav sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-20">
+                <div class="flex justify-between items-center h-20 gap-3">
 
-                    <!-- Logo -->
-                    <div class="flex items-center gap-4">
-                        <button id="burger-btn" onclick="toggleMenu()" class="md:hidden icon-btn-glass">
+                    <!-- Logo + Burger -->
+                    <div class="flex items-center gap-3">
+                        <button id="burger-btn" onclick="toggleMenu()" class="md:hidden icon-btn-glass" aria-label="Menu">
                             <i data-lucide="menu" class="w-6 h-6"></i>
                         </button>
                         <div class="flex items-center gap-3 logo-container">
                             <div class="logo-box">
                                 <i data-lucide="book-open" class="w-6 h-6 text-white"></i>
                             </div>
-                            <div>
+                            <div class="leading-tight">
                                 <h1 class="text-xl md:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">KR-Dict</h1>
                                 <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Study Hub</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Desktop Nav -->
-                    <nav class="hidden md:flex items-center gap-2 bg-white/10 dark:bg-black/20 p-1.5 rounded-full border border-white/20 backdrop-blur-md">
+                    <!-- Desktop Nav (pakai .nav-pill, tidak lagi pakai .hidden md:flex) -->
+                    <nav class="nav-pill" aria-label="Navigasi utama">
                         <button class="nav-link active" onclick="showTab('vocab-container', this)">
-                            <i data-lucide="book-open-text" class="w-4 h-4"></i><span>Kosakata</span>
+                            <i data-lucide="book-open-text"></i><span>Kosakata</span>
                         </button>
                         <button class="nav-link" onclick="showTab('hangeul', this)">
-                            <i data-lucide="scan" class="w-4 h-4"></i><span>Hangeul</span>
+                            <i data-lucide="scan"></i><span>Hangeul</span>
                         </button>
                         <button class="nav-link" onclick="showTab('grammar', this)">
-                            <i data-lucide="sparkles" class="w-4 h-4"></i><span>Grammar</span>
+                            <i data-lucide="sparkles"></i><span>Grammar</span>
                         </button>
                         <button class="nav-link" onclick="showTab('culture', this)">
-                            <i data-lucide="globe-2" class="w-4 h-4"></i><span>Budaya</span>
+                            <i data-lucide="globe-2"></i><span>Budaya</span>
                         </button>
                         <button class="nav-link" onclick="showTab('downloads', this)">
-                            <i data-lucide="cloud-download" class="w-4 h-4"></i><span>Materi</span>
+                            <i data-lucide="cloud-download"></i><span>Materi</span>
                         </button>
                         <button class="nav-link" onclick="showTab('quiz-hub', this)">
-                            <i data-lucide="pencil-ruler" class="w-4 h-4"></i><span>Latihan</span>
+                            <i data-lucide="pencil-ruler"></i><span>Latihan</span>
                         </button>
                         <button class="nav-link special-ai-nav" onclick="showTab('chat-ai', this)">
-                            <i data-lucide="bot" class="w-4 h-4"></i><span>AI Tutor</span>
+                            <i data-lucide="bot"></i><span>AI Tutor</span>
                         </button>
                     </nav>
 
                     <!-- Role Badge + Theme Toggle -->
                     <div class="flex items-center gap-2">
-                        <div id="roleBadge" class="flex items-center gap-1"></div>
-                        <button onclick="toggleDarkMode()" class="theme-toggle-btn">
+                        <div id="roleBadge" class="flex items-center gap-2"></div>
+                        <button onclick="toggleDarkMode()" class="theme-toggle-btn" aria-label="Ganti tema">
                             <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -110,6 +110,7 @@
                 </div>
             </div>
         </header>
+        <!-- ================= END HEADER ================= -->
 
         <!-- Main Content -->
         <main class="flex-grow overflow-y-auto custom-scroll relative z-10 p-4 md:p-8">
@@ -564,7 +565,7 @@
         </div>
     </div>
 
-    <!-- Quiz Finish Modal (Untuk quiz kosakata lama) -->
+    <!-- Quiz Finish Modal -->
     <div id="quiz-finish-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideQuizFinishModal()"></div>
         <div class="glass-card p-8 w-full max-w-sm text-center relative z-10 animate-scale-in border-t-4 border-indigo-500">
