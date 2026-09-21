@@ -2796,3 +2796,81 @@ main.app-main::-webkit-scrollbar-thumb {
 main.app-main::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+/* ============================================================
+   🔒 v4.2 — CERTIFICATE LOCK + LOCKED BUTTON STATE
+   ============================================================ */
+
+/* Locked certificate button */
+.quiz-action-btn.locked {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #64748b;
+  cursor: not-allowed;
+  border: 1px dashed #cbd5e1;
+  box-shadow: none;
+}
+.quiz-action-btn.locked:hover {
+  transform: none;
+  box-shadow: none;
+}
+.quiz-action-btn.locked svg {
+  opacity: 0.6;
+}
+.quiz-action-btn.locked .quiz-action-btn-title {
+  color: #64748b;
+}
+.quiz-action-btn.locked .quiz-action-btn-sub {
+  color: #94a3b8;
+}
+
+/* Info box when certificate is locked */
+.quiz-cert-locked-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-left: 4px solid #ef4444;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  animation: lockedIn 300ms ease;
+}
+@keyframes lockedIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.quiz-cert-locked-info > svg {
+  width: 22px;
+  height: 22px;
+  color: #dc2626;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.quiz-cert-locked-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #991b1b;
+  margin-bottom: 4px;
+}
+.quiz-cert-locked-desc {
+  font-size: 0.82rem;
+  color: #b91c1c;
+  line-height: 1.55;
+}
+.quiz-cert-locked-desc strong {
+  color: #7f1d1d;
+  font-weight: 800;
+}
+
+/* Dark mode variant */
+.dark .quiz-cert-locked-info {
+  background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(220,38,38,0.10));
+  border-color: rgba(239,68,68,0.3);
+}
+.dark .quiz-cert-locked-title { color: #fca5a5; }
+.dark .quiz-cert-locked-desc { color: #fecaca; }
+.dark .quiz-cert-locked-desc strong { color: #fee2e2; }
+.dark .quiz-action-btn.locked {
+  background: linear-gradient(135deg, rgba(30,41,59,0.6), rgba(51,65,85,0.5));
+  border-color: rgba(100,116,139,0.3);
+}
