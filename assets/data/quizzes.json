@@ -116,6 +116,41 @@
                 }
               ],
               "correct": "A"
+            },
+            {
+              "id": "q-mubcxgxomp4j",
+              "type": "reading",
+              "text": "[3 – 4] 다음 질문에 답하십시오.\n\n3. 다음 단어와 관계있는 것은 고르십시오.\n\n조사료",
+              "image": "",
+              "audioText": "",
+              "audioTarget": "question",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "양식장",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "과수원",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "가축",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "밭",
+                  "audioText": "",
+                  "image": ""
+                }
+              ],
+              "correct": "C"
             }
           ]
         },
