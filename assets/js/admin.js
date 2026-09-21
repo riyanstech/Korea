@@ -1,7 +1,8 @@
 /* ==========================================
-   KR-Dict — Admin Dashboard v8.2
+   KR-Dict — Admin Dashboard v8.4
    + Image upload for question & options
-   + Multi-line question support
+   + Multi-line question with live preview
+   + Line counter for textarea
    + Complete CRUD for all modules
    ========================================== */
 window.KR = window.KR || {};
@@ -385,7 +386,6 @@ KR.admin = (function () {
       els.qzContainer.innerHTML = `<div class="admin-empty"><i data-lucide="file-question"></i><div>Belum ada soal</div></div>`;
     } else {
       els.qzContainer.innerHTML = sec.questions.map((q, i) => {
-        // Preview text: replace newline with " · " for single-line
         const previewText = (q.text || q.audioText || '(tanpa teks)').replace(/\n+/g, ' · ').slice(0, 100);
         return `
           <div class="admin-row" data-id="${i}">
@@ -535,7 +535,42 @@ KR.admin = (function () {
   }
 
   /* ==========================================
-     ✅ QUESTION FORM — WITH IMAGE UPLOAD + MULTI-LINE
+     ✅ v8.4: LIVE PREVIEW untuk Textarea Pertanyaan
+     ========================================== */
+  function updateQTextPreview() {
+    const textarea = document.getElementById('qText');
+    const countEl = document.getElementById('qTextLineCount');
+    const previewContent = document.getElementById('qTextPreviewContent');
+    if (!textarea || !countEl || !previewContent) return;
+
+    const text = textarea.value || '';
+    const lines = text.split(/\r?\n/);
+    const lineCount = lines.length;
+
+    // Update counter
+    if (lineCount <= 1) {
+      countEl.textContent = '1 baris';
+      countEl.style.color = '#94a3b8';
+    } else {
+      countEl.textContent = `${lineCount} baris ✓`;
+      countEl.style.color = '#059669';
+    }
+
+    // Update preview
+    if (!text.trim()) {
+      previewContent.innerHTML = '<span style="font-style:italic;color:#94a3b8;">Ketik pertanyaan untuk melihat preview...</span>';
+    } else {
+      const escaped = text
+        .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\n/g, '<br>');
+      previewContent.innerHTML = escaped;
+    }
+  }
+
+  /* ==========================================
+     ✅ QUESTION FORM — WITH IMAGE UPLOAD + MULTI-LINE PREVIEW
      ========================================== */
   function questionFormHtml(q = {}) {
     const type = q.type || 'reading';
@@ -556,11 +591,16 @@ KR.admin = (function () {
 
       <div class="field">
         <label class="field-label">Teks Pertanyaan</label>
-        <textarea id="qText" class="textarea" rows="4" placeholder="Pertanyaan yang ditampilkan&#10;Tekan Enter untuk baris baru&#10;&#10;Contoh:&#10;[3-4] 다음 질문에 답하십시오.&#10;3. 다음 단어와 관계있는 것은 고르십시오.&#10;조사료">${esc(q.text || '')}</textarea>
-        <p style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">
-          <i data-lucide="corner-down-left" style="width:11px;height:11px;display:inline;vertical-align:middle"></i>
-          Tekan <strong>Enter</strong> untuk membuat baris baru (multi-line)
+        <textarea id="qText" class="textarea" rows="5" placeholder="Pertanyaan yang ditampilkan&#10;Tekan Enter untuk baris baru&#10;&#10;Contoh:&#10;[3-4] 다음 질문에 답하십시오.&#10;3. 다음 단어와 관계있는 것은 고르십시오.&#10;조사료" oninput="KR.admin.updateQTextPreview()">${esc(q.text || '')}</textarea>
+        <p style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;display:flex;align-items:center;gap:8px;">
+          <i data-lucide="corner-down-left" style="width:11px;height:11px;"></i>
+          <span>Tekan <strong>Enter</strong> untuk baris baru</span>
+          <span id="qTextLineCount" style="margin-left:auto;font-weight:800;color:#6366f1;">1 baris</span>
         </p>
+        <div id="qTextPreview" style="margin-top:8px;padding:10px 12px;background:var(--bg-subtle);border-radius:8px;border-left:3px solid #8b5cf6;font-size:0.85rem;line-height:1.55;color:var(--text-secondary);font-family:'Noto Sans KR',sans-serif;">
+          <div style="font-size:0.65rem;font-weight:800;color:#8b5cf6;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Live Preview</div>
+          <div id="qTextPreviewContent"></div>
+        </div>
       </div>
 
       <!-- ✅ GAMBAR PERTANYAAN -->
@@ -651,6 +691,9 @@ KR.admin = (function () {
 
     renderQuestionImage();
 
+    // ✅ v8.4: initial preview
+    setTimeout(() => updateQTextPreview(), 50);
+
     // ----- Options UI -----
     function renderOpts() {
       const list = document.getElementById('qOptionsList');
@@ -679,7 +722,6 @@ KR.admin = (function () {
         }).join('');
       }
 
-      // Render option images
       options.forEach((o, i) => {
         const area = list.querySelector(`[data-img="${i}"]`);
         if (!area) return;
@@ -700,14 +742,12 @@ KR.admin = (function () {
         }
       });
 
-      // Bind text inputs
       list.querySelectorAll('input[data-i]').forEach(inp => {
         inp.addEventListener('input', e => { options[Number(e.target.dataset.i)].text = e.target.value; });
       });
       list.querySelectorAll('input[data-audio]').forEach(inp => {
         inp.addEventListener('input', e => { options[Number(e.target.dataset.audio)].audioText = e.target.value; });
       });
-      // Bind delete option
       list.querySelectorAll('[data-del]').forEach(btn => {
         btn.addEventListener('click', () => {
           if (options.length <= 2) return KR.toast?.warn('Min 2 opsi');
@@ -716,14 +756,12 @@ KR.admin = (function () {
           renderOpts();
         });
       });
-      // Bind image add
       list.querySelectorAll('[data-act="add-opt-img"]').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = Number(btn.dataset.idx);
           list.querySelector(`[data-img-input="${idx}"]`)?.click();
         });
       });
-      // Bind image remove
       list.querySelectorAll('[data-act="remove-opt-img"]').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = Number(btn.dataset.idx);
@@ -731,7 +769,6 @@ KR.admin = (function () {
           renderOpts();
         });
       });
-      // Bind file inputs
       list.querySelectorAll('input[data-img-input]').forEach(inp => {
         inp.addEventListener('change', async (e) => {
           const idx = Number(inp.dataset.imgInput);
@@ -1766,5 +1803,5 @@ KR.admin = (function () {
     });
   }
 
-  return { init, open, close, switchTab, getVocab, getGrammar, getCulture, getDownloads, getBabList };
+  return { init, open, close, switchTab, getVocab, getGrammar, getCulture, getDownloads, getBabList, updateQTextPreview };
 })();
