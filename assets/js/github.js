@@ -1,6 +1,8 @@
 /* ==========================================
-   KR-Dict — GitHub Integration
-   Sync data (vocab, quiz) via GitHub API
+   KR-Dict — GitHub Integration v2.0 (FINAL)
+   + FIXED: encodeURIComponent pada path → segment-based encoding
+   + FIXED: Null safety pada config
+   + Sync data (vocab, quiz) via GitHub API
    ========================================== */
 window.KR = window.KR || {};
 
@@ -29,6 +31,20 @@ KR.github = (function () {
     };
   }
 
+  /**
+   * ✅ FIXED: Encode tiap segmen path, tapi tetap pertahankan slash (/).
+   * Contoh: 'assets/data/quizzes.json'
+   *   → 'assets/data/quizzes.json'  (slash TIDAK di-encode)
+   * Contoh: 'assets/data/na ma.json'
+   *   → 'assets/data/na%20ma.json'   (spasi di-encode)
+   */
+  function encodePath(path) {
+    return String(path || '')
+      .split('/')
+      .map(segment => encodeURIComponent(segment))
+      .join('/');
+  }
+
   async function testConnection() {
     if (!isConfigured()) return { ok: false, msg: 'Konfigurasi belum lengkap' };
     try {
@@ -48,7 +64,9 @@ KR.github = (function () {
   async function getFileSha(path) {
     try {
       const c = getConfig();
-      const res = await fetch(`${API}/repos/${c.owner}/${c.repo}/contents/${encodeURIComponent(path)}?ref=${c.branch}&t=${Date.now()}`, { headers: headers() });
+      // ✅ FIXED: pakai encodePath, bukan encodeURIComponent
+      const url = `${API}/repos/${c.owner}/${c.repo}/contents/${encodePath(path)}?ref=${c.branch}&t=${Date.now()}`;
+      const res = await fetch(url, { headers: headers() });
       if (!res.ok) return null;
       const data = await res.json();
       return data.sha || null;
@@ -58,10 +76,13 @@ KR.github = (function () {
   async function getFileContent(path) {
     try {
       const c = getConfig();
-      const res = await fetch(`${API}/repos/${c.owner}/${c.repo}/contents/${encodeURIComponent(path)}?ref=${c.branch}&t=${Date.now()}`, { headers: headers() });
+      // ✅ FIXED: pakai encodePath
+      const url = `${API}/repos/${c.owner}/${c.repo}/contents/${encodePath(path)}?ref=${c.branch}&t=${Date.now()}`;
+      const res = await fetch(url, { headers: headers() });
       if (!res.ok) return null;
       const data = await res.json();
       if (!data.content) return null;
+      // decode base64 → UTF-8 string
       return decodeURIComponent(escape(atob(data.content.replace(/\s/g, ''))));
     } catch { return null; }
   }
@@ -77,8 +98,12 @@ KR.github = (function () {
     };
     if (sha) body.sha = sha;
 
-    const res = await fetch(`${API}/repos/${c.owner}/${c.repo}/contents/${encodeURIComponent(path)}`, {
-      method: 'PUT', headers: headers(), body: JSON.stringify(body),
+    // ✅ FIXED: pakai encodePath
+    const url = `${API}/repos/${c.owner}/${c.repo}/contents/${encodePath(path)}`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: headers(),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -87,5 +112,14 @@ KR.github = (function () {
     return await res.json();
   }
 
-  return { getConfig, setConfig, clearConfig, isConfigured, testConnection, getFileContent, uploadFile, getFileSha };
+  return {
+    getConfig,
+    setConfig,
+    clearConfig,
+    isConfigured,
+    testConnection,
+    getFileContent,
+    uploadFile,
+    getFileSha
+  };
 })();
