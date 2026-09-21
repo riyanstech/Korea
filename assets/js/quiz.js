@@ -837,7 +837,7 @@ KR.quiz = (function () {
             </div>
             ${d.questionText ? `<div class="quiz-review-q">${escMultiline(d.questionText)}</div>` : ''}
             ${d.questionImage ? `<div class="quiz-review-image"><img src="${d.questionImage}" alt=""></div>` : ''}
-            ${isListening && d.audioText ? `<div class="quiz-review-audio"><button class="quiz-audio-replay" onclick="KR.quiz.speakText('${d.audioText.replace(/'/g, "\\'")}')"><i data-lucide="play" class="w-4 h-4"></i></button><span class="text-xs text-gray-500 italic">Audio: ${esc(d.audioText)}</span></div>` : ''}
+            ${isListening && d.audioText ? `<div class="quiz-review-audio"><button class="quiz-audio-replay" data-audio-text="${esc(d.audioText)}" onclick="KR.quiz.speakText(this.dataset.audioText)"><i data-lucide="play" class="w-4 h-4"></i></button><span class="text-xs text-gray-500 italic">Audio: ${esc(d.audioText)}</span></div>` : ''}
             <div class="quiz-review-answers">
               <div class="quiz-review-row"><span class="quiz-review-label">Jawaban Anda:</span><span class="quiz-review-val ${cls}">${d.userAns ? d.userAns + '. ' + escMultiline(userOpt?.text || '') : '(kosong)'}</span></div>
               ${!d.isCorrect ? `<div class="quiz-review-row"><span class="quiz-review-label">Jawaban Benar:</span><span class="quiz-review-val correct">${d.correct}. ${escMultiline(correctOpt?.text || '')}</span></div>` : ''}
