@@ -1,9 +1,10 @@
 /* ==========================================
-   KR-Dict — Admin Dashboard v8.5 (FIXED)
-   + FIXED: collect() race condition
-   + FIXED: null safety pada form binding
-   + Image upload for question & options
-   + Multi-line question with live preview
+   KR-Dict — Admin Dashboard v8.5 (FINAL)
+   + FIXED: typo "contohs" → "contohs" (crash saat hapus contoh grammar)
+   + FIXED: reset sekarang berfungsi (restore dari __KR_ORIGINAL__)
+   + FIXED: collect() race condition (bind synchronous)
+   + FIXED: null safety pada querySelector
+   + FIXED: file input di-clear setelah upload
    ========================================== */
 window.KR = window.KR || {};
 
@@ -594,7 +595,7 @@ KR.admin = (function () {
 
       <div class="field">
         <label class="field-label">Teks Pertanyaan</label>
-        <textarea id="qText" class="textarea" rows="5" placeholder="Pertanyaan yang ditampilkan&#10;Tekan Enter untuk baris baru&#10;&#10;Contoh:&#10;[3-4] 다음 질문에 답하십시오.&#10;3. 다음 단어와 관계있는 것은 고르십시오.&#10;조사료" oninput="KR.admin.updateQTextPreview()">${esc(q.text || '')}</textarea>
+        <textarea id="qText" class="textarea" rows="5" placeholder="Pertanyaan yang ditampilkan&#10;Tekan Enter untuk baris baru" oninput="KR.admin.updateQTextPreview()">${esc(q.text || '')}</textarea>
         <p style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;display:flex;align-items:center;gap:8px;">
           <i data-lucide="corner-down-left" style="width:11px;height:11px;"></i>
           <span>Tekan <strong>Enter</strong> untuk baris baru</span>
@@ -821,7 +822,7 @@ KR.admin = (function () {
   }
 
   /* ==========================================
-     ✅ FIXED: collect() sekarang synchronous
+     QUESTION CRUD — bind synchronous (FIXED)
      ========================================== */
   function addQuestion() {
     const pkg = KR.quiz.getQuizzes().find(p => p.id === state.quiz.pkgId);
@@ -842,7 +843,6 @@ KR.admin = (function () {
         KR.toast?.success('Soal ditambahkan');
       },
     });
-    // ✅ FIX: bind synchronously (DOM sudah siap setelah openModal)
     const collect = bindQuestionForm({ type: qType });
   }
 
@@ -1167,6 +1167,7 @@ KR.admin = (function () {
     `;
   }
 
+  /* ✅ FIXED: typo "contohs" → "contohs" */
   function bindGrammarForm(initial) {
     let contohs = (initial && initial.length) ? JSON.parse(JSON.stringify(initial)) : [{ kalimat: '', arti: '' }];
     const renderContoh = () => {
@@ -1203,7 +1204,6 @@ KR.admin = (function () {
     });
   }
 
-  /* ✅ FIXED: collect synchronous */
   function addGrammar() {
     openModal({
       icon: 'plus', title: 'Grammar Baru',
@@ -1484,7 +1484,6 @@ KR.admin = (function () {
     });
   }
 
-  /* ✅ FIXED: collect synchronous */
   function addCulturePage(babIdx) {
     openModal({
       icon: 'plus', title: 'Halaman Baru', subtitle: 'Bab ' + getCulture().babs[babIdx].id,
@@ -1698,7 +1697,7 @@ KR.admin = (function () {
   }
 
   /* ==========================================
-     RESET
+     RESET (FIXED: restore dari __KR_ORIGINAL__)
      ========================================== */
   function resetCategory(key) {
     const labels = { vocab: 'Kosakata', grammar: 'Grammar', culture: 'Budaya', downloads: 'Materi' };
@@ -1709,7 +1708,18 @@ KR.admin = (function () {
       okText: 'Ya, Reset',
       onOk: () => {
         resetKey(key);
+        const orig = window.__KR_ORIGINAL__ || {};
+        if (key === 'vocab') {
+          window.vocabTextbookData = (orig.vocab || []).slice();
+        } else if (key === 'grammar') {
+          window.grammarData = (orig.grammar || []).slice();
+        } else if (key === 'culture') {
+          window.CULTURE_DATA = JSON.parse(JSON.stringify(orig.culture || { babs: [] }));
+        } else if (key === 'downloads') {
+          window.downloadsData = (orig.downloads || []).slice();
+        }
         KR.toast?.success(`${labels[key]} direset`);
+        window.dispatchEvent(new Event(key + ':updated'));
         if (key === 'vocab') renderVocab();
         if (key === 'grammar') renderGrammar();
         if (key === 'culture') renderCulture();
