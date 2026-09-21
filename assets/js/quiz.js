@@ -1627,12 +1627,11 @@ KR.quiz = (function () {
     /* ============================================
        19. VERSION MARKER (bottom-left)
        ============================================ */
-    ctx.font = '600 7px "Plus Jakarta Sans", sans-serif';
-    ctx.fillStyle = 'rgba(148,163,184,0.5)';
-    ctx.textAlign = 'left';
-    ctx.letterSpacing = '1px';
-    ctx.fillText(`CERT v8.1 · ${tier.name} TIER`, 130, H - 46);
-    ctx.letterSpacing = '0px';
+    ctx.font = '700 11px ui-monospace, "SF Mono", Menlo, monospace';
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText(certId, W - 130, Y.metaY4);
+
+    // ← sebelumnya ada version marker di sini, sekarang sudah dihapus
 
     return cvs;
   }
