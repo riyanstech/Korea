@@ -1,8 +1,205 @@
+// ==========================================
+// KR-Dict — Main App v9.3
+// + Fixed navbar not clickable
+// + Bulletproof AI settings toggle
+// + Multi-Provider AI Tutor
+// ==========================================
+
+/* ---------- LOAD OVERRIDE DARI ADMIN ---------- */
+(function loadOverrides() {
+  const get = (k) => {
+    try {
+      const v = localStorage.getItem('krdict:' + k);
+      if (!v) return null;
+      return JSON.parse(v);
+    } catch { return null; }
+  };
+
+  const vocabOvr = get('vocabOverride');
+  if (vocabOvr && Array.isArray(vocabOvr) && vocabOvr.length > 0) {
+    window.vocabTextbookData = vocabOvr;
+  } else if (vocabOvr && Array.isArray(vocabOvr) && vocabOvr.length === 0) {
+    try { localStorage.removeItem('krdict:vocabOverride'); } catch {}
+  }
+
+  const grammarOvr = get('grammarOverride');
+  if (grammarOvr && Array.isArray(grammarOvr) && grammarOvr.length > 0) {
+    window.grammarData = grammarOvr;
+  } else if (grammarOvr && Array.isArray(grammarOvr) && grammarOvr.length === 0) {
+    try { localStorage.removeItem('krdict:grammarOverride'); } catch {}
+  }
+
+  const cultureOvr = get('cultureOverride');
+  if (cultureOvr && cultureOvr.babs && Array.isArray(cultureOvr.babs) && cultureOvr.babs.length > 0) {
+    window.CULTURE_DATA = cultureOvr;
+  } else if (cultureOvr && cultureOvr.babs && cultureOvr.babs.length === 0) {
+    try { localStorage.removeItem('krdict:cultureOverride'); } catch {}
+  }
+
+  const downloadsOvr = get('downloadsOverride');
+  if (downloadsOvr && Array.isArray(downloadsOvr) && downloadsOvr.length > 0) {
+    window.downloadsData = downloadsOvr;
+  } else if (downloadsOvr && Array.isArray(downloadsOvr) && downloadsOvr.length === 0) {
+    try { localStorage.removeItem('krdict:downloadsOverride'); } catch {}
+  }
+})();
+
+/* ---------- TOAST ---------- */
+window.KR = window.KR || {};
+KR.toast = (function () {
+  let container;
+  function show(msg, type = 'info', duration = 3000) {
+    if (!container) container = document.getElementById('toastContainer');
+    if (!container) { console.warn('[Toast]', msg); return; }
+    const div = document.createElement('div');
+    div.className = 'toast ' + type;
+    div.innerHTML = `<div style="flex:1">${msg}</div>`;
+    container.appendChild(div);
+    setTimeout(() => {
+      div.classList.add('removing');
+      setTimeout(() => div.remove(), 250);
+    }, duration);
+  }
+  return {
+    success: (m, d) => show(m, 'success', d),
+    error: (m, d) => show(m, 'error', d),
+    warn: (m, d) => show(m, 'warn', d),
+    info: (m, d) => show(m, 'info', d),
+  };
+})();
+
+/* ---------- STATE ---------- */
+let selectedVocabForQuiz = [];
+let quizQuestions = [];
+let currentQuestionIndex = 0;
+let currentScore = 0;
+let chatHistory = [];
+let isTyping = false;
+let selectedImageBase64 = null;
+let recognition = null;
+let isRecording = false;
+let currentQuickMode = 'tutor';
+
+// Call feature
+let isCallActive = false;
+let callSpeechSynth = window.speechSynthesis;
+let callRecognition = null;
+let isAIThinking = false;
+let isCallSpeaking = false;
+let userMuted = false;
+
 /* ==========================================
-   AI TUTOR MODULE (v2.1)
-   + Robust settings toggle
-   + Online/offline status
-   + Test connection
+   AI PROVIDERS CONFIG
+   ========================================== */
+const AI_PROVIDERS = {
+  gemini: {
+    name: 'Google Gemini',
+    icon: '✨',
+    endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
+    models: ['gemini-2.0-flash-exp', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-8b'],
+    defaultModel: 'gemini-2.0-flash-exp',
+    keyUrl: 'https://aistudio.google.com/app/apikey',
+    desc: 'Free tier generous, support gambar',
+    format: 'gemini',
+  },
+  groq: {
+    name: 'Groq (Gratis & Cepat)',
+    icon: '⚡',
+    endpoint: 'https://api.groq.com/openai/v1/chat/completions',
+    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'],
+    defaultModel: 'llama-3.3-70b-versatile',
+    keyUrl: 'https://console.groq.com/keys',
+    desc: 'Gratis, sangat cepat, limit tinggi',
+    format: 'openai',
+  },
+  openai: {
+    name: 'OpenAI (GPT)',
+    icon: '🤖',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'],
+    defaultModel: 'gpt-4o-mini',
+    keyUrl: 'https://platform.openai.com/api-keys',
+    desc: 'Berbayar, kualitas premium',
+    format: 'openai',
+  },
+  anthropic: {
+    name: 'Anthropic Claude',
+    icon: '🎭',
+    endpoint: 'https://api.anthropic.com/v1/messages',
+    models: ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'],
+    defaultModel: 'claude-3-5-haiku-20241022',
+    keyUrl: 'https://console.anthropic.com/settings/keys',
+    desc: 'Pintar & natural, support gambar',
+    format: 'anthropic',
+  },
+  openrouter: {
+    name: 'OpenRouter (Multi-Model)',
+    icon: '🌐',
+    endpoint: 'https://openrouter.ai/api/v1/chat/completions',
+    models: [
+      'google/gemini-flash-1.5',
+      'google/gemini-2.0-flash-exp:free',
+      'anthropic/claude-3.5-sonnet',
+      'meta-llama/llama-3.3-70b-instruct',
+      'deepseek/deepseek-chat',
+    ],
+    defaultModel: 'google/gemini-flash-1.5',
+    keyUrl: 'https://openrouter.ai/keys',
+    desc: 'Akses banyak model dari 1 API key',
+    format: 'openai',
+  },
+  deepseek: {
+    name: 'DeepSeek',
+    icon: '🐋',
+    endpoint: 'https://api.deepseek.com/v1/chat/completions',
+    models: ['deepseek-chat', 'deepseek-reasoner'],
+    defaultModel: 'deepseek-chat',
+    keyUrl: 'https://platform.deepseek.com/api_keys',
+    desc: 'Murah, cocok untuk reasoning',
+    format: 'openai',
+  },
+  mistral: {
+    name: 'Mistral AI',
+    icon: '🌪️',
+    endpoint: 'https://api.mistral.ai/v1/chat/completions',
+    models: ['mistral-large-latest', 'mistral-small-latest', 'open-mistral-nemo'],
+    defaultModel: 'mistral-small-latest',
+    keyUrl: 'https://console.mistral.ai/api-keys/',
+    desc: 'Eropa, cepat & murah',
+    format: 'openai',
+  },
+  custom: {
+    name: 'Custom (OpenAI-compatible)',
+    icon: '⚙️',
+    endpoint: '',
+    models: ['custom'],
+    defaultModel: 'custom',
+    keyUrl: '',
+    desc: 'Gunakan endpoint sendiri (OpenAI-compatible API)',
+    format: 'openai',
+  },
+};
+
+/* ---------- AI CONFIG STORAGE ---------- */
+function getAIConfig() {
+  const provider = localStorage.getItem('ai_provider') || 'gemini';
+  const cfg = AI_PROVIDERS[provider] || AI_PROVIDERS.gemini;
+  return {
+    provider,
+    model: localStorage.getItem('ai_model_' + provider) || cfg.defaultModel,
+    apiKey: localStorage.getItem('ai_key_' + provider) || '',
+    customEndpoint: localStorage.getItem('ai_custom_endpoint') || '',
+  };
+}
+function saveAIConfig({ provider, model, apiKey, customEndpoint }) {
+  if (provider) localStorage.setItem('ai_provider', provider);
+  if (model && provider) localStorage.setItem('ai_model_' + provider, model);
+  if (apiKey !== undefined && provider) localStorage.setItem('ai_key_' + provider, apiKey);
+  if (customEndpoint !== undefined) localStorage.setItem('ai_custom_endpoint', customEndpoint);
+}
+
+/* ==========================================
+   AI TUTOR MODULE
    ========================================== */
 KR.ai = (function () {
   'use strict';
@@ -116,7 +313,6 @@ KR.ai = (function () {
     updateStatusFromConfig();
   }
 
-  /* ✅ NEW: Update status indicator based on API key */
   function updateStatusFromConfig() {
     const cfg = getAIConfig();
     const statusEl = els.status || document.getElementById('ai-status');
@@ -127,8 +323,6 @@ KR.ai = (function () {
 
     if (cfg.apiKey && cfg.apiKey.trim().length > 10) {
       const p = AI_PROVIDERS[cfg.provider];
-      const persona = document.getElementById('chat-mode-select')?.value || 'tutor';
-      const personaLabel = persona === 'casual' ? 'Ji-eun' : 'Tutor';
       statusEl.innerHTML = `<span style="color:#10b981;font-weight:800;">● Online</span> • ${p?.name || cfg.provider}`;
       statusEl.style.color = '';
       if (dotEl) dotEl.style.background = '#10b981';
@@ -141,7 +335,6 @@ KR.ai = (function () {
     }
   }
 
-  /* ✅ NEW: Test connection to AI provider */
   async function testConnection() {
     const cfg = getAIConfig();
     if (!cfg.apiKey) {
@@ -559,8 +752,10 @@ KR.ai = (function () {
   };
 })();
 
-/* ---------- BRIDGE GLOBAL FUNCTIONS ---------- */
-/* ✅ ROBUST SETTINGS TOGGLE — multiple fallback classes */
+/* ==========================================
+   ✅ BULLETPROOF SETTINGS TOGGLE (v9.3)
+   Display-based approach — tidak ada inline style
+   ========================================== */
 function toggleChatSettings() {
   const sheet = document.getElementById('chat-settings');
   if (!sheet) {
@@ -572,16 +767,9 @@ function toggleChatSettings() {
     sheet.classList.remove('open');
     sheet.classList.remove('show');
     sheet.classList.remove('active');
-    sheet.style.opacity = '';
-    sheet.style.visibility = '';
-    sheet.style.pointerEvents = '';
     console.log('[AI] Settings closed');
   } else {
     sheet.classList.add('open');
-    sheet.classList.add('show');
-    sheet.style.opacity = '1';
-    sheet.style.visibility = 'visible';
-    sheet.style.pointerEvents = 'auto';
     console.log('[AI] Settings opened');
   }
   if (window.lucide) lucide.createIcons();
@@ -638,4 +826,936 @@ function handleImageSelect(e) { return KR.ai.handleImageSelect(e); }
 function cancelImage() { return KR.ai.cancelImage(); }
 function sendImage() { return KR.ai.sendImage(); }
 
-/* ---------- REST OF CODE (call feature, tabs, etc.) — SAMA SEPERTI SEBELUMNYA ---------- */
+/* ---------- CALL FEATURE ---------- */
+function updateCallUI(state) {
+  const statusEl = document.getElementById('call-status');
+  const modal = document.getElementById('call-modal');
+  if (!statusEl || !modal) return;
+  modal.classList.remove('call-listening', 'call-thinking', 'call-speaking');
+  if (state === 'listening') {
+    statusEl.innerText = "MENDENGARKAN ANDA...";
+    statusEl.style.color = '#4ade80';
+    modal.classList.add('call-listening');
+  } else if (state === 'thinking') {
+    statusEl.innerText = "AI SEDANG BERPIKIR...";
+    statusEl.style.color = '#facc15';
+    modal.classList.add('call-thinking');
+  } else if (state === 'speaking') {
+    statusEl.innerText = "AI BERBICARA...";
+    statusEl.style.color = '#f472b6';
+    modal.classList.add('call-speaking');
+  } else {
+    statusEl.innerText = "MENGHUBUNGKAN...";
+    statusEl.style.color = '#818cf8';
+  }
+}
+function toggleMute() {
+  userMuted = !userMuted;
+  const btn = document.getElementById('mute-btn');
+  if (!btn) return;
+  if (userMuted) {
+    btn.style.background = '#ef4444';
+    btn.innerHTML = '<i data-lucide="mic-off"></i>';
+    if (callRecognition) callRecognition.stop();
+  } else {
+    btn.style.background = 'rgba(255,255,255,0.1)';
+    btn.innerHTML = '<i data-lucide="mic"></i>';
+    if (!isCallSpeaking && !isAIThinking) startListeningLoop();
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+async function startCall() {
+  if (!('webkitSpeechRecognition' in window) || !('speechSynthesis' in window)) {
+    KR.toast?.error('Browser tidak mendukung panggilan suara');
+    return;
+  }
+  const cfg = getAIConfig();
+  if (!cfg.apiKey) {
+    KR.toast?.warn('Isi API Key dulu di ⚙️ Pengaturan');
+    toggleChatSettings();
+    return;
+  }
+  isCallActive = true;
+  isCallSpeaking = false;
+  isAIThinking = false;
+  userMuted = false;
+  document.getElementById('call-modal')?.classList.remove('hidden');
+  updateCallUI('connecting');
+
+  if (!callRecognition) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    callRecognition = new SR();
+    callRecognition.lang = 'ko-KR';
+    callRecognition.continuous = false;
+    callRecognition.interimResults = false;
+    callRecognition.onstart = () => {
+      if (isCallActive && !isAIThinking && !isCallSpeaking) updateCallUI('listening');
+    };
+    callRecognition.onresult = async (event) => {
+      if (userMuted) return;
+      const transcript = event.results[0][0].transcript;
+      if (transcript.trim().length > 0) await processCallResponse(transcript);
+      else startListeningLoop();
+    };
+    callRecognition.onerror = (event) => {
+      if (event.error !== 'no-speech') console.error("Speech Error", event.error);
+    };
+    callRecognition.onend = () => {
+      if (isCallActive && !isAIThinking && !isCallSpeaking && !userMuted) startListeningLoop();
+    };
+  }
+  setTimeout(() => {
+    const mode = document.getElementById('chat-mode-select')?.value || 'tutor';
+    const greeting = mode === 'casual' ? "안녕! 잘 지냈어?" : "안녕하세요! 시작해볼까요?";
+    speakInCall(greeting);
+  }, 1000);
+}
+function startListeningLoop() {
+  try { if (isCallActive && !userMuted) callRecognition.start(); } catch (e) {}
+}
+async function processCallResponse(userText) {
+  isAIThinking = true;
+  callRecognition.stop();
+  updateCallUI('thinking');
+
+  const cfg = getAIConfig();
+  if (!cfg.apiKey) {
+    isAIThinking = false;
+    speakInCall("API Key belum diisi.");
+    return;
+  }
+  const mode = document.getElementById('chat-mode-select')?.value || 'tutor';
+  const level = document.getElementById('chat-level-select')?.value || 'pemula';
+  const systemPrompt = `${mode === 'casual' ? 'Jawab lisan pendek (max 2 kalimat) seperti teman Korea (banmal).' : 'Jawab lisan pendek (max 2 kalimat) sebagai tutor sopan.'} Level user: ${level}. WAJIB output dalam Bahasa Korea saja.`;
+
+  try {
+    const reply = await callAIDirect(cfg, systemPrompt, [{ role: 'user', content: userText }]);
+    isAIThinking = false;
+    speakInCall(reply);
+  } catch (err) {
+    console.error(err);
+    isAIThinking = false;
+    speakInCall("죄송합니다, 인터넷 오류.");
+  }
+}
+
+async function callAIDirect(cfg, systemPrompt, messages) {
+  const provider = AI_PROVIDERS[cfg.provider];
+  if (!provider) throw new Error('Provider invalid');
+  let endpoint = cfg.provider === 'custom' ? cfg.customEndpoint : provider.endpoint;
+  endpoint = endpoint.replace('{model}', cfg.model);
+
+  if (provider.format === 'gemini') {
+    const contents = messages.map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: String(m.content) }],
+    }));
+    const res = await fetch(endpoint + '?key=' + cfg.apiKey, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Error');
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+
+  if (provider.format === 'anthropic') {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': cfg.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: cfg.model,
+        max_tokens: 300,
+        system: systemPrompt,
+        messages: messages.map(m => ({ role: m.role, content: [{ type: 'text', text: String(m.content) }] })),
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Error');
+    return data.content?.[0]?.text || '';
+  }
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + cfg.apiKey,
+  };
+  if (endpoint.includes('openrouter.ai')) {
+    headers['HTTP-Referer'] = location.origin || 'https://localhost';
+    headers['X-Title'] = 'KR-Dict Learning Hub';
+  }
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model: cfg.model,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      max_tokens: 300,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'Error');
+  return data.choices?.[0]?.message?.content || '';
+}
+
+function speakInCall(text) {
+  if (!isCallActive) return;
+  isCallSpeaking = true;
+  updateCallUI('speaking');
+  callSpeechSynth.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'ko-KR';
+  utterance.rate = 1.0;
+  const voices = window.speechSynthesis.getVoices();
+  const koVoice = voices.find(v => v.lang.startsWith('ko'));
+  if (koVoice) utterance.voice = koVoice;
+  utterance.onend = () => {
+    isCallSpeaking = false;
+    if (isCallActive) {
+      updateCallUI('listening');
+      startListeningLoop();
+    }
+  };
+  callSpeechSynth.speak(utterance);
+}
+function endCall() {
+  isCallActive = false;
+  isCallSpeaking = false;
+  if (callRecognition) callRecognition.stop();
+  callSpeechSynth.cancel();
+  document.getElementById('call-modal')?.classList.add('hidden');
+}
+
+/* ==========================================
+   MAIN INIT
+   ========================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  if (window.lucide) lucide.createIcons();
+
+  renderHangeul();
+  renderGrammar(window.grammarData || []);
+
+  const activeNav = document.querySelector('.nav-chip.active') || document.querySelector('.nav-link.active');
+  showTab('vocab-container', activeNav);
+
+  window.addEventListener('vocab:updated', filterVocabTextbook);
+  window.addEventListener('grammar:updated', () => renderGrammar(window.grammarData || []));
+  window.addEventListener('culture:updated', () => {
+    const el = document.getElementById('culture');
+    if (el && !el.classList.contains('hidden')) renderCultureList();
+  });
+  window.addEventListener('downloads:updated', renderDownloads);
+
+  document.addEventListener('visibilitychange', () => {
+    document.body.classList.toggle('tab-hidden', document.hidden);
+  });
+});
+
+/* ---------- THEME ---------- */
+function initTheme() {
+  if (localStorage.getItem('color-theme') === 'dark' ||
+      (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+    document.getElementById('theme-icon')?.setAttribute('data-lucide', 'sun');
+  } else {
+    document.documentElement.classList.remove('dark');
+    document.getElementById('theme-icon')?.setAttribute('data-lucide', 'moon');
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+function toggleDarkMode() {
+  if (document.documentElement.classList.contains('dark')) {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('color-theme', 'light');
+    document.getElementById('theme-icon')?.setAttribute('data-lucide', 'moon');
+  } else {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('color-theme', 'dark');
+    document.getElementById('theme-icon')?.setAttribute('data-lucide', 'sun');
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+/* ---------- MENU ---------- */
+function toggleMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('burger-btn');
+  if (!menu || !btn) return;
+  if (menu.classList.contains('open')) {
+    menu.classList.remove('open');
+    btn.innerHTML = '<i data-lucide="menu" class="w-6 h-6"></i>';
+  } else {
+    menu.classList.add('open');
+    btn.innerHTML = '<i data-lucide="x" class="w-6 h-6"></i>';
+  }
+  if (window.lucide) lucide.createIcons();
+}
+
+/* ==========================================
+   ✅ NAVIGATION v9.3 — WITH KILL SWITCH
+   Bersihkan state chat sebelum pindah tab
+   ========================================== */
+function showTab(tabId, element) {
+  // ✅ CLEANUP: pastikan semua state bersih dulu
+  document.body.classList.remove('chat-open');
+
+  // Force-hide chat-shell kalau bukan tab aktif
+  const chatShellEl = document.getElementById('chat-ai');
+  if (chatShellEl && tabId !== 'chat-ai') {
+    chatShellEl.classList.add('hidden');
+  }
+
+  // Force-close settings kalau ada yang nyangkut
+  const settingsEl = document.getElementById('chat-settings');
+  if (settingsEl) {
+    settingsEl.classList.remove('open', 'show', 'active');
+    settingsEl.removeAttribute('style'); // bersihkan inline style lama
+  }
+
+  // Switch tab
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  const target = document.getElementById(tabId);
+  if (!target) {
+    console.warn('[App] Tab not found:', tabId);
+    return;
+  }
+  target.classList.remove('hidden');
+  target.classList.remove('animate-slide-up');
+  void target.offsetWidth;
+  target.classList.add('animate-slide-up');
+
+  // Update active state
+  document.querySelectorAll('.nav-chip, .nav-link, .nav-link-mobile, .nav-item, .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
+  if (element) {
+    if (element.classList.contains('nav-chip')) element.classList.add('active');
+    if (element.classList.contains('nav-link')) element.classList.add('active');
+    if (element.classList.contains('nav-link-mobile')) element.classList.add('active');
+    if (element.classList.contains('nav-item')) element.classList.add('active');
+    if (element.classList.contains('mobile-nav-item')) element.classList.add('active');
+  }
+
+  // Close mobile menu
+  const menu = document.getElementById('mobile-menu');
+  if (menu && menu.classList.contains('open')) toggleMenu();
+
+  // Handle chat-ai body class
+  if (tabId === 'chat-ai') {
+    document.body.classList.add('chat-open');
+  }
+
+  // Init tab-specific
+  if (tabId === 'vocab-container') {
+    showVocabSubTab('vocab-textbook');
+    filterVocabTextbook();
+  } else if (tabId === 'downloads') {
+    renderDownloads();
+  } else if (tabId === 'culture') {
+    renderCultureList();
+  } else if (tabId === 'quiz-hub') {
+    if (window.KR && KR.quiz) KR.quiz.init();
+  } else if (tabId === 'chat-ai') {
+    if (window.KR && KR.ai) KR.ai.init();
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function showVocabSubTab(subTabId) {
+  document.querySelectorAll('.vocab-sub-tab').forEach(el => el.classList.add('hidden'));
+  const sub = document.getElementById(subTabId);
+  if (!sub) return;
+  sub.classList.remove('hidden');
+  sub.classList.remove('animate-fade-in');
+  void sub.offsetWidth;
+  sub.classList.add('animate-fade-in');
+
+  if (subTabId === 'vocab-selection') {
+    const filter = document.getElementById('quiz-chapter-filter');
+    if (filter) filter.value = '';
+    renderQuizSelection();
+  }
+}
+
+/* ---------- SPEAK ---------- */
+function speak(text, lang = 'ko-KR', onEndCallback = null) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  utterance.rate = 0.9;
+  const voices = window.speechSynthesis.getVoices();
+  const koVoice = voices.find(v => v.lang.startsWith('ko'));
+  if (koVoice) utterance.voice = koVoice;
+  if (onEndCallback) utterance.onend = onEndCallback;
+  window.speechSynthesis.speak(utterance);
+}
+
+/* ---------- HANGEUL ---------- */
+function renderHangeul() {
+  const container = document.getElementById('hangeul-grid');
+  if (!container) return;
+  const data = window.hangeulData || [];
+  const grouped = data.reduce((acc, item) => {
+    if (!acc[item.type]) acc[item.type] = [];
+    acc[item.type].push(item);
+    return acc;
+  }, {});
+  let html = '';
+  const order = ['Konsonan Dasar', 'Konsonan Rangkap', 'Vokal Dasar', 'Vokal Rangkap'];
+
+  order.forEach(type => {
+    if (grouped[type]) {
+      html += `<div class="col-span-full mt-6 mb-3">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 border-b-2 border-indigo-100 dark:border-gray-700 pb-2 inline-block">${type}</h3>
+      </div>`;
+      grouped[type].forEach(item => {
+        const details = item.awal
+          ? `<div class="hangeul-sub" style="display:flex; gap:8px; justify-content:center; font-size:0.68rem; margin-top:8px;">
+              <span><span style="color:var(--text-muted);">Awal:</span> <strong style="color:var(--primary);">${item.awal}</strong></span>
+              <span><span style="color:var(--text-muted);">Akhir:</span> <strong style="color:var(--accent);">${item.akhir}</strong></span>
+             </div>`
+          : `<div class="hangeul-sub">${item.rom}</div>`;
+        html += `
+          <div class="hangeul-card" onclick="speak('${item.hangeul}')">
+            <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+              <span class="hangeul-char">${item.hangeul}</span>
+            </div>
+            ${details}
+          </div>`;
+      });
+    }
+  });
+  container.innerHTML = html;
+}
+
+/* ---------- VOCAB ---------- */
+function renderVocab(data) {
+  const container = document.getElementById('vocab-textbook-list');
+  if (!container) return;
+
+  if (!data || data.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i data-lucide="search-x"></i></div>
+        <div class="empty-title">Tidak ada kata ditemukan</div>
+        <div class="empty-sub">Coba ubah filter atau kata kunci pencarian</div>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  const grouped = data.reduce((acc, item) => {
+    if (!acc[item.bab]) acc[item.bab] = [];
+    acc[item.bab].push(item);
+    return acc;
+  }, {});
+
+  const palettes = [
+    { from: '#6366f1', to: '#a855f7' },
+    { from: '#06b6d4', to: '#3b82f6' },
+    { from: '#f43f5e', to: '#ec4899' },
+    { from: '#f59e0b', to: '#f97316' },
+    { from: '#10b981', to: '#14b8a6' },
+    { from: '#8b5cf6', to: '#d946ef' },
+  ];
+
+  let html = '';
+  let babIndex = 0;
+  for (const [bab, items] of Object.entries(grouped)) {
+    const p = palettes[babIndex % palettes.length];
+    babIndex++;
+    html += `
+      <div class="bab-section">
+        <div class="bab-header" style="--from:${p.from};--to:${p.to}">
+          <div class="bab-header-left">
+            <div class="bab-icon"><i data-lucide="bookmark"></i></div>
+            <div>
+              <div class="bab-label">${bab}</div>
+              <div class="bab-count">${items.length} kata</div>
+            </div>
+          </div>
+          <div class="bab-deco"></div>
+        </div>
+        <div class="vocab-modern-grid">
+          ${items.map(item => `
+            <div class="vocab-modern-card" style="--from:${p.from};--to:${p.to}">
+              <div class="vocab-modern-accent"></div>
+              <div class="vocab-modern-body">
+                <div class="vocab-modern-hangeul">${item.hangeul}</div>
+                <div class="vocab-modern-rom">${item.rom || ''}</div>
+                <div class="vocab-modern-arti">${item.arti}</div>
+              </div>
+              <button class="vocab-modern-speak" onclick="event.stopPropagation(); speak('${item.hangeul}')" title="Dengarkan">
+                <i data-lucide="volume-2"></i>
+              </button>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+  container.innerHTML = html;
+  if (window.lucide) lucide.createIcons();
+}
+
+let vocabFilterTimer;
+function filterVocabTextbook() {
+  clearTimeout(vocabFilterTimer);
+  vocabFilterTimer = setTimeout(() => {
+    const chapter = document.getElementById('vocab-chapter-filter')?.value || '';
+    const search = (document.getElementById('vocab-textbook-search')?.value || '').toLowerCase().trim();
+    const data = window.vocabTextbookData || [];
+    const filtered = data.filter(item => {
+      const matchBab = chapter === '' || item.bab === chapter;
+      if (!matchBab) return false;
+      if (!search) return true;
+      return (item.hangeul || '').toLowerCase().includes(search) ||
+             (item.rom || '').toLowerCase().includes(search) ||
+             (item.arti || '').toLowerCase().includes(search);
+    });
+    renderVocab(filtered);
+  }, 200);
+}
+
+/* ---------- GRAMMAR ---------- */
+function renderGrammar(data) {
+  const container = document.getElementById('grammar-list');
+  if (!container) return;
+  if (!data || !data.length) {
+    container.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon"><i data-lucide="search-x"></i></div>
+        <div class="empty-title">Belum ada data grammar</div>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+  container.innerHTML = data.map(item => {
+    const fungsiHTML = Array.isArray(item.fungsi)
+      ? item.fungsi.map(f => `<li>${f}</li>`).join('')
+      : `<li>${item.fungsi || ''}</li>`;
+    const contohHTML = (item.contoh || []).map(c => `
+      <div class="example-item">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <div class="example-text">${c.kalimat}</div>
+          <button onclick="speak('${c.kalimat.replace(/'/g, "\\'")}')" style="color:var(--text-muted); background:none; border:none; cursor:pointer; padding:4px;" title="Dengarkan">
+            <i data-lucide="volume-2" style="width:16px; height:16px;"></i>
+          </button>
+        </div>
+        <div class="example-arti">${c.arti}</div>
+      </div>`).join('');
+    return `
+      <div class="grammar-card">
+        <div style="display:inline-block; padding:4px 12px; border-radius:999px; background:linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12)); color:#6366f1; font-size:0.68rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:10px;">Tata Bahasa</div>
+        <div class="grammar-struktur">${item.struktur}</div>
+        <div class="grammar-arti">${item.arti}</div>
+        <ul class="grammar-list">${fungsiHTML}</ul>
+        <div>
+          <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Contoh Kalimat</div>
+          ${contohHTML}
+        </div>
+      </div>`;
+  }).join('');
+  if (window.lucide) lucide.createIcons();
+}
+
+function filterGrammar() {
+  const query = (document.getElementById('grammar-search')?.value || '').toLowerCase().trim();
+  const data = window.grammarData || [];
+  const filtered = data.filter(item =>
+    (item.struktur || '').toLowerCase().includes(query) ||
+    (item.arti || '').toLowerCase().includes(query)
+  );
+  renderGrammar(filtered);
+}
+
+/* ---------- CULTURE ---------- */
+function renderCultureList() {
+  const container = document.getElementById('culture');
+  if (!container) return;
+  const data = window.CULTURE_DATA || { babs: [] };
+  let html = `
+    <div class="page-header">
+      <h2 class="display-2" style="font-weight: 800;">Budaya & Informasi</h2>
+      <p>Pelajari Budaya dan Informasi Textbook 2024</p>
+    </div>
+    <div style="max-width:400px; margin:0 auto var(--sp-6);">
+      <div class="glass-input-wrapper">
+        <i data-lucide="search"></i>
+        <input type="text" id="culture-search" oninput="filterCulture()" placeholder="Cari bab budaya..." class="glass-input">
+      </div>
+    </div>
+    <div id="culture-grid" style="display:grid; grid-template-columns:1fr; gap:16px;">`;
+
+  const palettes = [
+    { from: '#6366f1', to: '#a855f7' }, { from: '#06b6d4', to: '#3b82f6' },
+    { from: '#f43f5e', to: '#ec4899' }, { from: '#f59e0b', to: '#f97316' },
+    { from: '#10b981', to: '#14b8a6' }, { from: '#8b5cf6', to: '#d946ef' },
+  ];
+  (data.babs || []).forEach((bab, i) => {
+    const pageCount = (bab.pages || []).length;
+    const p = palettes[i % palettes.length];
+    html += `
+      <div class="card hoverable" style="cursor:pointer; position:relative; overflow:hidden;" onclick="renderCultureDetail(${bab.id})" data-title="${(bab.title || '').toLowerCase()}" data-id="${bab.id}">
+        <div style="position:absolute; top:-40px; right:-40px; width:140px; height:140px; border-radius:50%; background:radial-gradient(circle, ${p.from}, transparent 70%); opacity:0.12; filter:blur(20px); pointer-events:none;"></div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; position:relative; z-index:1;">
+          <span class="chip" style="background:linear-gradient(135deg, ${p.from}, ${p.to}); color:#fff; border:none;"><i data-lucide="bookmark"></i>BAB ${bab.id}</span>
+          <span class="chip neutral"><i data-lucide="file-text"></i>${pageCount} hal</span>
+        </div>
+        <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); line-height:1.35; margin-bottom:16px; position:relative; z-index:1;">${bab.title}</h3>
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:0.85rem; background:linear-gradient(135deg, ${p.from}, ${p.to}); -webkit-background-clip:text; background-clip:text; color:transparent; position:relative; z-index:1;">
+          Mulai Belajar <i data-lucide="arrow-right" style="width:16px; height:16px; color:${p.from};"></i>
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+  if (window.lucide) lucide.createIcons();
+}
+
+function filterCulture() {
+  const query = (document.getElementById('culture-search')?.value || '').toLowerCase();
+  document.querySelectorAll('#culture-grid > div').forEach(card => {
+    const title = card.getAttribute('data-title') || '';
+    const id = card.getAttribute('data-id') || '';
+    if (title.includes(query) || id.includes(query)) card.classList.remove('hidden');
+    else card.classList.add('hidden');
+  });
+}
+
+function renderCultureDetail(babId) {
+  const container = document.getElementById('culture');
+  const data = window.CULTURE_DATA || { babs: [] };
+  const bab = data.babs.find(b => b.id === babId);
+  if (!bab) return;
+  let html = `
+    <div style="max-width:800px; margin:0 auto;">
+      <button onclick="renderCultureList()" class="btn btn-ghost" style="margin-bottom:16px;">
+        <i data-lucide="arrow-left"></i> Kembali ke Daftar
+      </button>
+      <div style="text-align:center; margin-bottom:32px;">
+        <span class="chip primary" style="margin-bottom:8px; display:inline-flex;"><i data-lucide="bookmark"></i>BAB ${bab.id}</span>
+        <h2 class="display-2">${bab.title}</h2>
+      </div>`;
+  (bab.pages || []).forEach((page, idx) => {
+    const transId = `culture-trans-${bab.id}-${idx}`;
+    const vocabId = `culture-vocab-${bab.id}-${idx}`;
+    let vocabHtml = `
+      <div class="vocab-header">
+        <div>Bagian Kalimat</div>
+        <div>Fungsi / Grammar</div>
+        <div>Arti</div>
+      </div>`;
+    if (page.arti_per_kata && page.arti_per_kata.length > 0) {
+      page.arti_per_kata.forEach(v => {
+        vocabHtml += `
+          <div class="vocab-grid">
+            <div class="v-term">${v.bagian}</div>
+            <div class="v-func">${v.fungsi || '-'}</div>
+            <div class="v-def">${v.arti}</div>
+          </div>`;
+      });
+    } else {
+      vocabHtml = `<p class="v-def" style="text-align:center; color:var(--text-muted); font-style:italic; padding:16px;">Tidak ada detail kosakata.</p>`;
+    }
+    html += `
+      <div class="culture-page">
+        <div class="culture-korean">${page.korean}</div>
+        <div class="culture-actions">
+          <button class="pill-btn" onclick="playAudio('${(page.korean || '').replace(/'/g, "\\'")}', this)">
+            <i data-lucide="volume-2"></i> Dengar
+          </button>
+          <button class="pill-btn" onclick="toggleCultureSection('${transId}', this)">
+            <i data-lucide="languages"></i> Arti
+          </button>
+          <button class="pill-btn" onclick="toggleCultureSection('${vocabId}', this)">
+            <i data-lucide="list-tree"></i> Rincian
+          </button>
+        </div>
+        <div id="${transId}" class="reveal-box trans">
+          <p style="font-weight:500; color:var(--text); margin:0;">${page.arti_full}</p>
+        </div>
+        <div id="${vocabId}" class="reveal-box vocab" style="overflow-x:auto;">
+          ${vocabHtml}
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+  if (window.lucide) lucide.createIcons();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleCultureSection(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.style.display === 'block') {
+    el.style.display = 'none';
+    btn.classList.remove('active');
+  } else {
+    el.style.display = 'block';
+    btn.classList.add('active');
+  }
+}
+
+function playAudio(text, btn) {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.85;
+    const voices = window.speechSynthesis.getVoices();
+    const koVoice = voices.find(v => v.lang.startsWith('ko'));
+    if (koVoice) u.voice = koVoice;
+    if (btn) btn.classList.add('playing');
+    u.onend = () => { if (btn) btn.classList.remove('playing'); };
+    window.speechSynthesis.speak(u);
+  }
+}
+
+/* ---------- DOWNLOADS ---------- */
+let currentDownloadFilter = 'all';
+function renderDownloads() {
+  const container = document.getElementById('downloads-grid');
+  if (!container) return;
+  const data = window.downloadsData || [];
+  const filtered = currentDownloadFilter === 'all'
+    ? data
+    : data.filter(d => d.category === currentDownloadFilter);
+  if (!filtered.length) {
+    container.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon"><i data-lucide="download"></i></div>
+        <div class="empty-title">Belum ada materi</div>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+  container.innerHTML = filtered.map(item => `
+    <div class="card hoverable" style="display:flex; flex-direction:column;">
+      <div style="display:flex; gap:12px; margin-bottom:16px;">
+        <div class="card-icon" style="background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15)); color:#6366f1;">
+          <i data-lucide="${item.icon || 'file'}"></i>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <span class="chip neutral" style="margin-bottom:6px;">${item.category}</span>
+          <h4 style="font-size:1rem; font-weight:800; line-height:1.3; margin-top:4px;">${item.title}</h4>
+        </div>
+      </div>
+      <p style="font-size:0.83rem; color:var(--text-tertiary); line-height:1.55; flex:1; margin-bottom:16px;">${item.desc}</p>
+      <a href="${item.link}" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;">
+        Download <i data-lucide="download-cloud"></i>
+      </a>
+    </div>`).join('');
+  if (window.lucide) lucide.createIcons();
+}
+
+function filterDownloads(category, btnElement) {
+  currentDownloadFilter = category;
+  document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.remove('active'));
+  if (btnElement) btnElement.classList.add('active');
+  renderDownloads();
+}
+
+/* ---------- QUIZ KOSAKATA (LEGACY) ---------- */
+function shuffle(array) {
+  const a = array.slice();
+  let currentIndex = a.length, randomIndex;
+  while (currentIndex !== 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [a[currentIndex], a[randomIndex]] = [a[randomIndex], a[currentIndex]];
+  }
+  return a;
+}
+
+function renderQuizSelection() {
+  const chapter = document.getElementById('quiz-chapter-filter')?.value || '';
+  const container = document.getElementById('vocab-selection-list');
+  if (!container) return;
+  const data = window.vocabTextbookData || [];
+  const filteredData = chapter ? data.filter(item => item.bab === chapter) : data;
+
+  if (filteredData.length === 0) {
+    container.innerHTML = `<div style="padding:24px; text-align:center; font-size:0.85rem; color:var(--text-muted); font-style:italic;">Tidak ada kosakata di bab ini.</div>`;
+    updateQuizSelectionSummary();
+    return;
+  }
+
+  const selectedIds = selectedVocabForQuiz.map(v => v.id);
+  const showData = filteredData.slice(0, 200);
+  container.innerHTML = showData.map(item => `
+    <label style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:12px; border:1px solid var(--border); cursor:pointer; transition:all 0.15s; margin-bottom:6px;" onmouseover="this.style.background='var(--bg-subtle)'" onmouseout="this.style.background='var(--bg-elev)'">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:32px; height:32px; border-radius:50%; background:var(--bg-subtle); display:grid; place-items:center; font-size:0.7rem; font-weight:800; color:var(--text-tertiary);">${item.id}</div>
+        <div style="display:flex; flex-direction:column;">
+          <span style="font-family:'Noto Sans KR',sans-serif; font-weight:700; font-size:1rem; line-height:1; margin-bottom:4px; color:var(--text);">${item.hangeul}</span>
+          <span style="font-size:0.75rem; color:var(--text-tertiary);">${item.arti}</span>
+        </div>
+      </div>
+      <input type="checkbox" data-id="${item.id}" onchange="toggleVocabSelection(this, ${item.id})" style="width:18px; height:18px; accent-color:var(--primary); cursor:pointer;" ${selectedIds.includes(item.id) ? 'checked' : ''}>
+    </label>`).join('');
+
+  if (filteredData.length > 200) {
+    container.insertAdjacentHTML('beforeend',
+      `<div style="padding:12px; text-align:center; font-size:0.78rem; color:var(--text-muted); font-style:italic;">Menampilkan 200 dari ${filteredData.length} item.</div>`);
+  }
+  updateQuizSelectionSummary();
+}
+
+function toggleVocabSelection(checkbox, id) {
+  const data = window.vocabTextbookData || [];
+  if (checkbox.checked) {
+    if (!selectedVocabForQuiz.some(v => v.id === id)) {
+      const item = data.find(v => v.id === id);
+      if (item) selectedVocabForQuiz.push(item);
+    }
+  } else {
+    selectedVocabForQuiz = selectedVocabForQuiz.filter(v => v.id !== id);
+  }
+  updateQuizSelectionSummary();
+}
+
+function bulkSelectVocab(shouldSelect) {
+  const container = document.getElementById('vocab-selection-list');
+  const data = window.vocabTextbookData || [];
+  if (!container) return;
+  const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+  const visibleIds = checkboxes.map(cb => parseInt(cb.getAttribute('data-id')));
+  if (shouldSelect) {
+    visibleIds.forEach(id => {
+      if (!selectedVocabForQuiz.some(v => v.id === id)) {
+        const item = data.find(v => v.id === id);
+        if (item) selectedVocabForQuiz.push(item);
+      }
+    });
+  } else {
+    selectedVocabForQuiz = selectedVocabForQuiz.filter(v => !visibleIds.includes(v.id));
+  }
+  checkboxes.forEach(cb => cb.checked = shouldSelect);
+  updateQuizSelectionSummary();
+}
+
+function updateQuizSelectionSummary() {
+  const count = selectedVocabForQuiz.length;
+  const countEl = document.getElementById('selection-count');
+  if (countEl) countEl.innerText = count;
+  const startBtn = document.getElementById('start-quiz-btn');
+  const summaryContainer = document.getElementById('selected-vocab-summary');
+  if (count > 0) {
+    if (summaryContainer) {
+      summaryContainer.innerHTML = selectedVocabForQuiz.slice(0, 50).map(v =>
+        `<span class="chip primary" style="margin:2px;">${v.hangeul}</span>`
+      ).join('') + (count > 50 ? `<div style="font-size:0.72rem; color:var(--text-muted); margin-top:8px;">+${count - 50} lainnya...</div>` : '');
+    }
+    if (startBtn) {
+      startBtn.disabled = false;
+      startBtn.innerHTML = `Mulai Latihan (${count})`;
+    }
+  } else {
+    if (summaryContainer) summaryContainer.innerHTML = '<span style="font-style:italic; opacity:0.6;">Belum ada kata yang dipilih.</span>';
+    if (startBtn) {
+      startBtn.disabled = true;
+      startBtn.innerHTML = `Pilih Kata Dulu`;
+    }
+  }
+}
+
+function createQuestion(vocabItem) {
+  const data = window.vocabTextbookData || [];
+  const correctAnswer = vocabItem.arti;
+  const allPossibleAnswers = data.filter(item => item.arti !== correctAnswer).map(item => item.arti);
+  const wrongAnswers = shuffle(allPossibleAnswers).slice(0, 3);
+  return { hangeul: vocabItem.hangeul, correctAnswer, options: shuffle([...wrongAnswers, correctAnswer]) };
+}
+
+function startQuiz() {
+  if (selectedVocabForQuiz.length < 1) return;
+  quizQuestions = shuffle(selectedVocabForQuiz.map(createQuestion));
+  currentQuestionIndex = 0;
+  currentScore = 0;
+  const totalEl = document.getElementById('total-questions-count');
+  if (totalEl) totalEl.innerText = quizQuestions.length;
+  showVocabSubTab('quiz-mode');
+  renderQuestion(currentQuestionIndex);
+}
+
+function renderQuestion(index) {
+  if (index >= quizQuestions.length) { showQuizFinishModal(); return; }
+  const progressBar = document.getElementById('quiz-progress-bar');
+  if (progressBar) progressBar.style.width = `${(index / quizQuestions.length) * 100}%`;
+  const question = quizQuestions[index];
+  document.getElementById('current-question-index').innerText = index + 1;
+  document.getElementById('quiz-question').innerText = question.hangeul;
+  const footerContainer = document.getElementById('quiz-footer-container');
+  footerContainer.classList.add('translate-y-20', 'opacity-0');
+  document.getElementById('next-question-btn').disabled = true;
+  const optionsContainer = document.getElementById('quiz-options');
+  optionsContainer.innerHTML = question.options.map((option, i) => `
+    <button class="quiz-option" data-answer="${option}" onclick="checkAnswer(this, '${question.correctAnswer.replace(/'/g, "\\'")}')">
+      <div>${['A', 'B', 'C', 'D'][i]}</div>
+      <span style="flex:1; font-weight:600;">${option}</span>
+    </button>`).join('');
+  setTimeout(() => {
+    document.querySelectorAll('#quiz-options .quiz-option').forEach(btn => {
+      btn.style.pointerEvents = 'auto';
+      btn.style.touchAction = 'manipulation';
+    });
+  }, 100);
+  speak(question.hangeul);
+}
+
+function checkAnswer(selectedElement, correctAnswer) {
+  const selectedAnswer = selectedElement.getAttribute('data-answer');
+  const isCorrect = selectedAnswer === correctAnswer;
+  const allOptions = document.querySelectorAll('#quiz-options .quiz-option');
+  allOptions.forEach(btn => {
+    btn.classList.add('pointer-events-none');
+    btn.style.opacity = '0.6';
+    btn.onclick = null;
+  });
+  selectedElement.style.opacity = '1';
+  const feedbackEl = document.getElementById('quiz-feedback');
+  const footerContainer = document.getElementById('quiz-footer-container');
+  const nextBtn = document.getElementById('next-question-btn');
+  if (isCorrect) {
+    currentScore++;
+    selectedElement.classList.add('correct');
+    feedbackEl.innerHTML = '<span style="color:#059669; display:flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="check-circle-2" style="width:20px; height:20px;"></i> Benar! Excellent.</span>';
+  } else {
+    selectedElement.classList.add('incorrect');
+    feedbackEl.innerHTML = `<span style="color:#dc2626; display:flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="x-circle" style="width:20px; height:20px;"></i> Salah. Jawaban: ${correctAnswer}</span>`;
+    allOptions.forEach(btn => {
+      if (btn.getAttribute('data-answer') === correctAnswer) {
+        btn.classList.add('correct');
+        btn.style.opacity = '1';
+      }
+    });
+  }
+  nextBtn.disabled = false;
+  footerContainer.classList.remove('translate-y-20', 'opacity-0');
+  if (window.lucide) lucide.createIcons();
+}
+
+function nextQuestion() { renderQuestion(++currentQuestionIndex); }
+
+function showQuizFinishModal() {
+  const progressBar = document.getElementById('quiz-progress-bar');
+  if (progressBar) progressBar.style.width = `100%`;
+  const total = quizQuestions.length;
+  const score = Math.round((currentScore / total) * 100);
+  document.getElementById('final-score-number').innerText = score;
+  document.getElementById('final-score-detail').innerText = `${currentScore} / ${total} Benar`;
+  document.getElementById('quiz-finish-modal').classList.remove('hidden');
+}
+function hideQuizFinishModal() { document.getElementById('quiz-finish-modal').classList.add('hidden'); }
+function restartQuiz() { hideQuizFinishModal(); startQuiz(); }
