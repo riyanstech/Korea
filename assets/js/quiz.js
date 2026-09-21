@@ -1,6 +1,8 @@
 /* ==========================================
-   KR-Dict — Quiz Module (Reading + Listening)
-   Listening pakai Text-to-Speech (bisa dari pertanyaan / pilihan / keduanya)
+   KR-Dict — Quiz Module v4.0
+   + Responsive layout fix
+   + PDF result download
+   + Certificate generation
    ========================================== */
 window.KR = window.KR || {};
 
@@ -13,6 +15,7 @@ KR.quiz = (function () {
 
   let quizzes = [];
   let activeSession = null;
+  let lastResult = null; // simpan hasil terakhir untuk PDF & certificate
   let timerInterval = null;
   let els = {};
 
@@ -25,6 +28,7 @@ KR.quiz = (function () {
       empty: document.getElementById('quizPackEmpty'),
       loading: document.getElementById('quizPackLoading'),
       listWrap: document.getElementById('quizListWrap'),
+      hubHeader: document.getElementById('quizHubHeader'),
       setupModal: document.getElementById('quizSetupModal'),
       setupTitle: document.getElementById('quizSetupTitle'),
       setupDesc: document.getElementById('quizSetupDesc'),
@@ -49,8 +53,13 @@ KR.quiz = (function () {
       resultTitle: document.getElementById('quizResultTitle'),
       resultScore: document.getElementById('quizResultScore'),
       resultStats: document.getElementById('quizResultStats'),
+      resultActions: document.getElementById('quizResultActions'),
       resultReview: document.getElementById('quizResultReview'),
       resultClose: document.getElementById('quizResultClose'),
+      certModal: document.getElementById('certModal'),
+      certPreview: document.getElementById('certPreviewContainer'),
+      loadingOverlay: document.getElementById('loadingOverlay'),
+      loadingText: document.getElementById('loadingText'),
     };
     if (!els.list) return;
 
@@ -147,8 +156,6 @@ KR.quiz = (function () {
     let shuffleO = false;
 
     const sections = pkg.sections || [];
-    const totalQ = sections.reduce((s, sec) => s + (sec.questions?.length || 0), 0);
-
     els.setupTitle.textContent = pkg.name;
     els.setupDesc.textContent = pkg.description || '';
 
@@ -245,11 +252,50 @@ KR.quiz = (function () {
     u.lang = lang;
     u.rate = 0.9;
     u.pitch = 1;
-    // Pilih voice Korea jika ada
     const voices = window.speechSynthesis.getVoices();
     const koVoice = voices.find(v => v.lang.startsWith('ko'));
     if (koVoice) u.voice = koVoice;
     window.speechSynthesis.speak(u);
+  }
+
+  function formatDur(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
+  }
+
+  function escapeHtml(s = '') {
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  }
+
+  /* ==========================================
+     LAZY LOAD PDF LIBS
+     ========================================== */
+  function ensurePdfLibs() {
+    return new Promise((resolve, reject) => {
+      if (window.html2canvas && window.jspdf) return resolve(true);
+      const loadScript = (src) => new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = res;
+        s.onerror = () => rej(new Error('Gagal memuat: ' + src));
+        document.head.appendChild(s);
+      });
+      Promise.all([
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+        loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'),
+      ]).then(() => resolve(true)).catch(reject);
+    });
+  }
+
+  function showLoading(text = 'Memproses...') {
+    if (els.loadingText) els.loadingText.textContent = text;
+    els.loadingOverlay?.classList.remove('hidden');
+    els.loadingOverlay?.classList.add('flex');
+  }
+  function hideLoading() {
+    els.loadingOverlay?.classList.add('hidden');
+    els.loadingOverlay?.classList.remove('flex');
   }
 
   /* ==========================================
@@ -266,7 +312,6 @@ KR.quiz = (function () {
     if (config.shuffleQ) flat = shuffle(flat);
     if (!flat.length) { KR.toast?.warn('Paket belum punya soal'); return; }
 
-    // FIX BUG: shuffle options juga update correct
     if (config.shuffleO) {
       flat = flat.map(item => {
         const q = item.question;
@@ -306,10 +351,12 @@ KR.quiz = (function () {
   function showTestUI() {
     els.listWrap.classList.add('hidden');
     els.resultWrap.classList.add('hidden');
+    els.hubHeader?.classList.add('hidden'); // hide page title
     els.testWrap.classList.remove('hidden');
     els.testWrap.classList.add('flex');
     els.testTitle.textContent = activeSession.pkg.name;
-    document.body.style.overflow = 'hidden';
+    // Scroll main to top
+    document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'auto' });
   }
 
   function startTimer() {
@@ -344,7 +391,6 @@ KR.quiz = (function () {
     if (!item) return;
     const { section, question } = item;
     const isListening = question.type === 'listening';
-    const isKepribadian = section.type === 'kepribadian'; // if any
     const isPractice = mode === 'practice';
     const isRevealed = isPractice && revealed[currentIdx];
     const userAns = answers[currentIdx];
@@ -357,12 +403,10 @@ KR.quiz = (function () {
     els.testProgress.textContent = `${currentIdx + 1} / ${flatQuestions.length}`;
     els.testProgressBar.style.width = ((currentIdx + 1) / flatQuestions.length * 100) + '%';
 
-    // Build question HTML
     let qHtml = '';
 
-    // Audio player (jika listening)
     if (isListening) {
-      const audioTarget = question.audioTarget || 'question'; // 'question' | 'options' | 'both'
+      const audioTarget = question.audioTarget || 'question';
       if (audioTarget === 'question' || audioTarget === 'both') {
         qHtml += `
           <div class="audio-player-card">
@@ -377,7 +421,6 @@ KR.quiz = (function () {
       }
     }
 
-    // Question text
     if (question.text) {
       qHtml += `<div class="quiz-question-text">${esc(question.text)}</div>`;
     }
@@ -385,7 +428,6 @@ KR.quiz = (function () {
       qHtml += `<div class="quiz-question-image"><img src="${question.image}" alt=""></div>`;
     }
 
-    // Options
     let optionsHtml = '<div class="quiz-options-grid">';
     (question.options || []).forEach(opt => {
       const selected = userAns === opt.id;
@@ -415,7 +457,6 @@ KR.quiz = (function () {
     optionsHtml += '</div>';
     qHtml += optionsHtml;
 
-    // Feedback (practice mode)
     if (isPractice && isRevealed) {
       const isCorrect = userAns === question.correct;
       qHtml += `
@@ -430,21 +471,19 @@ KR.quiz = (function () {
 
     els.testQ.innerHTML = qHtml;
 
-    // Bind option clicks
     els.testQ.querySelectorAll('.quiz-option-card:not([disabled])').forEach(btn => {
-      btn.addEventListener('click', () => handleAnswer(btn.dataset.opt, section.type === 'kepribadian'));
+      btn.addEventListener('click', () => handleAnswer(btn.dataset.opt));
     });
 
-    // Nav buttons
     els.testPrev.disabled = currentIdx === 0;
     const isLast = currentIdx === flatQuestions.length - 1;
     els.testNext.classList.toggle('hidden', isLast);
     els.testSubmit.classList.toggle('hidden', !isLast);
 
     renderNav();
-    els.testQ.scrollTop = 0;
+    // Scroll question area to top
+    document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Auto play audio untuk listening (setelah 300ms)
     if (isListening && !isRevealed && (question.audioTarget === 'question' || question.audioTarget === 'both') && question.audioText) {
       setTimeout(() => {
         if (activeSession && activeSession.currentIdx === currentIdx) playAudio(currentIdx, 'question');
@@ -472,10 +511,10 @@ KR.quiz = (function () {
     KR.toast?.info('🔊 Memutar audio...', 1000);
   }
 
-  function handleAnswer(optId, isKepribadian) {
+  function handleAnswer(optId) {
     const idx = activeSession.currentIdx;
     activeSession.answers[idx] = optId;
-    if (activeSession.mode === 'practice' && !isKepribadian) {
+    if (activeSession.mode === 'practice') {
       activeSession.revealed[idx] = true;
     }
     renderQuestion();
@@ -527,7 +566,6 @@ KR.quiz = (function () {
     const duration = Math.round((Date.now() - startedAt) / 1000);
     const score = total ? Math.round((correct / total) * 100) : 0;
 
-    // Save history
     const history = STORAGE.get(RESULT_KEY, []);
     history.unshift({
       id: Date.now().toString(36),
@@ -538,7 +576,8 @@ KR.quiz = (function () {
     if (history.length > 30) history.length = 30;
     STORAGE.set(RESULT_KEY, history);
 
-    showResults({ pkg, mode, score, correct, wrong, total, duration, details });
+    lastResult = { pkg, mode, score, correct, wrong, total, duration, details, at: Date.now() };
+    showResults(lastResult);
   }
 
   /* ==========================================
@@ -548,6 +587,7 @@ KR.quiz = (function () {
     els.testWrap.classList.add('hidden');
     els.testWrap.classList.remove('flex');
     els.resultWrap.classList.remove('hidden');
+    els.hubHeader?.classList.add('hidden');
 
     els.resultTitle.textContent = r.pkg.name;
 
@@ -567,50 +607,579 @@ KR.quiz = (function () {
       <div class="quiz-stat"><i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i><div><div class="quiz-stat-num">${r.wrong}</div><div class="quiz-stat-label">Salah</div></div></div>
       <div class="quiz-stat"><i data-lucide="list" class="w-5 h-5 text-purple-500"></i><div><div class="quiz-stat-num">${r.total}</div><div class="quiz-stat-label">Total</div></div></div>`;
 
-    // Review
-    let reviewHtml = '<h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">Review Jawaban</h3>';
-    r.details.forEach((d, i) => {
-      const isListening = d.questionType === 'listening';
-      const cls = d.isCorrect ? 'correct' : (d.userAns ? 'incorrect' : 'skipped');
-      const userOpt = (d.options || []).find(o => o.id === d.userAns);
-      const correctOpt = (d.options || []).find(o => o.id === d.correct);
-      reviewHtml += `
-        <div class="quiz-review-item ${cls}">
-          <div class="quiz-review-head">
-            <span class="quiz-review-num">Soal ${i + 1}</span>
-            <span class="quiz-review-badge ${cls}">
-              <i data-lucide="${d.isCorrect ? 'check' : d.userAns ? 'x' : 'minus'}" class="w-3 h-3"></i>
-              ${d.isCorrect ? 'Benar' : d.userAns ? 'Salah' : 'Kosong'}
-            </span>
-            ${isListening ? '<span class="quiz-review-tag pink"><i data-lucide="headphones" class="w-3 h-3"></i>Listening</span>' : ''}
-          </div>
-          ${d.questionText ? `<div class="quiz-review-q">${esc(d.questionText)}</div>` : ''}
-          ${isListening && d.audioText ? `<div class="quiz-review-audio"><button class="quiz-audio-replay" onclick="KR.quiz.speakText('${d.audioText.replace(/'/g, "\\'")}')"><i data-lucide="play" class="w-4 h-4"></i></button><span class="text-xs text-gray-500 italic">Audio di soal ini</span></div>` : ''}
-          <div class="quiz-review-answers">
-            <div class="quiz-review-row"><span class="quiz-review-label">Jawaban Anda:</span><span class="quiz-review-val ${cls}">${d.userAns ? d.userAns + '. ' + esc(userOpt?.text || '') : '(kosong)'}</span></div>
-            ${!d.isCorrect ? `<div class="quiz-review-row"><span class="quiz-review-label">Jawaban Benar:</span><span class="quiz-review-val correct">${d.correct}. ${esc(correctOpt?.text || '')}</span></div>` : ''}
-          </div>
-        </div>`;
-    });
+    // ACTION BUTTONS
+    els.resultActions.innerHTML = `
+      <button class="quiz-action-btn primary" onclick="KR.quiz.downloadResultPDF()">
+        <i data-lucide="file-down"></i>
+        <div>
+          <div class="quiz-action-btn-title">Download PDF</div>
+          <div class="quiz-action-btn-sub">Rincian jawaban & skor</div>
+        </div>
+      </button>
+      <button class="quiz-action-btn gold" onclick="KR.quiz.generateCertificate()">
+        <i data-lucide="award"></i>
+        <div>
+          <div class="quiz-action-btn-title">Sertifikat</div>
+          <div class="quiz-action-btn-sub">Bukti kelulusan resmi</div>
+        </div>
+      </button>
+    `;
+
+    // REVIEW — pisahkan benar/salah
+    const wrongItems = r.details.filter(d => !d.isCorrect);
+    const correctItems = r.details.filter(d => d.isCorrect);
+
+    let reviewHtml = `
+      <div class="quiz-review-tabs">
+        <button class="quiz-review-tab active" data-tab="wrong">
+          <i data-lucide="x-circle"></i> Salah (${wrongItems.length})
+        </button>
+        <button class="quiz-review-tab" data-tab="correct">
+          <i data-lucide="check-circle"></i> Benar (${correctItems.length})
+        </button>
+        <button class="quiz-review-tab" data-tab="all">
+          <i data-lucide="list"></i> Semua (${r.details.length})
+        </button>
+      </div>
+      <div id="quizReviewContent"></div>
+    `;
+
     els.resultReview.innerHTML = reviewHtml;
 
-    els.resultWrap.scrollTop = 0;
+    function renderReviewTab(filter) {
+      let items = filter === 'wrong' ? wrongItems : filter === 'correct' ? correctItems : r.details;
+      if (!items.length) {
+        document.getElementById('quizReviewContent').innerHTML = `
+          <div class="quiz-review-empty">
+            <i data-lucide="${filter === 'wrong' ? 'party-popper' : 'search-x'}"></i>
+            <div>${filter === 'wrong' ? 'Sempurna! Tidak ada jawaban salah 🎉' : 'Tidak ada data'}</div>
+          </div>`;
+        if (window.lucide) lucide.createIcons();
+        return;
+      }
+
+      let html = '';
+      items.forEach((d, idx) => {
+        const origIdx = r.details.indexOf(d);
+        const isListening = d.questionType === 'listening';
+        const cls = d.isCorrect ? 'correct' : (d.userAns ? 'incorrect' : 'skipped');
+        const userOpt = (d.options || []).find(o => o.id === d.userAns);
+        const correctOpt = (d.options || []).find(o => o.id === d.correct);
+        html += `
+          <div class="quiz-review-item ${cls}">
+            <div class="quiz-review-head">
+              <span class="quiz-review-num">Soal ${origIdx + 1}</span>
+              <span class="quiz-review-badge ${cls}">
+                <i data-lucide="${d.isCorrect ? 'check' : d.userAns ? 'x' : 'minus'}" class="w-3 h-3"></i>
+                ${d.isCorrect ? 'Benar' : d.userAns ? 'Salah' : 'Kosong'}
+              </span>
+              ${isListening ? '<span class="quiz-review-tag pink"><i data-lucide="headphones" class="w-3 h-3"></i>Listening</span>' : ''}
+            </div>
+            ${d.questionText ? `<div class="quiz-review-q">${esc(d.questionText)}</div>` : ''}
+            ${isListening && d.audioText ? `<div class="quiz-review-audio"><button class="quiz-audio-replay" onclick="KR.quiz.speakText('${d.audioText.replace(/'/g, "\\'")}')"><i data-lucide="play" class="w-4 h-4"></i></button><span class="text-xs text-gray-500 italic">Audio: ${esc(d.audioText)}</span></div>` : ''}
+            <div class="quiz-review-answers">
+              <div class="quiz-review-row"><span class="quiz-review-label">Jawaban Anda:</span><span class="quiz-review-val ${cls}">${d.userAns ? d.userAns + '. ' + esc(userOpt?.text || '') : '(kosong)'}</span></div>
+              ${!d.isCorrect ? `<div class="quiz-review-row"><span class="quiz-review-label">Jawaban Benar:</span><span class="quiz-review-val correct">${d.correct}. ${esc(correctOpt?.text || '')}</span></div>` : ''}
+            </div>
+          </div>`;
+      });
+      document.getElementById('quizReviewContent').innerHTML = html;
+      if (window.lucide) lucide.createIcons();
+    }
+
+    els.resultReview.querySelectorAll('.quiz-review-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        els.resultReview.querySelectorAll('.quiz-review-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderReviewTab(tab.dataset.tab);
+      });
+    });
+
+    renderReviewTab('wrong'); // default tampilkan yang salah
+
+    // Scroll top
+    document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'auto' });
     if (window.lucide) lucide.createIcons();
   }
 
   function speakText(text) { speak(text); }
 
-  function formatDur(sec) {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return m > 0 ? `${m}m ${s}s` : `${s}s`;
-  }
-
   function closeResults() {
     els.resultWrap.classList.add('hidden');
     els.listWrap.classList.remove('hidden');
-    document.body.style.overflow = '';
+    els.hubHeader?.classList.remove('hidden');
     activeSession = null;
+    if (window.lucide) lucide.createIcons();
+  }
+
+  /* ==========================================
+     ✅ DOWNLOAD PDF HASIL
+     ========================================== */
+  async function downloadResultPDF() {
+    if (!lastResult) { KR.toast?.error('Tidak ada hasil'); return; }
+    showLoading('Membuat PDF...');
+    try {
+      await ensurePdfLibs();
+      const { jsPDF } = window.jspdf;
+      const r = lastResult;
+      const user = (KR.auth?.getUserData?.()?.name) || 'Siswa KR-Dict';
+      const dateStr = new Date(r.at).toLocaleString('id-ID', {
+        day: '2-digit', month: 'long', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      let y = margin;
+
+      // HEADER
+      doc.setFillColor(99, 102, 241);
+      doc.rect(0, 0, pageW, 30, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text('KR-Dict Learning Hub', margin, 14);
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Laporan Hasil Latihan Soal', margin, 22);
+
+      y = 45;
+
+      // INFO SISWA
+      doc.setTextColor(15, 23, 42);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('Informasi Peserta', margin, y);
+      y += 2;
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, pageW - margin, y);
+      y += 8;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      const info = [
+        ['Nama Peserta', user],
+        ['Paket Latihan', r.pkg.name],
+        ['Mode', r.mode === 'exam' ? 'Ujian (dengan waktu)' : 'Latihan (feedback instan)'],
+        ['Tanggal', dateStr],
+      ];
+      info.forEach(([k, v]) => {
+        doc.setTextColor(100, 116, 139);
+        doc.text(k + ':', margin, y);
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(v), margin + 45, y);
+        doc.setFont('helvetica', 'normal');
+        y += 7;
+      });
+
+      y += 5;
+
+      // SKOR BOX
+      doc.setFillColor(238, 242, 255);
+      doc.roundedRect(margin, y, pageW - margin * 2, 30, 3, 3, 'F');
+      doc.setTextColor(79, 70, 229);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text('SKOR AKHIR', margin + 5, y + 8);
+      doc.setFontSize(26);
+      doc.text(`${r.score}%`, margin + 5, y + 22);
+      doc.setFontSize(11);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`${r.correct} benar / ${r.total} soal`, margin + 60, y + 15);
+      doc.text(`Waktu: ${formatDur(r.duration)}`, margin + 60, y + 22);
+      y += 40;
+
+      // STATISTIK
+      doc.setTextColor(15, 23, 42);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('Statistik', margin, y);
+      y += 2;
+      doc.setDrawColor(226, 232, 240);
+      doc.line(margin, y, pageW - margin, y);
+      y += 8;
+
+      const stats = [
+        ['Total Soal', String(r.total)],
+        ['Jawaban Benar', String(r.correct)],
+        ['Jawaban Salah', String(r.wrong)],
+        ['Tidak Dijawab', String(r.total - r.correct - r.wrong)],
+      ];
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      stats.forEach(([k, v]) => {
+        doc.setTextColor(100, 116, 139);
+        doc.text(k, margin, y);
+        doc.setTextColor(15, 23, 42);
+        doc.setFont('helvetica', 'bold');
+        doc.text(v, margin + 60, y);
+        doc.setFont('helvetica', 'normal');
+        y += 7;
+      });
+
+      y += 10;
+
+      // REVIEW SOAL
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(15, 23, 42);
+      doc.text('Rincian Jawaban', margin, y);
+      y += 2;
+      doc.line(margin, y, pageW - margin, y);
+      y += 8;
+
+      doc.setFontSize(10);
+      r.details.forEach((d, i) => {
+        if (y > pageH - 40) {
+          doc.addPage();
+          y = margin;
+        }
+        const isCorrect = d.isCorrect;
+        const userOpt = (d.options || []).find(o => o.id === d.userAns);
+        const correctOpt = (d.options || []).find(o => o.id === d.correct);
+
+        // Nomor + status
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(isCorrect ? 5 : (d.userAns ? 220 : 148), isCorrect ? 150 : (38), isCorrect ? 105 : (38));
+        doc.text(`Soal ${i + 1}`, margin, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 116, 139);
+        doc.text(isCorrect ? '✓ Benar' : d.userAns ? '✗ Salah' : '○ Kosong', margin + 20, y);
+        doc.setFontSize(10);
+        y += 5;
+
+        // Pertanyaan
+        if (d.questionText) {
+          doc.setTextColor(15, 23, 42);
+          const qLines = doc.splitTextToSize(d.questionText, pageW - margin * 2);
+          qLines.forEach(line => {
+            if (y > pageH - 20) { doc.addPage(); y = margin; }
+            doc.text(line, margin, y);
+            y += 5;
+          });
+        }
+
+        // Jawaban user & benar
+        doc.setFontSize(9);
+        if (!isCorrect) {
+          doc.setTextColor(220, 38, 38);
+          const uLine = `Jawaban Anda: ${d.userAns || '(kosong)'}. ${userOpt?.text || ''}`;
+          const uLines = doc.splitTextToSize(uLine, pageW - margin * 2);
+          uLines.forEach(line => {
+            if (y > pageH - 20) { doc.addPage(); y = margin; }
+            doc.text(line, margin + 4, y);
+            y += 5;
+          });
+          doc.setTextColor(5, 150, 105);
+          const cLine = `Jawaban Benar: ${d.correct}. ${correctOpt?.text || ''}`;
+          const cLines = doc.splitTextToSize(cLine, pageW - margin * 2);
+          cLines.forEach(line => {
+            if (y > pageH - 20) { doc.addPage(); y = margin; }
+            doc.text(line, margin + 4, y);
+            y += 5;
+          });
+        } else {
+          doc.setTextColor(100, 116, 139);
+          const line = `Jawaban: ${d.userAns}. ${userOpt?.text || ''}`;
+          const lines = doc.splitTextToSize(line, pageW - margin * 2);
+          lines.forEach(l => {
+            if (y > pageH - 20) { doc.addPage(); y = margin; }
+            doc.text(l, margin + 4, y);
+            y += 5;
+          });
+        }
+
+        // Garis pemisah
+        y += 3;
+        if (y > pageH - 15) { doc.addPage(); y = margin; }
+        doc.setDrawColor(241, 245, 249);
+        doc.line(margin, y, pageW - margin, y);
+        y += 6;
+      });
+
+      // FOOTER setiap halaman
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        doc.setFontSize(8);
+        doc.setTextColor(148, 163, 184);
+        doc.text(
+          `KR-Dict Learning Hub — Halaman ${p}/${totalPages}`,
+          pageW / 2, pageH - 8,
+          { align: 'center' }
+        );
+      }
+
+      const filename = `Hasil-Latihan_${r.pkg.name.replace(/[^a-z0-9]/gi, '_')}_${new Date(r.at).toISOString().slice(0, 10)}.pdf`;
+      doc.save(filename);
+      KR.toast?.success('✅ PDF berhasil di-download!');
+    } catch (err) {
+      console.error(err);
+      KR.toast?.error('Gagal membuat PDF: ' + err.message);
+    } finally {
+      hideLoading();
+    }
+  }
+
+  /* ==========================================
+     ✅ CERTIFICATE
+     ========================================== */
+  function buildCertificateHTML({ name, pkgName, score, dateStr, certId, grade }) {
+    // A4 landscape ~ 1123 x 794 px
+    return `
+      <div id="certRender" style="
+        width: 1123px; height: 794px;
+        background: linear-gradient(135deg, #fdfcf7 0%, #faf7f0 100%);
+        padding: 0; box-sizing: border-box;
+        font-family: 'Playfair Display', Georgia, serif;
+        position: relative; overflow: hidden;
+        color: #1e293b;
+      ">
+        <!-- Outer decorative border -->
+        <div style="position:absolute; inset:24px; border:3px double #b8860b; border-radius:6px; pointer-events:none;"></div>
+        <div style="position:absolute; inset:32px; border:1px solid #d4af37; border-radius:4px; pointer-events:none;"></div>
+
+        <!-- Corner ornaments -->
+        <div style="position:absolute; top:16px; left:16px; width:60px; height:60px; border-top:4px solid #b8860b; border-left:4px solid #b8860b; border-top-left-radius:8px;"></div>
+        <div style="position:absolute; top:16px; right:16px; width:60px; height:60px; border-top:4px solid #b8860b; border-right:4px solid #b8860b; border-top-right-radius:8px;"></div>
+        <div style="position:absolute; bottom:16px; left:16px; width:60px; height:60px; border-bottom:4px solid #b8860b; border-left:4px solid #b8860b; border-bottom-left-radius:8px;"></div>
+        <div style="position:absolute; bottom:16px; right:16px; width:60px; height:60px; border-bottom:4px solid #b8860b; border-right:4px solid #b8860b; border-bottom-right-radius:8px;"></div>
+
+        <!-- Watermark -->
+        <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-25deg); font-size:180px; font-weight:900; color:rgba(184,134,11,0.05); font-family:'Playfair Display',serif; letter-spacing:0.1em; pointer-events:none; user-select:none;">KR-DICT</div>
+
+        <!-- Content -->
+        <div style="position:relative; padding:70px 90px; text-align:center; height:100%; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between;">
+
+          <!-- Top -->
+          <div>
+            <!-- Crest / Emblem -->
+            <div style="
+              width: 88px; height: 88px; margin: 0 auto 12px;
+              border-radius: 50%;
+              background: radial-gradient(circle at 30% 30%, #f5d67b 0%, #d4af37 40%, #b8860b 100%);
+              box-shadow: 0 6px 20px rgba(184,134,11,0.4), inset 0 -4px 8px rgba(0,0,0,0.15);
+              display: grid; place-items: center;
+              border: 3px solid #fff8e1;
+              position: relative;
+            ">
+              <div style="font-size:44px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">🏆</div>
+            </div>
+
+            <!-- Brand -->
+            <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; font-weight:800; letter-spacing:0.4em; color:#b8860b; text-transform:uppercase; margin-bottom:4px;">KR-DICT LEARNING HUB</div>
+            <div style="width:100px; height:2px; background:#b8860b; margin:0 auto 20px;"></div>
+
+            <!-- Main Title -->
+            <h1 style="
+              font-size: 58px; font-weight: 900; letter-spacing: 0.02em;
+              margin: 0; line-height: 1;
+              background: linear-gradient(135deg, #1e293b 0%, #4f46e5 50%, #b8860b 100%);
+              -webkit-background-clip: text; background-clip: text;
+              color: transparent;
+            ">CERTIFICATE</h1>
+            <p style="font-size:16px; letter-spacing:0.5em; color:#64748b; margin:6px 0 0; font-weight:600; font-family:'Plus Jakarta Sans',sans-serif;">OF ACHIEVEMENT</p>
+          </div>
+
+          <!-- Middle -->
+          <div>
+            <p style="font-size:15px; color:#64748b; margin:0 0 12px; font-style:italic; font-family:Georgia,serif;">This certificate is proudly presented to</p>
+
+            <div style="
+              font-family: 'Playfair Display', Georgia, serif;
+              font-size: 48px; font-weight: 700; color: #1e293b;
+              padding: 8px 40px; margin: 0 auto 4px;
+              display: inline-block;
+              border-bottom: 2px solid #d4af37;
+              letter-spacing: 0.02em;
+              line-height: 1.15;
+            ">${escapeHtml(name)}</div>
+
+            <p style="font-size:15px; color:#64748b; margin:20px auto 0; max-width:640px; line-height:1.7; font-family:Georgia,serif;">
+              for successfully completing the practice quiz
+            </p>
+            <p style="font-size:22px; font-weight:700; color:#4f46e5; margin:8px 0 0; font-family:'Playfair Display',serif;">
+              "${escapeHtml(pkgName)}"
+            </p>
+            <p style="font-size:15px; color:#64748b; margin:12px 0 0; font-family:Georgia,serif;">
+              with an outstanding score of
+            </p>
+            <div style="
+              font-family: 'Playfair Display', serif;
+              font-size: 42px; font-weight: 900; margin: 6px 0 0;
+              background: linear-gradient(135deg, #b8860b, #d4af37);
+              -webkit-background-clip: text; background-clip: text;
+              color: transparent;
+            ">${score}<span style="font-size:24px;">%</span> · ${grade}</div>
+          </div>
+
+          <!-- Bottom -->
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:20px;">
+            <!-- Signature -->
+            <div style="text-align:center; min-width:200px;">
+              <div style="font-family:'Playfair Display',serif; font-size:22px; font-style:italic; color:#1e293b; border-bottom:1px solid #94a3b8; padding-bottom:4px; margin-bottom:6px;">KR-Dict</div>
+              <div style="font-size:11px; font-weight:800; letter-spacing:0.15em; color:#64748b; text-transform:uppercase; font-family:'Plus Jakarta Sans',sans-serif;">Founder & Director</div>
+            </div>
+
+            <!-- Gold seal -->
+            <div style="
+              width: 90px; height: 90px; border-radius: 50%;
+              background: radial-gradient(circle, #d4af37 0%, #b8860b 70%, #8b6508 100%);
+              display: grid; place-items: center;
+              color: #fff8e1; font-family: 'Playfair Display',serif; font-weight:900; font-size:11px;
+              box-shadow: 0 6px 16px rgba(184,134,11,0.5), inset 0 0 0 3px #fff8e1, inset 0 0 0 5px #d4af37;
+              text-align: center; line-height:1.2; padding: 8px;
+              letter-spacing: 0.05em;
+            ">
+              <div>
+                OFFICIAL<br>
+                <span style="font-size:18px;">★</span><br>
+                SEAL
+              </div>
+            </div>
+
+            <!-- Meta -->
+            <div style="text-align:right; min-width:200px; font-family:'Plus Jakarta Sans',sans-serif;">
+              <div style="font-size:10px; font-weight:800; letter-spacing:0.15em; color:#94a3b8; text-transform:uppercase;">Issued Date</div>
+              <div style="font-size:13px; font-weight:700; color:#1e293b; margin-bottom:8px;">${dateStr}</div>
+              <div style="font-size:10px; font-weight:800; letter-spacing:0.15em; color:#94a3b8; text-transform:uppercase;">Certificate ID</div>
+              <div style="font-size:12px; font-weight:700; color:#1e293b; font-family:monospace;">${certId}</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }
+
+  function getGrade(score) {
+    if (score >= 90) return 'A · EXCELLENT';
+    if (score >= 80) return 'B · VERY GOOD';
+    if (score >= 70) return 'C · GOOD';
+    if (score >= 60) return 'D · PASS';
+    return 'E · KEEP LEARNING';
+  }
+
+  async function generateCertificate() {
+    if (!lastResult) { KR.toast?.error('Kerjakan latihan dulu'); return; }
+    showLoading('Membuat sertifikat...');
+    try {
+      await ensurePdfLibs();
+      const r = lastResult;
+      const user = (KR.auth?.getUserData?.()?.name) || 'Siswa KR-Dict';
+      const dateStr = new Date(r.at).toLocaleDateString('id-ID', {
+        day: '2-digit', month: 'long', year: 'numeric'
+      });
+      const certId = 'KRD-' + r.at.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
+      const grade = getGrade(r.score);
+
+      const html = buildCertificateHTML({
+        name: user, pkgName: r.pkg.name, score: r.score,
+        dateStr, certId, grade
+      });
+
+      // Show in modal
+      els.certPreview.innerHTML = html;
+      els.certModal.classList.remove('hidden');
+      els.certModal.classList.add('flex');
+
+      // Store for download
+      _certHTML = html;
+      _certFilenameBase = `Sertifikat_${r.pkg.name.replace(/[^a-z0-9]/gi, '_')}_${user.replace(/[^a-z0-9]/gi, '_')}`;
+    } catch (err) {
+      console.error(err);
+      KR.toast?.error('Gagal membuat sertifikat');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  let _certHTML = null;
+  let _certFilenameBase = 'Sertifikat';
+
+  async function downloadCertificatePDF() {
+    if (!_certHTML) return;
+    showLoading('Menyiapkan PDF...');
+    try {
+      await ensurePdfLibs();
+      const { jsPDF } = window.jspdf;
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.innerHTML = _certHTML;
+      document.body.appendChild(container);
+
+      const target = container.querySelector('#certRender');
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#fdfcf7',
+        logging: false,
+      });
+      document.body.removeChild(container);
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      pdf.save(`${_certFilenameBase}.pdf`);
+      KR.toast?.success('🎉 Sertifikat PDF berhasil di-download!');
+    } catch (err) {
+      console.error(err);
+      KR.toast?.error('Gagal membuat PDF sertifikat');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  async function downloadCertificatePNG() {
+    if (!_certHTML) return;
+    showLoading('Menyiapkan PNG...');
+    try {
+      await ensurePdfLibs();
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.innerHTML = _certHTML;
+      document.body.appendChild(container);
+
+      const target = container.querySelector('#certRender');
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#fdfcf7',
+        logging: false,
+      });
+      document.body.removeChild(container);
+
+      const link = document.createElement('a');
+      link.download = `${_certFilenameBase}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      KR.toast?.success('🎉 Sertifikat PNG berhasil di-download!');
+    } catch (err) {
+      console.error(err);
+      KR.toast?.error('Gagal membuat PNG');
+    } finally {
+      hideLoading();
+    }
+  }
+
+  function closeCertModal() {
+    els.certModal.classList.add('hidden');
+    els.certModal.classList.remove('flex');
   }
 
   /* ==========================================
@@ -640,17 +1209,27 @@ KR.quiz = (function () {
         els.testWrap.classList.add('hidden');
         els.testWrap.classList.remove('flex');
         els.listWrap.classList.remove('hidden');
-        document.body.style.overflow = '';
+        els.hubHeader?.classList.remove('hidden');
         activeSession = null;
+        if (window.lucide) lucide.createIcons();
       }
     });
     els.resultClose?.addEventListener('click', closeResults);
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !els.certModal.classList.contains('hidden')) {
+        closeCertModal();
+      }
+    });
   }
 
   return {
     init, reload: loadQuizzes,
     playAudio, speakText,
-    // Expose untuk admin
+    downloadResultPDF, generateCertificate,
+    downloadCertificatePDF, downloadCertificatePNG,
+    closeCertModal,
     getQuizzes: () => quizzes,
     saveQuizzes,
     setQuizzes: (arr) => { quizzes = arr; saveQuizzes(); renderList(); },
