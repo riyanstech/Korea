@@ -1160,8 +1160,10 @@ KR.quiz = (function () {
       footerLine: 668,
       signatureY: 706,
       sealY: 712,
-      metaY1: 700,
-      metaY2: 724,
+      metaY1: 686,   // ISSUED DATE label
+      metaY2: 708,   // Date value
+      metaY3: 732,   // CERTIFICATE ID label
+      metaY4: 750,   // Cert ID value
     };
 
     /* ============================================
@@ -1591,13 +1593,14 @@ KR.quiz = (function () {
     ctx.letterSpacing = '2px';
     ctx.fillText('SEAL', sealCx, sealCy + 20);
     ctx.letterSpacing = '0px';
-
+     
     /* ============================================
-       18. META (right)
+       18. META (right) — aligned
        ============================================ */
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
 
+    // --- ISSUED DATE ---
     ctx.font = '800 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
     ctx.letterSpacing = '2px';
@@ -1608,15 +1611,16 @@ KR.quiz = (function () {
     ctx.fillStyle = '#1e293b';
     ctx.fillText(dateStr, W - 130, Y.metaY2);
 
+    // --- CERTIFICATE ID ---
     ctx.font = '800 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
     ctx.letterSpacing = '2px';
-    ctx.fillText('CERTIFICATE ID', W - 130, Y.metaY2 + 22);
+    ctx.fillText('CERTIFICATE ID', W - 130, Y.metaY3);
     ctx.letterSpacing = '0px';
 
     ctx.font = '700 11px ui-monospace, "SF Mono", Menlo, monospace';
     ctx.fillStyle = '#1e293b';
-    ctx.fillText(certId, W - 130, Y.metaY2 + 40);
+    ctx.fillText(certId, W - 130, Y.metaY4);
 
     /* ============================================
        19. VERSION MARKER (bottom-left)
