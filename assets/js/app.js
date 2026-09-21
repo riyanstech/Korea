@@ -469,7 +469,7 @@ function renderCultureList() {
 
   let html = `
     <div class="page-header" style="text-align:center;">
-      <h2 class="display-2">Budaya & Informasi</h2>
+      <h2 class="display-2 font-extrabold tracking-tight">Budaya & Informasi</h2>
       <p>Pelajari Budaya dan Informasi Textbook 2024</p>
     </div>
     <div style="max-width:400px; margin:0 auto var(--sp-6);">
