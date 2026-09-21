@@ -186,6 +186,41 @@
                 }
               ],
               "correct": "B"
+            },
+            {
+              "id": "q-mubel4hltjng",
+              "type": "reading",
+              "text": "모종을 심기 전에 비료를 뿌립니다. 그러면 땅에 영양분이 많아져서 작물이____________자랄 수 있습니다.",
+              "image": "",
+              "audioText": "",
+              "audioTarget": "question",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "딱딱하게",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "튼튼하게",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "싱싱하게",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "당당하게",
+                  "audioText": "",
+                  "image": ""
+                }
+              ],
+              "correct": "B"
             }
           ]
         },
