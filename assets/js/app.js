@@ -1,8 +1,9 @@
 // ==========================================
-// KR-Dict — Main App
+// KR-Dict — Main App v4.0
+// Modern design + fixed navbar
 // ==========================================
 
-/* ---------- LOAD OVERRIDE DARI ADMIN (FIXED) ---------- */
+/* ---------- LOAD OVERRIDE DARI ADMIN ---------- */
 (function loadOverrides() {
   const get = (k) => {
     try {
@@ -12,7 +13,6 @@
     } catch { return null; }
   };
 
-  // 🔧 FIX: Cek juga array tidak boleh kosong (bug: [] itu truthy!)
   const vocabOvr = get('vocabOverride');
   if (vocabOvr && Array.isArray(vocabOvr) && vocabOvr.length > 0) {
     window.vocabTextbookData = vocabOvr;
@@ -46,7 +46,6 @@
     try { localStorage.removeItem('krdict:downloadsOverride'); } catch {}
   }
 
-  // Log final data count untuk debug
   console.log('[KR] Final data loaded:');
   console.log('  - Vocab:', window.vocabTextbookData?.length || 0);
   console.log('  - Grammar:', window.grammarData?.length || 0);
@@ -117,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Default tab
-  const activeNav = document.querySelector('.nav-link.active') || document.querySelector('.nav-item.active');
+  const activeNav = document.querySelector('.nav-chip.active') || document.querySelector('.nav-link.active');
   showTab('vocab-container', activeNav);
   resetChat();
 
@@ -155,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDownloads();
   });
 
-  // Tab visibility optimization
   document.addEventListener('visibilitychange', () => {
     document.body.classList.toggle('tab-hidden', document.hidden);
   });
@@ -202,7 +200,7 @@ function toggleMenu() {
   if (window.lucide) lucide.createIcons();
 }
 
-/* ---------- NAVIGATION ---------- */
+/* ---------- NAVIGATION (MODERN) ---------- */
 function showTab(tabId, element) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   const target = document.getElementById(tabId);
@@ -215,8 +213,10 @@ function showTab(tabId, element) {
   void target.offsetWidth;
   target.classList.add('animate-slide-up');
 
-  document.querySelectorAll('.nav-link, .nav-link-mobile, .nav-item, .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
+  // Update active state untuk semua jenis nav
+  document.querySelectorAll('.nav-chip, .nav-link, .nav-link-mobile, .nav-item, .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
   if (element) {
+    if (element.classList.contains('nav-chip')) element.classList.add('active');
     if (element.classList.contains('nav-link')) element.classList.add('active');
     if (element.classList.contains('nav-link-mobile')) element.classList.add('active');
     if (element.classList.contains('nav-item')) element.classList.add('active');
@@ -309,17 +309,17 @@ function renderHangeul() {
   container.innerHTML = html;
 }
 
-/* ---------- VOCAB ---------- */
+/* ---------- VOCAB (MODERN CARDS v4.0) ---------- */
 function renderVocab(data) {
   const container = document.getElementById('vocab-textbook-list');
   if (!container) return;
 
   if (!data || data.length === 0) {
     container.innerHTML = `
-      <div class="admin-empty" style="padding: 60px 20px;">
-        <i data-lucide="search-x" style="width:48px; height:48px; opacity:0.4;"></i>
-        <div style="font-weight:700; color:var(--text-secondary);">Tidak ada data ditemukan</div>
-        <div style="font-size:0.8rem; color:var(--text-muted);">Coba ubah filter atau kata kunci pencarian</div>
+      <div class="empty-state">
+        <div class="empty-icon"><i data-lucide="search-x"></i></div>
+        <div class="empty-title">Tidak ada kata ditemukan</div>
+        <div class="empty-sub">Coba ubah filter atau kata kunci pencarian</div>
       </div>`;
     if (window.lucide) lucide.createIcons();
     return;
@@ -331,24 +331,45 @@ function renderVocab(data) {
     return acc;
   }, {});
 
+  // Palet warna bergilir per bab
+  const palettes = [
+    { from: '#6366f1', to: '#a855f7' },
+    { from: '#06b6d4', to: '#3b82f6' },
+    { from: '#f43f5e', to: '#ec4899' },
+    { from: '#f59e0b', to: '#f97316' },
+    { from: '#10b981', to: '#14b8a6' },
+    { from: '#8b5cf6', to: '#d946ef' },
+  ];
+
   let html = '';
+  let babIndex = 0;
 
   for (const [bab, items] of Object.entries(grouped)) {
+    const p = palettes[babIndex % palettes.length];
+    babIndex++;
+
     html += `
-      <div class="mb-6">
-        <div class="bab-heading">
-          <i data-lucide="bookmark"></i>
-          ${bab} <span style="opacity:0.7; font-weight:600;">· ${items.length} kata</span>
+      <div class="bab-section">
+        <div class="bab-header" style="--from:${p.from};--to:${p.to}">
+          <div class="bab-header-left">
+            <div class="bab-icon"><i data-lucide="bookmark"></i></div>
+            <div>
+              <div class="bab-label">${bab}</div>
+              <div class="bab-count">${items.length} kata</div>
+            </div>
+          </div>
+          <div class="bab-deco"></div>
         </div>
-        <div class="vocab-grid-cards">
+        <div class="vocab-modern-grid">
           ${items.map(item => `
-            <div class="vocab-card">
-              <div class="vocab-card-body">
-                <div class="vocab-hangeul">${item.hangeul}</div>
-                <div class="vocab-rom">${item.rom || ''}</div>
-                <div class="vocab-arti">${item.arti}</div>
+            <div class="vocab-modern-card" style="--from:${p.from};--to:${p.to}">
+              <div class="vocab-modern-accent"></div>
+              <div class="vocab-modern-body">
+                <div class="vocab-modern-hangeul">${item.hangeul}</div>
+                <div class="vocab-modern-rom">${item.rom || ''}</div>
+                <div class="vocab-modern-arti">${item.arti}</div>
               </div>
-              <button class="speak-btn" onclick="speak('${item.hangeul}')" title="Dengarkan">
+              <button class="vocab-modern-speak" onclick="event.stopPropagation(); speak('${item.hangeul}')" title="Dengarkan">
                 <i data-lucide="volume-2"></i>
               </button>
             </div>`).join('')}
@@ -391,9 +412,9 @@ function renderGrammar(data) {
 
   if (!data || !data.length) {
     container.innerHTML = `
-      <div class="admin-empty" style="grid-column:1/-1; padding:60px 20px;">
-        <i data-lucide="search-x" style="width:48px; height:48px; opacity:0.4;"></i>
-        <div style="font-weight:700; color:var(--text-secondary);">Belum ada data grammar</div>
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon"><i data-lucide="search-x"></i></div>
+        <div class="empty-title">Belum ada data grammar</div>
       </div>`;
     if (window.lucide) lucide.createIcons();
     return;
@@ -417,7 +438,7 @@ function renderGrammar(data) {
 
     return `
       <div class="grammar-card">
-        <div style="display:inline-block; padding:4px 12px; border-radius:999px; background:var(--primary-soft); color:var(--primary); font-size:0.68rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:10px;">Tata Bahasa</div>
+        <div style="display:inline-block; padding:4px 12px; border-radius:999px; background:linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12)); color:#6366f1; font-size:0.68rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:10px;">Tata Bahasa</div>
         <div class="grammar-struktur">${item.struktur}</div>
         <div class="grammar-arti">${item.arti}</div>
         <ul class="grammar-list">${fungsiHTML}</ul>
@@ -459,17 +480,28 @@ function renderCultureList() {
     </div>
     <div id="culture-grid" style="display:grid; grid-template-columns:1fr; gap:16px;">`;
 
-  (data.babs || []).forEach(bab => {
+  const palettes = [
+    { from: '#6366f1', to: '#a855f7' },
+    { from: '#06b6d4', to: '#3b82f6' },
+    { from: '#f43f5e', to: '#ec4899' },
+    { from: '#f59e0b', to: '#f97316' },
+    { from: '#10b981', to: '#14b8a6' },
+    { from: '#8b5cf6', to: '#d946ef' },
+  ];
+
+  (data.babs || []).forEach((bab, i) => {
     const pageCount = (bab.pages || []).length;
+    const p = palettes[i % palettes.length];
     html += `
-      <div class="card hoverable" style="cursor:pointer;" onclick="renderCultureDetail(${bab.id})" data-title="${(bab.title || '').toLowerCase()}" data-id="${bab.id}">
-        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px;">
-          <span class="chip primary"><i data-lucide="bookmark"></i>BAB ${bab.id}</span>
+      <div class="card hoverable" style="cursor:pointer; position:relative; overflow:hidden;" onclick="renderCultureDetail(${bab.id})" data-title="${(bab.title || '').toLowerCase()}" data-id="${bab.id}">
+        <div style="position:absolute; top:-40px; right:-40px; width:140px; height:140px; border-radius:50%; background:radial-gradient(circle, ${p.from}, transparent 70%); opacity:0.12; filter:blur(20px); pointer-events:none;"></div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; position:relative; z-index:1;">
+          <span class="chip" style="background:linear-gradient(135deg, ${p.from}, ${p.to}); color:#fff; border:none;"><i data-lucide="bookmark"></i>BAB ${bab.id}</span>
           <span class="chip neutral"><i data-lucide="file-text"></i>${pageCount} hal</span>
         </div>
-        <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); line-height:1.35; margin-bottom:16px;">${bab.title}</h3>
-        <div style="display:flex; align-items:center; gap:6px; color:var(--primary); font-weight:700; font-size:0.85rem;">
-          Mulai Belajar <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
+        <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); line-height:1.35; margin-bottom:16px; position:relative; z-index:1;">${bab.title}</h3>
+        <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:0.85rem; background:linear-gradient(135deg, ${p.from}, ${p.to}); -webkit-background-clip:text; background-clip:text; color:transparent; position:relative; z-index:1;">
+          Mulai Belajar <i data-lucide="arrow-right" style="width:16px; height:16px; color:${p.from};"></i>
         </div>
       </div>`;
   });
@@ -599,9 +631,9 @@ function renderDownloads() {
 
   if (!filtered.length) {
     container.innerHTML = `
-      <div class="admin-empty" style="grid-column:1/-1; padding:60px 20px;">
-        <i data-lucide="download" style="width:48px; height:48px; opacity:0.4;"></i>
-        <div style="font-weight:700; color:var(--text-secondary);">Belum ada materi</div>
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon"><i data-lucide="download"></i></div>
+        <div class="empty-title">Belum ada materi</div>
       </div>`;
     if (window.lucide) lucide.createIcons();
     return;
@@ -610,7 +642,7 @@ function renderDownloads() {
   container.innerHTML = filtered.map(item => `
     <div class="card hoverable" style="display:flex; flex-direction:column;">
       <div style="display:flex; gap:12px; margin-bottom:16px;">
-        <div class="card-icon" style="background:var(--primary-soft); color:var(--primary);">
+        <div class="card-icon" style="background:linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15)); color:#6366f1; width:48px; height:48px; border-radius:12px; display:grid; place-items:center;">
           <i data-lucide="${item.icon || 'file'}"></i>
         </div>
         <div style="flex:1; min-width:0;">
