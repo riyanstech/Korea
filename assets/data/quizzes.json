@@ -2,9 +2,9 @@
   "packages": [
     {
       "id": "pkg-eps-1",
-      "name": "EPS-TOPIK Set 1",
+      "name": "EPS-TOPIK  1",
       "description": "Latihan soal Reading & Listening untuk persiapan EPS-TOPIK",
-      "duration": 30,
+      "duration": 50,
       "sections": [
         {
           "id": "sec-r1",
