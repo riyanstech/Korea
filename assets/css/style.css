@@ -1,10 +1,9 @@
 /* =========================================
-   KR-Dict — Design System v9.2 (FINAL)
-   + Modern vibrant design
-   + Fixed navbar & mobile menu
+   KR-Dict — Design System v9.3 (FINAL)
+   + Fixed navbar not clickable (chat-shell z-index fix)
+   + Bulletproof AI settings (display approach)
    + Complete Quiz Hub module
-   + Tiered Certificates v8.x
-   + AI Tutor v2.1 (bulletproof settings)
+   + Tiered Certificates
    ========================================= */
 
 /* ============================================================
@@ -130,7 +129,7 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
 .container-xl { max-width: 1280px; margin: 0 auto; padding-left: var(--sp-4); padding-right: var(--sp-4); }
 
 /* ============================================================
-   5. HEADER MODERN
+   5. HEADER MODERN — Z-INDEX 50
    ============================================================ */
 .app-header {
   position: sticky; top: 0; z-index: 50;
@@ -167,7 +166,6 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
     radial-gradient(600px 80px at 70% 100%, rgba(244,63,94,0.16), transparent 70%);
 }
 
-/* Logo */
 .logo-container { display: flex; align-items: center; gap: 12px; }
 .logo-box {
   width: 44px; height: 44px; border-radius: 14px;
@@ -200,7 +198,6 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
   color: var(--text-muted); margin-top: 2px;
 }
 
-/* Nav pill */
 .nav-pill-modern {
   display: none; align-items: center; gap: 4px; padding: 6px;
   background: rgba(255, 255, 255, 0.6);
@@ -268,7 +265,6 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
   50% { opacity: 0.6; transform: scale(0.85); }
 }
 
-/* Theme toggle */
 .theme-toggle-btn {
   width: 42px; height: 42px; border-radius: 14px;
   display: inline-grid; place-items: center;
@@ -292,7 +288,6 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
 .theme-toggle-btn:active { transform: scale(0.94) rotate(12deg); }
 .theme-toggle-btn svg { width: 18px; height: 18px; }
 
-/* Badge buttons */
 #roleBadge { display: flex; align-items: center; gap: 6px; }
 .badge-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -335,7 +330,6 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
   box-shadow: 0 6px 14px -4px rgba(239,68,68,0.5);
 }
 
-/* Mobile menu */
 #mobile-menu {
   max-height: 0; overflow: hidden;
   transition: max-height var(--t-base);
@@ -358,7 +352,6 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
   box-shadow: 0 6px 14px -4px rgba(99,102,241,0.45);
 }
 
-/* Legacy nav-link */
 .nav-link {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 14px; border-radius: var(--r-full);
@@ -381,7 +374,7 @@ main.app-main {
 }
 @media (min-width: 768px) { main.app-main { padding: var(--sp-8) var(--sp-6); } }
 
-.page-header { margin-bottom: var(--sp-6); }
+.page-header { margin-bottom: var(--sp-6); text-align: center; }
 .page-header h2 { margin-bottom: 4px; }
 .page-header p { color: var(--text-tertiary); font-size: 0.9rem; margin: 0; }
 
@@ -727,7 +720,6 @@ main.app-main {
 .dark .vocab-modern-card { background: rgba(17, 24, 39, 0.7); }
 .dark .vocab-modern-speak { background: rgba(51, 65, 85, 0.5); }
 
-/* Legacy vocab */
 .vocab-grid-cards { display: grid; gap: var(--sp-4); grid-template-columns: 1fr; }
 @media (min-width: 768px) { .vocab-grid-cards { grid-template-columns: repeat(2, 1fr); } }
 .vocab-card {
@@ -761,7 +753,6 @@ main.app-main {
 }
 .bab-heading svg { width: 14px; height: 14px; }
 
-/* Empty state */
 .empty-state {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 80px 24px; text-align: center; gap: 12px;
@@ -877,7 +868,7 @@ main.app-main {
 .v-def { color: var(--text); font-weight: 600; }
 
 /* ============================================================
-   12. QUIZ LEGACY (vocab quiz)
+   12. QUIZ LEGACY
    ============================================================ */
 .quiz-question-card {
   padding: var(--sp-8) var(--sp-5); text-align: center;
@@ -949,6 +940,12 @@ main.app-main {
   padding: 7px 14px; border-radius: var(--r-md);
   background: var(--primary-soft); color: var(--primary); letter-spacing: 0.02em;
 }
+.quiz-timer.timer-warn, .quiz-timer.warn {
+  background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(244,63,94,0.15));
+  color: #dc2626;
+  animation: pulseSoft 1.2s ease-in-out infinite;
+}
+@keyframes pulseSoft { 50% { opacity: 0.65; } }
 
 /* ============================================================
    14. QUIZ HUB — Sticky layout
@@ -1017,7 +1014,6 @@ main.app-main {
 .quiz-chip-pink { background: rgba(236,72,153,0.10); color: #ec4899; }
 .quiz-chip-gray { background: var(--bg-subtle); color: var(--text-tertiary); }
 
-/* Audio player */
 .audio-player-card {
   display: flex; align-items: center; gap: 16px;
   padding: 18px 20px;
@@ -1062,7 +1058,6 @@ main.app-main {
   letter-spacing: 0.05em; position: relative; z-index: 1;
 }
 
-/* Question text */
 .quiz-question-text {
   font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif;
   font-size: 1.15rem; font-weight: 700; line-height: 1.6;
@@ -1077,7 +1072,6 @@ main.app-main {
 }
 .quiz-question-image img { width: 100%; display: block; }
 
-/* Options grid */
 .quiz-options-grid {
   display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;
 }
@@ -1206,7 +1200,6 @@ main.app-main {
 }
 .quiz-nav-btn.success:hover:not(:disabled) { transform: translateY(-1px); }
 
-/* Score circle */
 .quiz-score-circle {
   width: 160px; height: 160px; margin: 0 auto;
   border-radius: 50%; display: grid; place-items: center;
@@ -1350,7 +1343,6 @@ main.app-main {
 }
 .quiz-review-empty svg { width: 48px; height: 48px; opacity: 0.5; }
 
-/* Result action buttons */
 .quiz-result-actions {
   display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px;
 }
@@ -1750,7 +1742,6 @@ main.app-main {
   font-weight: 800; font-size: 0.72rem;
 }
 
-/* Image upload UI */
 .img-upload-btn {
   display: flex; align-items: center; justify-content: center;
   gap: 8px; width: 100%; padding: 14px 16px;
@@ -1789,7 +1780,6 @@ main.app-main {
 .img-preview-remove svg { width: 14px; height: 14px; }
 .opt-img-area { margin-top: 4px; }
 
-/* Setup modal */
 .setup-section-item {
   display: flex; align-items: center; gap: var(--sp-3);
   padding: var(--sp-3); background: var(--bg-subtle);
@@ -1898,7 +1888,7 @@ main.app-main {
 }
 
 /* ============================================================
-   20. CARDS — Backward compatibility
+   20. CARDS
    ============================================================ */
 .glass-card, .glass-panel-solid, .header-section {
   background: var(--bg-elev);
@@ -1942,7 +1932,6 @@ main.app-main {
   background: linear-gradient(135deg, #f1f5f9 0%, #a5b4fc 60%, #f9a8d4 100%);
   -webkit-background-clip: text; background-clip: text;
 }
-
 .card {
   background: var(--bg-elev);
   border: 1px solid var(--border);
@@ -1957,14 +1946,7 @@ main.app-main {
 }
 
 /* ============================================================
-   21. HEADER SECTION — Clean (v9.2)
-   ============================================================ */
-.page-header { margin-bottom: var(--sp-6); text-align: center; }
-.page-header h2 { margin-bottom: 4px; }
-.page-header p { color: var(--text-tertiary); font-size: 0.9rem; margin: 0; }
-
-/* ============================================================
-   22. KAKAO/WA STYLE BUBBLES
+   21. WA/Kakao Bubbles (fallback)
    ============================================================ */
 .wa-bubble {
   padding: 10px 14px; border-radius: 16px;
@@ -1984,7 +1966,47 @@ main.app-main {
 .wa-time { font-size: 0.65rem; opacity: 0.7; margin-top: 4px; text-align: right; }
 
 /* ============================================================
-   23. RESPONSIVE GLOBAL
+   22. QUIZ NAV DOTS
+   ============================================================ */
+.quiz-nav-dot {
+  width: 30px; height: 30px; border-radius: 7px;
+  font-size: 0.72rem; font-weight: 700;
+  background: var(--bg-elev); border: 1.5px solid var(--border);
+  color: var(--text-tertiary); transition: all var(--t-fast);
+}
+.quiz-nav-dot.answered { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
+.quiz-nav-dot.current { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* ============================================================
+   23. CERT MODAL
+   ============================================================ */
+#certModal { z-index: 200; }
+#certPreviewContainer { max-width: 100%; overflow-x: auto; }
+#certPreviewContainer > * { min-width: 700px; }
+@media (max-width: 900px) {
+  #certPreviewContainer #certRender {
+    transform: scale(0.7);
+    transform-origin: top left;
+  }
+}
+#loadingOverlay {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+#loadingOverlay > div { box-shadow: 0 24px 48px -12px rgba(0,0,0,0.3); }
+
+@supports (padding: max(0px)) {
+  .quiz-test-sticky-bottom { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+}
+main.app-main::-webkit-scrollbar { width: 8px; }
+main.app-main::-webkit-scrollbar-track { background: transparent; }
+main.app-main::-webkit-scrollbar-thumb {
+  background: var(--border-strong); border-radius: 4px;
+}
+main.app-main::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ============================================================
+   24. RESPONSIVE GLOBAL
    ============================================================ */
 @media (max-width: 767px) {
   .app-header .h-\[72px\] { height: 64px; }
@@ -2015,70 +2037,31 @@ main.app-main {
 .perf-list > * { content-visibility: auto; contain-intrinsic-size: 80px; }
 
 /* ============================================================
-   24. 🎯 QUIZ NAV DOTS
-   ============================================================ */
-.quiz-nav-dot {
-  width: 30px; height: 30px; border-radius: 7px;
-  font-size: 0.72rem; font-weight: 700;
-  background: var(--bg-elev); border: 1.5px solid var(--border);
-  color: var(--text-tertiary); transition: all var(--t-fast);
-}
-.quiz-nav-dot.answered { background: var(--primary-soft); border-color: var(--primary); color: var(--primary); }
-.quiz-nav-dot.current { background: var(--primary); border-color: var(--primary); color: #fff; }
-.quiz-timer.timer-warn, .quiz-timer.warn {
-  background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(244,63,94,0.15));
-  color: #dc2626;
-  animation: pulseSoft 1.2s ease-in-out infinite;
-}
-@keyframes pulseSoft { 50% { opacity: 0.65; } }
-
-/* ============================================================
-   25. CERT MODAL
-   ============================================================ */
-#certModal { z-index: 200; }
-#certPreviewContainer { max-width: 100%; overflow-x: auto; }
-#certPreviewContainer > * { min-width: 700px; }
-@media (max-width: 900px) {
-  #certPreviewContainer #certRender {
-    transform: scale(0.7);
-    transform-origin: top left;
-  }
-}
-#loadingOverlay {
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-#loadingOverlay > div { box-shadow: 0 24px 48px -12px rgba(0,0,0,0.3); }
-
-@supports (padding: max(0px)) {
-  .quiz-test-sticky-bottom { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
-}
-
-main.app-main::-webkit-scrollbar { width: 8px; }
-main.app-main::-webkit-scrollbar-track { background: transparent; }
-main.app-main::-webkit-scrollbar-thumb {
-  background: var(--border-strong); border-radius: 4px;
-}
-main.app-main::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-/* ============================================================
-   26. 🤖 AI TUTOR v2.1 — BULLETPROOF SETTINGS
+   25. 🤖 AI TUTOR v2.3 — SAFE LAYOUT (z-index FIXED)
    ============================================================ */
 
+/* ✅ KILL SWITCH — Force hide when .hidden is present */
+#chat-ai.hidden,
+.chat-shell.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* ✅ Chat shell — z-index 30 (di bawah header z-50, TIDAK menutupi navbar) */
 .chat-shell {
   position: fixed;
   top: 64px;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 40;
-  display: none;
+  z-index: 30;
+  display: flex;
   flex-direction: column;
   background: var(--bg-elev);
   overflow: hidden;
   isolation: isolate;
 }
-.chat-shell:not(.hidden) { display: flex; }
 @media (min-width: 768px) {
   .chat-shell {
     top: 88px;
@@ -2185,25 +2168,26 @@ body.chat-open { overflow: hidden; }
 .chat-messages::-webkit-scrollbar { width: 5px; }
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 
-.wa-bubble {
+/* Chat bubbles (scoped inside .chat-shell to not conflict with fallback) */
+.chat-shell .wa-bubble {
   max-width: 88%; padding: 10px 14px; border-radius: 16px;
   font-size: 0.9rem; line-height: 1.55;
   word-wrap: break-word; overflow-wrap: break-word; word-break: break-word;
   animation: chatBubbleIn 240ms cubic-bezier(0.4, 0, 0.2, 1);
   font-family: 'Plus Jakarta Sans', 'Noto Sans KR', sans-serif;
 }
-@media (min-width: 768px) { .wa-bubble { max-width: 78%; } }
+@media (min-width: 768px) { .chat-shell .wa-bubble { max-width: 78%; } }
 @keyframes chatBubbleIn {
   from { opacity: 0; transform: translateY(6px) scale(0.98); }
   to { opacity: 1; transform: none; }
 }
-.wa-bubble-user {
+.chat-shell .wa-bubble-user {
   align-self: flex-end; margin-left: auto;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff; border-bottom-right-radius: 5px;
   box-shadow: 0 4px 12px -4px rgba(99,102,241,0.4);
 }
-.wa-bubble-ai {
+.chat-shell .wa-bubble-ai {
   align-self: flex-start; margin-right: auto;
   background: var(--bg-elev); color: var(--text);
   border: 1px solid var(--border); border-bottom-left-radius: 5px;
@@ -2219,7 +2203,6 @@ body.chat-open { overflow: hidden; }
   padding: 2px 6px; border-radius: 4px;
   font-family: ui-monospace, monospace; font-size: 0.85em;
 }
-.wa-time { font-size: 0.62rem; opacity: 0.7; margin-top: 5px; text-align: right; }
 
 .chat-system-hint {
   align-self: center; padding: 6px 14px;
@@ -2324,36 +2307,42 @@ body.chat-open { overflow: hidden; }
 }
 
 /* ============================================================
-   27. ✅ SETTINGS SHEET — BULLETPROOF
+   26. ✅ SETTINGS SHEET — v9.3 BULLETPROOF (DISPLAY-BASED)
    ============================================================ */
+
+/* Panel 100% hidden saat tidak ada .open — tidak bisa overlap */
 #chat-settings {
+  display: none;
   position: absolute;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  z-index: 100 !important;
-  opacity: 0;
-  visibility: hidden;
+  inset: 0;
+  z-index: 100;
   pointer-events: none;
-  transition: opacity 220ms ease, visibility 0s linear 220ms;
 }
 #chat-settings.open,
 #chat-settings.show,
 #chat-settings.active {
-  opacity: 1 !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  transition: opacity 220ms ease, visibility 0s linear 0s;
+  display: block;
+  pointer-events: auto;
+  animation: chatSettingsFadeIn 200ms ease;
+}
+@keyframes chatSettingsFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .chat-settings-backdrop {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  inset: 0;
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   cursor: pointer;
+  display: none;
+}
+#chat-settings.open .chat-settings-backdrop,
+#chat-settings.show .chat-settings-backdrop,
+#chat-settings.active .chat-settings-backdrop {
+  display: block;
 }
 
 .chat-settings-panel {
@@ -2364,17 +2353,19 @@ body.chat-open { overflow: hidden; }
   left: 0; right: 0; bottom: 0;
   max-height: 88%;
   transform: translateY(100%);
-  transition: transform 320ms cubic-bezier(0.32, 0.72, 0, 1);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  pointer-events: auto;
 }
-#chat-settings.open .chat-settings-panel,
-#chat-settings.show .chat-settings-panel,
-#chat-settings.active .chat-settings-panel {
+#chat-settings.open .chat-settings-panel {
   transform: translateY(0);
+  animation: chatPanelUp 320ms cubic-bezier(0.32, 0.72, 0, 1);
 }
-
+@keyframes chatPanelUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
 @media (min-width: 768px) {
   .chat-settings-panel {
     left: auto; right: 0; top: 0; bottom: 0;
@@ -2382,10 +2373,13 @@ body.chat-open { overflow: hidden; }
     border-radius: 0 24px 24px 0;
     transform: translateX(100%);
   }
-  #chat-settings.open .chat-settings-panel,
-  #chat-settings.show .chat-settings-panel,
-  #chat-settings.active .chat-settings-panel {
+  #chat-settings.open .chat-settings-panel {
     transform: translateX(0);
+    animation: chatPanelRight 320ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @keyframes chatPanelRight {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
   }
 }
 
@@ -2502,7 +2496,7 @@ select.chat-settings-input {
   background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
-.chat-img-preview.hidden { display: none; }
+.chat-img-preview.hidden { display: none !important; }
 .chat-img-preview-card {
   width: 100%; max-width: 400px;
   background: var(--bg-elev); border-radius: 20px; padding: 12px;
@@ -2531,7 +2525,7 @@ select.chat-settings-input {
 .dark .chat-shell { background: var(--bg-elev); }
 .dark .chat-messages { background: #0f172a; }
 .dark .chat-chip { background: rgba(51,65,85,0.5); }
-.dark .wa-bubble-ai { background: #1e293b; border-color: #334155; }
+.dark .chat-shell .wa-bubble-ai { background: #1e293b; border-color: #334155; }
 .dark .chat-input-field { background: #1e293b; }
 .dark .chat-settings-panel { background: var(--bg-elev); }
 
