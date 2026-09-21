@@ -1,6 +1,6 @@
 /* =========================================
-   KR-Dict — Design System v3.2 (Tailwind-Safe)
-   Fix: Menu hilang & layout berantakan
+   KR-Dict — Design System v3.3 (FINAL FIX)
+   Fix: Navbar hilang, theme toggle, badge, nav-pill
    ========================================= */
 
 /* ---------- TOKENS ---------- */
@@ -113,6 +113,8 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
   position: sticky; top: 0; z-index: 50;
   background: var(--bg-elev);
   border-bottom: 1px solid var(--border);
+  backdrop-filter: saturate(180%) blur(8px);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
 }
 
 .header-inner {
@@ -122,12 +124,13 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
 
 .logo-group { display: flex; align-items: center; gap: var(--sp-3); }
 .logo-box {
-  width: 40px; height: 40px; border-radius: var(--r-md);
+  width: 42px; height: 42px; border-radius: var(--r-md);
   display: grid; place-items: center; color: #fff;
   background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-  box-shadow: 0 4px 12px -4px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 6px 14px -6px rgba(79, 70, 229, 0.55);
+  flex-shrink: 0;
 }
-.logo-box svg { width: 20px; height: 20px; }
+.logo-box svg { width: 22px; height: 22px; }
 
 .brand-name {
   font-size: 1.05rem; font-weight: 800; letter-spacing: -0.03em;
@@ -779,8 +782,8 @@ main.app-main {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- MISC ---------- */
-/* FIX: HAPUS !important — biar Tailwind md:flex, md:block, dll. bisa bekerja */
-.hidden { display: none; }
+/* 🔥 FIX #1: Ganti .hidden dengan :where() → Tailwind md:flex tetap menang */
+:where(.hidden) { display: none; }
 
 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 @media (prefers-reduced-motion: reduce) {
@@ -795,13 +798,8 @@ main.app-main {
 
 /* ============================================================
    BACKWARD COMPATIBILITY v3.2 — Tailwind-Safe
-   Aturan:
-   1. JANGAN pernah pakai `!important` pada `display` / `padding` / `width`
-      karena akan memblock Tailwind utility.
-   2. Pakai `:where()` untuk specificity rendah → Tailwind bisa override.
    ============================================================ */
 
-/* --- Cards: hanya atur visual (background, border, radius) --- */
 .glass-card,
 .glass-panel-solid,
 .header-section {
@@ -813,14 +811,12 @@ main.app-main {
 
 .glass-panel-solid { border-radius: var(--r-xl); }
 
-/* Padding default dengan specificity 0 → Tailwind p-* tetap bisa override */
 :where(.glass-card, .glass-panel-solid) { padding: var(--sp-5); }
 :where(.header-section) { padding: var(--sp-6); }
 @media (min-width: 768px) {
   :where(.header-section) { padding: var(--sp-8); }
 }
 
-/* --- Inputs --- */
 .glass-input,
 .glass-select,
 .glass-select-sm {
@@ -869,7 +865,6 @@ main.app-main {
 }
 .glass-input-wrapper > input { padding-left: 40px; }
 
-/* --- Buttons --- */
 .btn-primary-gradient {
   display: inline-flex;
   align-items: center;
@@ -944,7 +939,6 @@ main.app-main {
   border: none; cursor: pointer;
 }
 
-/* --- Chips & Badges --- */
 .glass-badge {
   display: inline-flex; align-items: center;
   padding: 6px 14px;
@@ -969,7 +963,6 @@ main.app-main {
   box-shadow: var(--shadow-sm);
 }
 
-/* --- Pill buttons --- */
 .pill-btn {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 14px; border-radius: var(--r-full);
@@ -983,7 +976,6 @@ main.app-main {
 .pill-btn.active { background: var(--primary); color: #fff; }
 .pill-btn svg { width: 14px; height: 14px; }
 
-/* --- Culture reveal --- */
 .reveal-box {
   display: none;
   padding: var(--sp-4);
@@ -997,7 +989,6 @@ main.app-main {
 .reveal-box.trans { border-left-color: var(--accent); }
 .reveal-box.vocab { border-left-color: var(--success); }
 
-/* --- Culture vocab table --- */
 .vocab-grid {
   display: grid; grid-template-columns: 1fr;
   gap: 4px; padding: 8px 0;
@@ -1023,7 +1014,6 @@ main.app-main {
 .hover-lift { transition: all var(--t-base); }
 .hover-lift:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 
-/* --- Chat bubbles --- */
 .wa-bubble {
   padding: 10px 14px; border-radius: 16px;
   max-width: 82%; font-size: 0.9rem; line-height: 1.5;
@@ -1058,7 +1048,6 @@ main.app-main {
   transform: translateY(0); opacity: 1; pointer-events: auto;
 }
 
-/* --- Legacy quiz options --- */
 .quiz-option {
   display: flex; align-items: center; gap: var(--sp-3);
   width: 100%; padding: var(--sp-4); text-align: left;
@@ -1095,10 +1084,10 @@ main.app-main {
 }
 #quiz-footer-container.opacity-0 { opacity: 0; pointer-events: none; }
 
-/* --- Mobile menu --- */
 .glass-mobile-menu {
   background: var(--bg-elev);
   border-top: 1px solid var(--border);
+  box-shadow: 0 8px 24px -8px rgba(15, 23, 42, 0.15);
 }
 
 .nav-link-mobile {
@@ -1112,26 +1101,6 @@ main.app-main {
 .nav-link-mobile:hover { background: var(--bg-subtle); color: var(--text); }
 .nav-link-mobile.active { background: var(--primary); color: #fff; }
 
-/* --- Nav-link (older class) --- */
-.nav-link {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: var(--r-full);
-  font-size: 0.82rem; font-weight: 600;
-  color: var(--text-tertiary);
-  transition: all var(--t-fast); white-space: nowrap;
-  background: transparent; border: none; cursor: pointer;
-}
-.nav-link:hover { color: var(--text); background: rgba(255, 255, 255, 0.6); }
-.nav-link.active {
-  background: var(--bg-elev); color: var(--primary);
-  box-shadow: var(--shadow-xs);
-}
-.special-ai-nav.active {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: #fff;
-}
-
-/* --- Login screen bg --- */
 .login-screen-bg {
   background:
     radial-gradient(900px 500px at 20% 0%, rgba(79, 70, 229, 0.12), transparent 60%),
@@ -1178,7 +1147,6 @@ main.app-main {
 .login-option-icon.user, .role-icon.user { background: linear-gradient(135deg, #06b6d4, #0891b2); }
 .login-option-icon.admin, .role-icon.admin { background: linear-gradient(135deg, #f59e0b, #ef4444); }
 
-/* --- Admin form helpers --- */
 .admin-input-field {
   width: 100%; padding: 11px 14px;
   border-radius: var(--r-md);
@@ -1334,4 +1302,166 @@ main.app-main {
 .perf-list > * {
   content-visibility: auto;
   contain-intrinsic-size: 80px;
+}
+
+/* ============================================================
+   🔥 FIX v3.3 — NAVBAR & THEME TOGGLE
+   Tambahan baru untuk memperbaiki tampilan header
+   ============================================================ */
+
+/* Theme toggle button (sebelumnya tidak ada CSS-nya) */
+.theme-toggle-btn {
+  width: 40px; height: 40px;
+  border-radius: var(--r-md);
+  display: inline-grid; place-items: center;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  flex-shrink: 0;
+}
+.theme-toggle-btn:hover {
+  background: var(--bg-muted);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+.theme-toggle-btn:active { transform: scale(0.94); }
+.theme-toggle-btn svg { width: 18px; height: 18px; }
+
+/* Nav pill desktop — pengganti class Tailwind `hidden md:flex bg-white/10` */
+.nav-pill {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  padding: 6px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+}
+@media (min-width: 768px) {
+  .nav-pill { display: inline-flex; }
+}
+
+/* Nav link styling (menggantikan versi lama yang tipis/pucat) */
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--r-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: all var(--t-fast);
+  white-space: nowrap;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-link svg { width: 15px; height: 15px; flex-shrink: 0; }
+.nav-link:hover {
+  color: var(--primary);
+  background: var(--bg-elev);
+}
+.nav-link.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 8px -2px rgba(79, 70, 229, 0.5);
+}
+.nav-link.special-ai-nav:not(.active) {
+  color: var(--primary);
+}
+.nav-link.special-ai-nav.active {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+}
+
+/* btn-ghost: tambahkan base style lengkap (sebelumnya tanpa padding/display) */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  white-space: nowrap;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bg-subtle);
+  color: var(--text);
+}
+.btn-ghost:active:not(:disabled) { transform: scale(0.97); }
+.btn-ghost svg { width: 16px; height: 16px; }
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Logo container — sinkron dengan HTML */
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Role badge wrapper */
+#roleBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Badge buttons */
+.badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: var(--r-md);
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  white-space: nowrap;
+}
+.badge-btn:hover { background: var(--bg-muted); color: var(--text); }
+.badge-btn svg { width: 14px; height: 14px; }
+
+.badge-admin {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 10px -4px rgba(79, 70, 229, 0.5);
+}
+.badge-admin:hover { filter: brightness(1.08); color: #fff; }
+
+.badge-user {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: transparent;
+}
+
+.badge-logout {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-tertiary);
+}
+.badge-logout:hover {
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-color: transparent;
+}
+
+/* Header height — compact tapi lega */
+.glass-nav .h-20 {
+  height: 72px;
 }
