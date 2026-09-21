@@ -264,6 +264,41 @@
                 }
               ],
               "correct": "A"
+            },
+            {
+              "id": "q-mubej98aiq0q",
+              "type": "listening",
+              "text": "배합 사료랑 ___________ 를 같이 주면 될까요?",
+              "image": "",
+              "audioText": "배합 사료랑 조사료를같이 주면 될까요?",
+              "audioTarget": "question",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "조사료",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "계량컵",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "급수기",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "급이기",
+                  "audioText": "",
+                  "image": ""
+                }
+              ],
+              "correct": "A"
             }
           ]
         }
