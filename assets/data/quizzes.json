@@ -151,6 +151,41 @@
                 }
               ],
               "correct": "C"
+            },
+            {
+              "id": "q-mubd8yi2dt1b",
+              "type": "reading",
+              "text": "Aku Suka\nAlya Rahmawati\nNAMUN",
+              "image": "",
+              "audioText": "",
+              "audioTarget": "question",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "A",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "B",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "C",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "D",
+                  "audioText": "",
+                  "image": ""
+                }
+              ],
+              "correct": "A"
             }
           ]
         },
