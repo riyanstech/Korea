@@ -1,16 +1,16 @@
 /* ==========================================
-   KR-Dict — Quiz Module v7.0 (TIERED CERTIFICATES)
-   + Canvas-based certificate (100% reliable)
-   + 3 tiers: Diamond / Gold / Silver
+   KR-Dict — Quiz Module v8.0 (FINAL)
+   + Tiered Certificates (Diamond/Gold/Silver)
+   + Clean professional certificate design
+   + Canvas-based (100% reliable)
    + Submit tanpa konfirmasi
-   + PDF Report via html2canvas
    ========================================== */
 window.KR = window.KR || {};
 
 KR.quiz = (function () {
   'use strict';
 
-  console.log('%c[KR-Dict Quiz] %cv7.0 — Tiered Certificates',
+  console.log('%c[KR-Dict Quiz] %cv8.0 — Clean Professional Certificates',
     'color:#6366f1;font-weight:800',
     'color:#10b981;font-weight:700');
 
@@ -729,7 +729,6 @@ KR.quiz = (function () {
     `;
 
     if (canGetCert) {
-      // Warna tombol sertifikat mengikuti tier
       const tierStyle = `background: linear-gradient(135deg, ${tier.tierGradient[0]} 0%, ${tier.tierGradient[1]} 50%, ${tier.tierGradient[2]} 100%);`;
       actionsHTML += `
         <button class="quiz-action-btn gold" style="${tierStyle}" onclick="KR.quiz.generateCertificate()">
@@ -1068,7 +1067,7 @@ KR.quiz = (function () {
   }
 
   /* ==========================================
-     ✅ CANVAS CERTIFICATE — TIERED DESIGN v7.0
+     ✅ CANVAS CERTIFICATE — CLEAN PRO v8.0
      ========================================== */
   function roundRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -1084,104 +1083,40 @@ KR.quiz = (function () {
     ctx.closePath();
   }
 
-  function drawCornerFlourish(ctx, x, y, scaleX, scaleY, color) {
+  function drawMinimalCorner(ctx, x, y, sx, sy, color) {
     ctx.save();
     ctx.translate(x, y);
-    ctx.scale(scaleX, scaleY);
+    ctx.scale(sx, sy);
     ctx.strokeStyle = color;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+    ctx.lineCap = 'square';
 
-    // Outer L-shape (thick)
-    ctx.lineWidth = 5;
+    // Outer thick L
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(0, 70);
+    ctx.moveTo(0, 60);
     ctx.lineTo(0, 0);
-    ctx.lineTo(70, 0);
+    ctx.lineTo(60, 0);
     ctx.stroke();
 
-    // Inner L-shape (thin)
-    ctx.lineWidth = 2;
+    // Inner thin L
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.moveTo(0, 55);
-    ctx.lineTo(0, 15);
-    ctx.lineTo(15, 15);
-    ctx.lineTo(15, 0);
-    ctx.lineTo(55, 0);
+    ctx.moveTo(0, 40);
+    ctx.lineTo(0, 10);
+    ctx.lineTo(10, 10);
+    ctx.lineTo(10, 0);
+    ctx.lineTo(40, 0);
     ctx.stroke();
 
-    // Decorative swirl
-    ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(6, 30);
-    ctx.quadraticCurveTo(15, 35, 20, 42);
-    ctx.quadraticCurveTo(15, 45, 10, 38);
-    ctx.stroke();
-
-    // Dot
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(8, 8, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.restore();
-  }
-
-  function drawLaurelLeaves(ctx, cx, cy, radius, side, color) {
-    // side = -1 (left), +1 (right)
-    const leaves = 7;
-    for (let i = 0; i < leaves; i++) {
-      const angle = (-Math.PI / 2) + (side * (i + 1) * 0.18) + Math.PI / 2;
-      const r1 = radius;
-      const r2 = radius + 24;
-      const x1 = cx + Math.cos(angle) * r1;
-      const y1 = cy + Math.sin(angle) * r1;
-      const x2 = cx + Math.cos(angle) * r2;
-      const y2 = cy + Math.sin(angle) * r2;
-
-      ctx.save();
-      ctx.translate((x1 + x2) / 2, (y1 + y2) / 2);
-      ctx.rotate(angle + Math.PI / 2);
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 6, 11, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
-  }
-
-  function drawTierBadge(ctx, x, y, tier) {
-    // Small tier badge top-right
-    const bw = 180, bh = 46, br = 10;
-    const grd = ctx.createLinearGradient(x - bw, y, x, y + bh);
-    grd.addColorStop(0, tier.tierGradient[0]);
-    grd.addColorStop(1, tier.tierGradient[1]);
-
+    // Small diamond at inner corner
     ctx.save();
-    ctx.shadowColor = 'rgba(15,23,42,0.15)';
-    ctx.shadowBlur = 12;
-    ctx.shadowOffsetY = 3;
-    roundRect(ctx, x - bw, y, bw, bh, br);
-    ctx.fillStyle = grd;
-    ctx.fill();
+    ctx.translate(10, 10);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = color;
+    ctx.fillRect(-3, -3, 6, 6);
     ctx.restore();
 
-    // Icon
-    ctx.font = '22px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(tier.icon, x - bw + 14, y + bh / 2 + 1);
-
-    // Text
-    ctx.font = '900 13px "Plus Jakarta Sans", sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'left';
-    ctx.fillText(tier.name, x - bw + 46, y + bh / 2 - 6);
-
-    ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.fillText('TIER CERTIFICATE', x - bw + 46, y + bh / 2 + 8);
+    ctx.restore();
   }
 
   function renderCertificateToCanvas({ name, pkgName, score, dateStr, certId, gradeText, wrong }) {
@@ -1195,7 +1130,43 @@ KR.quiz = (function () {
     ctx.scale(SCALE, SCALE);
     ctx.textBaseline = 'middle';
 
-    // ============ 1. BACKGROUND ============
+    /* ============================================
+       📐 LAYOUT GRID (Y-positions)
+       ============================================ */
+    const Y = {
+      borderOuter: 24,
+      borderInner: 36,
+
+      tierBadge: 56,
+
+      emblem: 118,
+      emblemR: 40,
+
+      brand: 182,
+      brandLine: 200,
+
+      title: 258,
+      subtitle: 300,
+
+      presented: 348,
+      name: 400,
+      nameUnderline: 430,
+      completed: 472,
+      pkg: 508,
+
+      scoreLabel: 548,
+      scoreY: 596,
+
+      footerLine: 668,
+      signatureY: 706,
+      sealY: 712,
+      metaY1: 700,
+      metaY2: 724,
+    };
+
+    /* ============================================
+       1. BACKGROUND
+       ============================================ */
     const bgGrad = ctx.createLinearGradient(0, 0, W, H);
     bgGrad.addColorStop(0, tier.bg1);
     bgGrad.addColorStop(1, tier.bg2);
@@ -1204,62 +1175,102 @@ KR.quiz = (function () {
 
     // Subtle dot pattern
     ctx.save();
-    ctx.globalAlpha = 0.035;
+    ctx.globalAlpha = 0.025;
     ctx.fillStyle = tier.primary;
-    for (let x = 30; x < W; x += 22) {
-      for (let y = 30; y < H; y += 22) {
+    for (let x = 20; x < W; x += 18) {
+      for (let y = 20; y < H; y += 18) {
         ctx.beginPath();
-        ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+        ctx.arc(x, y, 0.9, 0, Math.PI * 2);
         ctx.fill();
       }
     }
     ctx.restore();
 
-    // ============ 2. WATERMARK ============
+    /* ============================================
+       2. WATERMARK
+       ============================================ */
     ctx.save();
-    ctx.translate(W / 2, H / 2);
-    ctx.rotate(-22 * Math.PI / 180);
-    ctx.font = '900 200px "Playfair Display", Georgia, serif';
+    ctx.font = '900 260px "Playfair Display", Georgia, serif';
     ctx.fillStyle = tier.primary;
-    ctx.globalAlpha = 0.045;
+    ctx.globalAlpha = 0.028;
     ctx.textAlign = 'center';
-    ctx.fillText(tier.watermark, 0, 20);
+    ctx.fillText('KR-DICT', W / 2, H / 2 + 20);
     ctx.restore();
 
-    // ============ 3. BORDERS (3-layer ornate) ============
-    // Outer thick
+    /* ============================================
+       3. BORDERS (double line)
+       ============================================ */
     ctx.strokeStyle = tier.borderOuter;
-    ctx.lineWidth = 4;
-    ctx.strokeRect(22, 22, W - 44, H - 44);
-    // Middle thin
+    ctx.lineWidth = 3;
+    ctx.strokeRect(Y.borderOuter, Y.borderOuter, W - Y.borderOuter * 2, H - Y.borderOuter * 2);
     ctx.strokeStyle = tier.borderInner;
+    ctx.lineWidth = 0.8;
+    ctx.strokeRect(Y.borderInner, Y.borderInner, W - Y.borderInner * 2, H - Y.borderInner * 2);
+
+    /* ============================================
+       4. CORNER ORNAMENTS
+       ============================================ */
+    const cx = Y.borderOuter, cy = Y.borderOuter;
+    drawMinimalCorner(ctx, cx, cy, 1, 1, tier.borderOuter);
+    drawMinimalCorner(ctx, W - cx, cy, -1, 1, tier.borderOuter);
+    drawMinimalCorner(ctx, cx, H - cy, 1, -1, tier.borderOuter);
+    drawMinimalCorner(ctx, W - cx, H - cy, -1, -1, tier.borderOuter);
+
+    /* ============================================
+       5. TIER BADGE (top-right)
+       ============================================ */
+    const badgeW = 170, badgeH = 42;
+    const badgeX = W - 70 - badgeW;
+    const badgeY = Y.tierBadge;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(15,23,42,0.18)';
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 4;
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 8);
+    const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY + badgeH);
+    badgeGrad.addColorStop(0, tier.tierGradient[0]);
+    badgeGrad.addColorStop(1, tier.tierGradient[2]);
+    ctx.fillStyle = badgeGrad;
+    ctx.fill();
+    ctx.restore();
+
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, 8);
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
     ctx.lineWidth = 1;
-    ctx.strokeRect(32, 32, W - 64, H - 64);
-    // Inner thick accent
-    ctx.strokeStyle = tier.borderAccent;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(40, 40, W - 80, H - 80);
+    ctx.stroke();
 
-    // ============ 4. CORNER FLOURISHES ============
-    drawCornerFlourish(ctx, 30, 30, 1, 1, tier.borderOuter);
-    drawCornerFlourish(ctx, W - 30, 30, -1, 1, tier.borderOuter);
-    drawCornerFlourish(ctx, 30, H - 30, 1, -1, tier.borderOuter);
-    drawCornerFlourish(ctx, W - 30, H - 30, -1, -1, tier.borderOuter);
+    ctx.font = '20px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(tier.icon, badgeX + 14, badgeY + badgeH / 2);
 
-    // ============ 5. TIER BADGE (top-right) ============
-    drawTierBadge(ctx, W - 50, 60, tier);
+    ctx.font = '900 13px "Plus Jakarta Sans", -apple-system, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.letterSpacing = '1.5px';
+    ctx.fillText(tier.name, badgeX + 44, badgeY + badgeH / 2 - 6);
+    ctx.letterSpacing = '0px';
 
-    // ============ 6. EMBLEM WITH LAUREL WREATH ============
-    const emblemX = W / 2, emblemY = 128, emblemR = 46;
+    ctx.font = '600 8px "Plus Jakarta Sans", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    ctx.letterSpacing = '1.2px';
+    ctx.fillText('TIER CERTIFICATE', badgeX + 44, badgeY + badgeH / 2 + 8);
+    ctx.letterSpacing = '0px';
 
-    // Laurel wreath left
-    drawLaurelLeaves(ctx, emblemX, emblemY, emblemR + 4, -1, tier.primary);
-    // Laurel wreath right
-    drawLaurelLeaves(ctx, emblemX, emblemY, emblemR + 4, 1, tier.primary);
+    /* ============================================
+       6. EMBLEM (clean circle)
+       ============================================ */
+    const emblemX = W / 2, emblemY = Y.emblem, emblemR = Y.emblemR;
 
-    // Emblem circle with tier gradient
+    ctx.beginPath();
+    ctx.arc(emblemX, emblemY, emblemR + 8, 0, Math.PI * 2);
+    ctx.strokeStyle = tier.accent;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
     const emblemGrad = ctx.createRadialGradient(
-      emblemX - 15, emblemY - 15, 5,
+      emblemX - emblemR * 0.3, emblemY - emblemR * 0.3, 4,
       emblemX, emblemY, emblemR
     );
     emblemGrad.addColorStop(0, tier.sealColors[0]);
@@ -1270,264 +1281,352 @@ KR.quiz = (function () {
     ctx.arc(emblemX, emblemY, emblemR, 0, Math.PI * 2);
     ctx.fillStyle = emblemGrad;
     ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(emblemX, emblemY, emblemR - 3, 0, Math.PI * 2);
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(emblemX, emblemY, emblemR - 9, 0, Math.PI * 2);
     ctx.strokeStyle = tier.accent;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(emblemX, emblemY, emblemR - 6, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Tier icon (emoji) inside emblem
-    ctx.font = '48px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "EmojiOne Color", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(tier.icon, emblemX, emblemY + 3);
-
-    // ============ 7. BRAND LINE ============
-    ctx.font = '800 12px "Plus Jakarta Sans", -apple-system, sans-serif';
-    ctx.fillStyle = tier.primary;
-    ctx.textAlign = 'center';
-    ctx.fillText('K R - D I C T   L E A R N I N G   H U B', W / 2, 208);
-
-    // ============ 8. DECORATIVE DIVIDER ============
-    const divY = 224;
-    ctx.strokeStyle = tier.primary;
     ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(W / 2 - 180, divY);
-    ctx.lineTo(W / 2 - 30, divY);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(W / 2 + 30, divY);
-    ctx.lineTo(W / 2 + 180, divY);
-    ctx.stroke();
-    // Diamond center
-    ctx.save();
-    ctx.translate(W / 2, divY);
-    ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = tier.primary;
-    ctx.fillRect(-6, -6, 12, 12);
-    ctx.restore();
 
-    // ============ 9. MAIN TITLE (tier-specific) ============
-    const titleText = 'CERTIFICATE';
-    ctx.font = '900 58px "Playfair Display", Georgia, serif';
+    ctx.font = '40px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "EmojiOne Color", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(tier.icon, emblemX, emblemY + 2);
+
+    /* ============================================
+       7. BRAND NAME
+       ============================================ */
+    ctx.font = '800 11px "Plus Jakarta Sans", -apple-system, sans-serif';
     ctx.fillStyle = tier.primary;
     ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(15,23,42,0.08)';
-    ctx.shadowBlur = 4;
-    ctx.shadowOffsetY = 2;
-    ctx.fillText(titleText, W / 2, 272);
-    ctx.shadowBlur = 0;
-    ctx.shadowOffsetY = 0;
+    ctx.letterSpacing = '6px';
+    ctx.fillText('KR-DICT  LEARNING  HUB', W / 2, Y.brand);
+    ctx.letterSpacing = '0px';
 
-    // ============ 10. TIER SUBTITLE (OF EXCELLENCE / ACHIEVEMENT / COMPLETION) ============
-    const subtitleText = tier.title.replace('Certificate of ', '').toUpperCase();
-    ctx.font = '700 16px "Plus Jakarta Sans", -apple-system, sans-serif';
+    ctx.strokeStyle = tier.borderInner;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(W / 2 - 40, Y.brandLine);
+    ctx.lineTo(W / 2 + 40, Y.brandLine);
+    ctx.stroke();
+
+    /* ============================================
+       8. TITLE
+       ============================================ */
+    ctx.font = '900 54px "Playfair Display", Georgia, serif';
+    ctx.fillStyle = tier.primary;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '2px';
+    ctx.fillText('CERTIFICATE', W / 2, Y.title);
+    ctx.letterSpacing = '0px';
+
+    /* ============================================
+       9. SUBTITLE
+       ============================================ */
+    const subtitle = tier.title.replace('Certificate of ', '').toUpperCase();
+    ctx.font = '700 15px "Plus Jakarta Sans", -apple-system, sans-serif';
     ctx.fillStyle = tier.deep;
     ctx.textAlign = 'center';
-    // Letterspacing via manual spacing
-    const spacedSubtitle = subtitleText.split('').join(' ');
-    ctx.fillText(spacedSubtitle, W / 2, 306);
+    ctx.letterSpacing = '8px';
+    ctx.fillText(subtitle, W / 2, Y.subtitle);
+    ctx.letterSpacing = '0px';
 
-    // ============ 11. "PRESENTED TO" ============
+    /* ============================================
+       10. "PRESENTED TO"
+       ============================================ */
     ctx.font = 'italic 15px Georgia, "Times New Roman", serif';
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'center';
-    ctx.fillText('This certificate is proudly presented to', W / 2, 350);
+    ctx.fillText('This is to certify that', W / 2, Y.presented);
 
-    // ============ 12. NAME ============
+    /* ============================================
+       11. NAME
+       ============================================ */
     const displayName = name.length > 34 ? name.slice(0, 32) + '…' : name;
-    ctx.font = '700 48px "Playfair Display", Georgia, serif';
+    ctx.font = '700 52px "Playfair Display", Georgia, serif';
     ctx.fillStyle = '#1e293b';
     ctx.textAlign = 'center';
-    ctx.fillText(displayName, W / 2, 402);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(displayName, W / 2, Y.name);
 
-    // Name underline (with tier accent)
     const nameWidth = ctx.measureText(displayName).width;
-    const underlineWidth = Math.max(nameWidth + 80, 320);
-    const ulY = 430;
-    // Main underline
-    ctx.strokeStyle = tier.borderInner;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(W / 2 - underlineWidth / 2, ulY);
-    ctx.lineTo(W / 2 + underlineWidth / 2, ulY);
-    ctx.stroke();
-    // End dots
-    ctx.fillStyle = tier.primary;
-    ctx.beginPath();
-    ctx.arc(W / 2 - underlineWidth / 2, ulY, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(W / 2 + underlineWidth / 2, ulY, 3, 0, Math.PI * 2);
-    ctx.fill();
+    const underlineW = Math.max(nameWidth + 100, 340);
+    const ulLeft = W / 2 - underlineW / 2;
+    const ulRight = W / 2 + underlineW / 2;
 
-    // ============ 13. CONTEXT LINE ============
+    ctx.strokeStyle = tier.borderInner;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(ulLeft, Y.nameUnderline);
+    ctx.lineTo(ulRight, Y.nameUnderline);
+    ctx.stroke();
+
+    [ulLeft, ulRight].forEach(x => {
+      ctx.save();
+      ctx.translate(x, Y.nameUnderline);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = tier.primary;
+      ctx.fillRect(-3, -3, 6, 6);
+      ctx.restore();
+    });
+
+    /* ============================================
+       12. "HAS SUCCESSFULLY COMPLETED"
+       ============================================ */
     ctx.font = '15px Georgia, "Times New Roman", serif';
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'center';
-    ctx.fillText('for successfully completing the practice quiz', W / 2, 470);
+    ctx.fillText('has successfully completed the practice quiz', W / 2, Y.completed);
 
-    // ============ 14. PACKAGE NAME ============
-    const displayPkg = pkgName.length > 42 ? pkgName.slice(0, 40) + '…' : pkgName;
-    ctx.font = '700 24px "Playfair Display", Georgia, serif';
+    /* ============================================
+       13. PACKAGE NAME
+       ============================================ */
+    const displayPkg = pkgName.length > 44 ? pkgName.slice(0, 42) + '…' : pkgName;
+    ctx.font = '700 22px "Playfair Display", Georgia, serif';
     ctx.fillStyle = tier.primary;
     ctx.textAlign = 'center';
-    ctx.fillText(`"${displayPkg}"`, W / 2, 504);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`"${displayPkg}"`, W / 2, Y.pkg);
 
-    // ============ 15. "WITH AN OUTSTANDING SCORE OF" ============
-    ctx.font = '14px Georgia, "Times New Roman", serif';
+    /* ============================================
+       14. SCORE ROW (medal · score · grade)
+       ============================================ */
+    ctx.font = 'italic 14px Georgia, "Times New Roman", serif';
     ctx.fillStyle = '#64748b';
     ctx.textAlign = 'center';
-    ctx.fillText('with an outstanding score of', W / 2, 538);
+    ctx.fillText('with an outstanding score of', W / 2, Y.scoreLabel);
 
-    // ============ 16. SCORE with MEDAL ============
-    const scoreY = 590;
-    // Medal circle (left of score)
-    const medalX = W / 2 - 200, medalR = 34;
+    const scoreText = `${score}%`;
+    const gradeLabel = gradeText;
+
+    ctx.font = '900 44px "Playfair Display", Georgia, serif';
+    const scoreWidth = ctx.measureText(scoreText).width;
+
+    ctx.font = '800 16px "Plus Jakarta Sans", -apple-system, sans-serif';
+    const gradeWidth = ctx.measureText(gradeLabel).width;
+
+    const medalR = 30;
+    const gap1 = 18;
+    const gap2 = 16;
+    const totalRowWidth = medalR * 2 + gap1 + scoreWidth + gap2 + gradeWidth;
+    const rowStartX = (W - totalRowWidth) / 2;
+
+    const medalCx = rowStartX + medalR;
+    const medalCy = Y.scoreY;
+    const scoreX = medalCx + medalR + gap1;
+    const gradeX = scoreX + scoreWidth + gap2;
 
     // Ribbon tails
     ctx.fillStyle = tier.primary;
     ctx.beginPath();
-    ctx.moveTo(medalX - 14, scoreY + 20);
-    ctx.lineTo(medalX - 22, scoreY + 50);
-    ctx.lineTo(medalX - 8, scoreY + 44);
-    ctx.lineTo(medalX - 2, scoreY + 50);
-    ctx.lineTo(medalX + 6, scoreY + 20);
+    ctx.moveTo(medalCx - 12, medalCy + medalR - 2);
+    ctx.lineTo(medalCx - 20, medalCy + medalR + 22);
+    ctx.lineTo(medalCx - 6, medalCy + medalR + 16);
+    ctx.lineTo(medalCx, medalCy + medalR + 22);
+    ctx.lineTo(medalCx + 6, medalCy + medalR - 2);
     ctx.closePath();
     ctx.fill();
+
     ctx.fillStyle = tier.accent;
     ctx.beginPath();
-    ctx.moveTo(medalX + 2, scoreY + 20);
-    ctx.lineTo(medalX + 8, scoreY + 50);
-    ctx.lineTo(medalX + 14, scoreY + 44);
-    ctx.lineTo(medalX + 26, scoreY + 50);
-    ctx.lineTo(medalX + 18, scoreY + 20);
+    ctx.moveTo(medalCx, medalCy + medalR - 2);
+    ctx.lineTo(medalCx + 6, medalCy + medalR + 22);
+    ctx.lineTo(medalCx + 12, medalCy + medalR + 16);
+    ctx.lineTo(medalCx + 20, medalCy + medalR + 22);
+    ctx.lineTo(medalCx + 12, medalCy + medalR - 2);
     ctx.closePath();
     ctx.fill();
 
     // Medal circle
-    const medalGrad = ctx.createRadialGradient(medalX - 10, scoreY - 10, 4, medalX, scoreY, medalR);
+    const medalGrad = ctx.createRadialGradient(
+      medalCx - 10, medalCy - 10, 4,
+      medalCx, medalCy, medalR
+    );
     medalGrad.addColorStop(0, tier.sealColors[0]);
     medalGrad.addColorStop(0.5, tier.sealColors[2]);
     medalGrad.addColorStop(1, tier.sealColors[3]);
     ctx.beginPath();
-    ctx.arc(medalX, scoreY, medalR, 0, Math.PI * 2);
+    ctx.arc(medalCx, medalCy, medalR, 0, Math.PI * 2);
     ctx.fillStyle = medalGrad;
     ctx.fill();
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.5;
     ctx.stroke();
     ctx.strokeStyle = tier.accent;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(medalX, scoreY, medalR - 5, 0, Math.PI * 2);
+    ctx.arc(medalCx, medalCy, medalR - 5, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Tier icon in medal
-    ctx.font = '32px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.font = '26px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText(tier.icon, medalX, scoreY + 2);
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(tier.icon, medalCx, medalCy + 1);
 
-    // Score text
-    ctx.font = '900 46px "Playfair Display", Georgia, serif';
+    // Score
+    ctx.font = '900 44px "Playfair Display", Georgia, serif';
     ctx.fillStyle = tier.primary;
     ctx.textAlign = 'left';
-    ctx.fillText(`${score}%`, medalX + medalR + 24, scoreY - 6);
+    ctx.textBaseline = 'middle';
+    ctx.fillText(scoreText, scoreX, medalCy + 2);
 
-    // Grade text
-    ctx.font = '800 18px "Plus Jakarta Sans", -apple-system, sans-serif';
+    // Grade
+    ctx.font = '800 16px "Plus Jakarta Sans", -apple-system, sans-serif';
     ctx.fillStyle = tier.deep;
-    ctx.fillText(`· ${gradeText}`, medalX + medalR + 24 + ctx.measureText(`${score}%`).width + 14, scoreY - 6);
+    ctx.textAlign = 'left';
+    ctx.fillText(gradeLabel, gradeX, medalCy + 3);
 
-    // Small "score" label below
-    ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
+    // "FINAL SCORE" caption
+    ctx.font = '700 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.letterSpacing = '2px';
-    ctx.fillText('FINAL SCORE', medalX + medalR + 24, scoreY + 20);
+    ctx.letterSpacing = '3px';
+    ctx.textAlign = 'left';
+    ctx.fillText('FINAL SCORE', scoreX, medalCy + 26);
     ctx.letterSpacing = '0px';
 
-    // ============ 17. FOOTER DECORATIVE LINE ============
-    const footerY = 665;
+    /* ============================================
+       15. FOOTER SEPARATOR
+       ============================================ */
     ctx.strokeStyle = tier.borderInner;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 0.8;
     ctx.beginPath();
-    ctx.moveTo(120, footerY);
-    ctx.lineTo(W - 120, footerY);
+    ctx.moveTo(120, Y.footerLine);
+    ctx.lineTo(W - 120, Y.footerLine);
     ctx.stroke();
 
-    // ============ 18. SIGNATURE (LEFT) ============
+    ctx.save();
+    ctx.translate(W / 2, Y.footerLine);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = tier.borderOuter;
+    ctx.fillRect(-3, -3, 6, 6);
+    ctx.restore();
+
+    /* ============================================
+       16. SIGNATURE (left)
+       ============================================ */
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+
     ctx.font = 'italic 26px "Playfair Display", Georgia, serif';
     ctx.fillStyle = '#1e293b';
-    ctx.textAlign = 'center';
-    ctx.fillText('KR-Dict', 220, footerY + 40);
+    ctx.fillText('KR-Dict', 220, Y.signatureY);
 
     ctx.strokeStyle = '#94a3b8';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 0.8;
     ctx.beginPath();
-    ctx.moveTo(130, footerY + 62);
-    ctx.lineTo(310, footerY + 62);
+    ctx.moveTo(140, Y.signatureY + 22);
+    ctx.lineTo(300, Y.signatureY + 22);
     ctx.stroke();
 
-    ctx.font = '800 10px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '800 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#64748b';
-    ctx.fillText('FOUNDER & DIRECTOR', 220, footerY + 82);
+    ctx.letterSpacing = '2px';
+    ctx.fillText('FOUNDER & DIRECTOR', 220, Y.signatureY + 40);
+    ctx.letterSpacing = '0px';
 
-    // ============ 19. OFFICIAL SEAL (CENTER) ============
-    const sealX = W / 2, sealY = footerY + 55, sealR = 52;
-    const sealGrad = ctx.createRadialGradient(sealX - 18, sealY - 18, 5, sealX, sealY, sealR);
+    /* ============================================
+       17. OFFICIAL SEAL (center)
+       ============================================ */
+    const sealR = 46;
+    const sealCx = W / 2;
+    const sealCy = Y.sealY - 10;
+
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, sealR + 6, 0, Math.PI * 2);
+    ctx.strokeStyle = tier.accent;
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    const sealGrad = ctx.createRadialGradient(
+      sealCx - 15, sealCy - 15, 5,
+      sealCx, sealCy, sealR
+    );
     sealGrad.addColorStop(0, tier.sealColors[0]);
     sealGrad.addColorStop(0.45, tier.sealColors[1]);
     sealGrad.addColorStop(0.75, tier.sealColors[2]);
     sealGrad.addColorStop(1, tier.sealColors[3]);
     ctx.beginPath();
-    ctx.arc(sealX, sealY, sealR, 0, Math.PI * 2);
+    ctx.arc(sealCx, sealCy, sealR, 0, Math.PI * 2);
     ctx.fillStyle = sealGrad;
     ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.strokeStyle = tier.accent;
-    ctx.lineWidth = 1.5;
+
     ctx.beginPath();
-    ctx.arc(sealX, sealY, sealR - 6, 0, Math.PI * 2);
+    ctx.arc(sealCx, sealCy, sealR - 3, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    ctx.font = '900 10px "Playfair Display", Georgia, serif';
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, sealR - 8, 0, Math.PI * 2);
+    ctx.strokeStyle = tier.accent;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, sealR - 14, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+
+    ctx.font = '900 9px "Playfair Display", Georgia, serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText('OFFICIAL', sealX, sealY - 14);
-    ctx.font = '22px serif';
-    ctx.fillText('★', sealX, sealY + 2);
-    ctx.font = '900 10px "Playfair Display", Georgia, serif';
-    ctx.fillText('SEAL', sealX, sealY + 20);
+    ctx.letterSpacing = '2px';
+    ctx.fillText('OFFICIAL', sealCx, sealCy - 14);
+    ctx.letterSpacing = '0px';
 
-    // ============ 20. META (RIGHT) ============
+    ctx.font = '18px serif';
+    ctx.fillText('★', sealCx, sealCy + 4);
+
+    ctx.font = '900 9px "Playfair Display", Georgia, serif';
+    ctx.letterSpacing = '2px';
+    ctx.fillText('SEAL', sealCx, sealCy + 20);
+    ctx.letterSpacing = '0px';
+
+    /* ============================================
+       18. META (right)
+       ============================================ */
     ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
 
-    ctx.font = '800 10px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '800 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('ISSUED DATE', W - 130, footerY + 30);
+    ctx.letterSpacing = '2px';
+    ctx.fillText('ISSUED DATE', W - 130, Y.metaY1);
+    ctx.letterSpacing = '0px';
+
     ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#1e293b';
-    ctx.fillText(dateStr, W - 130, footerY + 50);
+    ctx.fillText(dateStr, W - 130, Y.metaY2);
 
-    ctx.font = '800 10px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '800 9px "Plus Jakarta Sans", sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('CERTIFICATE ID', W - 130, footerY + 74);
-    ctx.font = '700 12px ui-monospace, "SF Mono", Menlo, monospace';
-    ctx.fillStyle = '#1e293b';
-    ctx.fillText(certId, W - 130, footerY + 92);
+    ctx.letterSpacing = '2px';
+    ctx.fillText('CERTIFICATE ID', W - 130, Y.metaY2 + 22);
+    ctx.letterSpacing = '0px';
 
-    // ============ 21. VERSION MARKER ============
-    ctx.font = '700 8px "Plus Jakarta Sans", sans-serif';
-    ctx.fillStyle = 'rgba(184,134,11,0.35)';
-    ctx.textAlign = 'right';
-    ctx.fillText(`CERT v7.0 · ${tier.name}`, W - 60, H - 55);
-    ctx.textAlign = 'center';
+    ctx.font = '700 11px ui-monospace, "SF Mono", Menlo, monospace';
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText(certId, W - 130, Y.metaY2 + 40);
+
+    /* ============================================
+       19. VERSION MARKER (bottom-left)
+       ============================================ */
+    ctx.font = '600 7px "Plus Jakarta Sans", sans-serif';
+    ctx.fillStyle = 'rgba(148,163,184,0.5)';
+    ctx.textAlign = 'left';
+    ctx.letterSpacing = '1px';
+    ctx.fillText(`CERT v8.0 · ${tier.name} TIER`, 130, H - 46);
+    ctx.letterSpacing = '0px';
 
     return cvs;
   }
@@ -1548,7 +1647,6 @@ KR.quiz = (function () {
       await ensurePdfLibs();
       await waitFonts();
 
-      // Force font load
       const dummy = document.createElement('span');
       dummy.style.cssText = 'position:absolute;left:-9999px;font-family:"Playfair Display",Georgia,serif;font-weight:900;font-size:56px;';
       dummy.textContent = 'LOAD';
@@ -1581,7 +1679,6 @@ KR.quiz = (function () {
 
       const dataUrl = _certCanvas.toDataURL('image/png');
 
-      // Modal preview with tier banner
       els.certPreview.innerHTML = `
         <div style="border-radius:14px; overflow:hidden; margin-bottom:14px; background:linear-gradient(135deg, ${tier.tierGradient[0]}, ${tier.tierGradient[1]}, ${tier.tierGradient[2]}); padding:16px 20px; display:flex; align-items:center; gap:14px; color:#fff; box-shadow:0 8px 24px -8px rgba(15,23,42,0.25);">
           <div style="font-size:38px; line-height:1;">${tier.icon}</div>
