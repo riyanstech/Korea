@@ -1,0 +1,54 @@
+{
+  "packages": [
+    {
+      "id": "pkg-eps-1",
+      "name": "EPS-TOPIK Set 1",
+      "description": "Latihan soal Reading & Listening untuk persiapan EPS-TOPIK",
+      "duration": 30,
+      "sections": [
+        {
+          "id": "sec-r1",
+          "name": "Reading — Perkenalan",
+          "type": "reading",
+          "duration": 10,
+          "questions": [
+            {
+              "id": "q1",
+              "type": "reading",
+              "text": "저는 학생입니다. 밥을 먹습니다. Kata '밥' berarti?",
+              "options": [
+                { "id": "A", "text": "Air" },
+                { "id": "B", "text": "Nasi" },
+                { "id": "C", "text": "Roti" },
+                { "id": "D", "text": "Susu" }
+              ],
+              "correct": "B"
+            }
+          ]
+        },
+        {
+          "id": "sec-l1",
+          "name": "Listening — Salam",
+          "type": "listening",
+          "duration": 10,
+          "questions": [
+            {
+              "id": "q2",
+              "type": "listening",
+              "text": "Apa yang diucapkan?",
+              "audioText": "안녕하세요",
+              "audioTarget": "question",
+              "options": [
+                { "id": "A", "text": "Selamat pagi" },
+                { "id": "B", "text": "Halo" },
+                { "id": "C", "text": "Terima kasih" },
+                { "id": "D", "text": "Selamat malam" }
+              ],
+              "correct": "B"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
