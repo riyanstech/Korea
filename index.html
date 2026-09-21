@@ -4,82 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>KR-Dict | Learning Hub</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        korean: ['Noto Sans KR', 'sans-serif'],
-                        serif: ['Playfair Display', 'serif'],
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], korean: ['Noto Sans KR', 'sans-serif'], serif: ['Playfair Display', 'serif'] } } } }
     </script>
-
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=9.2">
 </head>
 <body class="antialiased">
-
     <div class="ambient-bg"></div>
     <div class="ambient-orb orb-1"></div>
     <div class="ambient-orb orb-2"></div>
 
     <div id="app" class="main-layout transition-colors duration-500">
-
-        <!-- ================= HEADER ================= -->
         <header class="app-header">
             <div class="header-glow"></div>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                 <div class="flex justify-between items-center h-[72px] gap-3">
                     <div class="flex items-center gap-3">
-                        <button id="burger-btn" onclick="toggleMenu()" class="md:hidden icon-btn-glass" aria-label="Menu">
-                            <i data-lucide="menu" class="w-6 h-6"></i>
-                        </button>
+                        <button id="burger-btn" onclick="toggleMenu()" class="md:hidden icon-btn-glass" aria-label="Menu"><i data-lucide="menu" class="w-6 h-6"></i></button>
                         <div class="flex items-center gap-3 logo-container">
-                            <div class="logo-box">
-                                <i data-lucide="book-open" class="w-6 h-6 text-white"></i>
-                            </div>
+                            <div class="logo-box"><i data-lucide="book-open" class="w-6 h-6 text-white"></i></div>
                             <div class="leading-tight">
                                 <h1 class="brand-title">KR-Dict</h1>
                                 <p class="brand-sub">STUDY HUB</p>
                             </div>
                         </div>
                     </div>
-
                     <nav class="nav-pill-modern" aria-label="Navigasi utama">
-                        <button class="nav-chip nav-chip-indigo active" onclick="showTab('vocab-container', this)">
-                            <i data-lucide="book-open-text"></i><span>Kosakata</span>
-                        </button>
-                        <button class="nav-chip nav-chip-cyan" onclick="showTab('hangeul', this)">
-                            <i data-lucide="scan"></i><span>Hangeul</span>
-                        </button>
-                        <button class="nav-chip nav-chip-violet" onclick="showTab('grammar', this)">
-                            <i data-lucide="sparkles"></i><span>Grammar</span>
-                        </button>
-                        <button class="nav-chip nav-chip-amber" onclick="showTab('culture', this)">
-                            <i data-lucide="globe-2"></i><span>Budaya</span>
-                        </button>
-                        <button class="nav-chip nav-chip-emerald" onclick="showTab('downloads', this)">
-                            <i data-lucide="cloud-download"></i><span>Materi</span>
-                        </button>
-                        <button class="nav-chip nav-chip-rose" onclick="showTab('quiz-hub', this)">
-                            <i data-lucide="pencil-ruler"></i><span>Latihan</span>
-                        </button>
-                        <button class="nav-chip nav-chip-ai" onclick="showTab('chat-ai', this)">
-                            <i data-lucide="bot"></i><span>AI Tutor</span>
-                        </button>
+                        <button class="nav-chip nav-chip-indigo active" onclick="showTab('vocab-container', this)"><i data-lucide="book-open-text"></i><span>Kosakata</span></button>
+                        <button class="nav-chip nav-chip-cyan" onclick="showTab('hangeul', this)"><i data-lucide="scan"></i><span>Hangeul</span></button>
+                        <button class="nav-chip nav-chip-violet" onclick="showTab('grammar', this)"><i data-lucide="sparkles"></i><span>Grammar</span></button>
+                        <button class="nav-chip nav-chip-amber" onclick="showTab('culture', this)"><i data-lucide="globe-2"></i><span>Budaya</span></button>
+                        <button class="nav-chip nav-chip-emerald" onclick="showTab('downloads', this)"><i data-lucide="cloud-download"></i><span>Materi</span></button>
+                        <button class="nav-chip nav-chip-rose" onclick="showTab('quiz-hub', this)"><i data-lucide="pencil-ruler"></i><span>Latihan</span></button>
+                        <button class="nav-chip nav-chip-ai" onclick="showTab('chat-ai', this)"><i data-lucide="bot"></i><span>AI Tutor</span></button>
                     </nav>
-
                     <div class="flex items-center gap-2">
                         <div id="roleBadge" class="flex items-center gap-2"></div>
                         <button onclick="toggleDarkMode()" class="theme-toggle-btn" aria-label="Ganti tema">
@@ -88,7 +51,6 @@
                     </div>
                 </div>
             </div>
-
             <div id="mobile-menu" class="md:hidden glass-mobile-menu">
                 <div class="p-4 space-y-2">
                     <button class="nav-link-mobile active" onclick="showTab('vocab-container', this)"><i data-lucide="book-open-text"></i>Kosakata Textbook</button>
@@ -102,11 +64,9 @@
             </div>
         </header>
 
-        <!-- ================= MAIN ================= -->
         <main class="app-main flex-grow min-h-0 overflow-y-auto custom-scroll relative z-10 p-4 md:p-8">
             <div class="max-w-7xl mx-auto h-full">
 
-                <!-- 1. KOSAKATA TAB -->
                 <div id="vocab-container" class="tab-content animate-slide-up space-y-8">
                     <div id="vocab-textbook" class="vocab-sub-tab space-y-6">
                         <div class="header-section glass-card p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -115,23 +75,21 @@
                                 <p class="text-gray-500 dark:text-gray-400 mt-1">Mastering EPS-TOPIK Vocabulary</p>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                                <button onclick="showVocabSubTab('vocab-selection')" class="btn-primary-gradient">
-                                    <i data-lucide="gamepad-2" class="w-5 h-5 mr-2"></i>Mulai Latihan
-                                </button>
+                                <button onclick="showVocabSubTab('vocab-selection')" class="btn-primary-gradient"><i data-lucide="gamepad-2" class="w-5 h-5 mr-2"></i>Mulai Latihan</button>
                                 <div class="glass-input-wrapper">
                                     <select id="vocab-chapter-filter" onchange="filterVocabTextbook()" class="glass-select">
                                         <option value="">Semua Bab</option>
                                         <option value="BAB 1">BAB 1 자기소개 (Perkenalan diri)</option>
-                                        <option value="BAB 2">BAB 2 생활용품 (Barang kebutuhan sehari-hari)</option>
+                                        <option value="BAB 2">BAB 2 생활용품 (Barang sehari-hari)</option>
                                         <option value="BAB 3">BAB 3 위치와 장소 (Tempat & lokasi)</option>
                                         <option value="BAB 4">BAB 4 동작과 사물 (Aksi & benda)</option>
                                         <option value="BAB 5">BAB 5 날짜와 요일 (Hari & tanggal)</option>
-                                        <option value="BAB 6">BAB 6 하루 일과 (Rutinitas sehari-hari)</option>
+                                        <option value="BAB 6">BAB 6 하루 일과 (Rutinitas)</option>
                                         <option value="BAB 7">BAB 7 계절과 날씨 (Cuaca & musim)</option>
-                                        <option value="BAB 8">BAB 8 가족 과 친구 (Teman & keluarga)</option>
+                                        <option value="BAB 8">BAB 8 가족과 친구 (Teman & keluarga)</option>
                                         <option value="BAB 9">BAB 9 음식 주문 (Memesan makanan)</option>
                                         <option value="BAB 10">BAB 10 물건 구입 (Membeli barang)</option>
-                                        <option value="BAB 11">BAB 11 집안일 (Pekerjaan dalam rumah)</option>
+                                        <option value="BAB 11">BAB 11 집안일 (Pekerjaan rumah)</option>
                                         <option value="BAB 12">BAB 12 대중교통 (Transportasi umum)</option>
                                         <option value="BAB 13">BAB 13 주말 활동 (Aktivitas akhir pekan)</option>
                                         <option value="BAB 14">BAB 14 길 찾기 (Mencari jalan)</option>
@@ -140,17 +98,17 @@
                                         <option value="BAB 17">BAB 17 휴가 (Cuti)</option>
                                         <option value="BAB 18">BAB 18 취미 (Hobi)</option>
                                         <option value="BAB 19">BAB 19 요리 (Memasak)</option>
-                                        <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet dan smartphone)</option>
+                                        <option value="BAB 20">BAB 20 인터넷과 스마트폰 (Internet & smartphone)</option>
                                         <option value="BAB 21">BAB 21 병원 (Rumah sakit)</option>
                                         <option value="BAB 22">BAB 22 약국 (Apotek)</option>
                                         <option value="BAB 23">BAB 23 우체국 (Kantor pos)</option>
                                         <option value="BAB 24">BAB 24 은행 (Bank)</option>
-                                        <option value="BAB 25">BAB 25 외국인 근로자 지원 기관 (Lembaga dukungan pekerja asing)</option>
-                                        <option value="BAB 26">BAB 26 한국의 주거 문화와 음식 문화 (Budaya makanan dan rumah Korea)</option>
-                                        <option value="BAB 27">BAB 27 한국의 기념일 (Hari peringatan)</option>
-                                        <option value="BAB 28">BAB 28 한국의 명절 (Hari raya Korea)</option>
-                                        <option value="BAB 29">BAB 29 한국의 예절 (Sopan santun Korea)</option>
-                                        <option value="BAB 30">BAB 30 한국의 대중문화 (Budaya popular Korea)</option>
+                                        <option value="BAB 25">BAB 25 외국인 근로자 지원 기관</option>
+                                        <option value="BAB 26">BAB 26 주거 & 음식 문화</option>
+                                        <option value="BAB 27">BAB 27 기념일 (Hari peringatan)</option>
+                                        <option value="BAB 28">BAB 28 명절 (Hari raya)</option>
+                                        <option value="BAB 29">BAB 29 예절 (Sopan santun)</option>
+                                        <option value="BAB 30">BAB 30 대중문화 (Budaya populer)</option>
                                     </select>
                                 </div>
                                 <div class="glass-input-wrapper relative w-full sm:w-64">
@@ -161,20 +119,15 @@
                         </div>
                         <div id="vocab-textbook-list" class="grid grid-cols-1 gap-4"></div>
                     </div>
-
                     <div id="vocab-selection" class="vocab-sub-tab hidden space-y-6">
                         <div class="flex justify-between items-center mb-2">
                             <h2 class="text-2xl font-bold dark:text-white">Persiapan Kuis</h2>
-                            <button onclick="showVocabSubTab('vocab-textbook')" class="btn-ghost">
-                                <i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Kembali
-                            </button>
+                            <button onclick="showVocabSubTab('vocab-textbook')" class="btn-ghost"><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Kembali</button>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                             <div class="md:col-span-8 glass-card p-6">
                                 <div class="flex justify-between items-center mb-6">
-                                    <h3 class="text-lg font-semibold flex items-center text-indigo-600 dark:text-indigo-400">
-                                        <i data-lucide="filter" class="w-5 h-5 mr-2"></i> Pilih Materi
-                                    </h3>
+                                    <h3 class="text-lg font-semibold flex items-center text-indigo-600 dark:text-indigo-400"><i data-lucide="filter" class="w-5 h-5 mr-2"></i> Pilih Materi</h3>
                                     <div class="flex gap-2">
                                         <button onclick="bulkSelectVocab(true)" class="btn-xs-primary">Pilih Semua</button>
                                         <button onclick="bulkSelectVocab(false)" class="btn-xs-danger">Reset</button>
@@ -182,55 +135,30 @@
                                 </div>
                                 <select id="quiz-chapter-filter" onchange="renderQuizSelection()" class="glass-select w-full mb-4">
                                     <option value="">Pilih Bab Tertentu...</option>
-                                    <option value="BAB 1">BAB 1</option>
-                                    <option value="BAB 2">BAB 2</option>
-                                    <option value="BAB 3">BAB 3</option>
-                                    <option value="BAB 4">BAB 4</option>
-                                    <option value="BAB 5">BAB 5</option>
-                                    <option value="BAB 6">BAB 6</option>
-                                    <option value="BAB 7">BAB 7</option>
-                                    <option value="BAB 8">BAB 8</option>
-                                    <option value="BAB 9">BAB 9</option>
-                                    <option value="BAB 10">BAB 10</option>
-                                    <option value="BAB 11">BAB 11</option>
-                                    <option value="BAB 12">BAB 12</option>
-                                    <option value="BAB 13">BAB 13</option>
-                                    <option value="BAB 14">BAB 14</option>
-                                    <option value="BAB 15">BAB 15</option>
-                                    <option value="BAB 16">BAB 16</option>
-                                    <option value="BAB 17">BAB 17</option>
-                                    <option value="BAB 18">BAB 18</option>
-                                    <option value="BAB 19">BAB 19</option>
-                                    <option value="BAB 20">BAB 20</option>
-                                    <option value="BAB 21">BAB 21</option>
-                                    <option value="BAB 22">BAB 22</option>
-                                    <option value="BAB 23">BAB 23</option>
-                                    <option value="BAB 24">BAB 24</option>
-                                    <option value="BAB 25">BAB 25</option>
-                                    <option value="BAB 26">BAB 26</option>
-                                    <option value="BAB 27">BAB 27</option>
-                                    <option value="BAB 28">BAB 28</option>
-                                    <option value="BAB 29">BAB 29</option>
-                                    <option value="BAB 30">BAB 30</option>
+                                    <option value="BAB 1">BAB 1</option><option value="BAB 2">BAB 2</option><option value="BAB 3">BAB 3</option>
+                                    <option value="BAB 4">BAB 4</option><option value="BAB 5">BAB 5</option><option value="BAB 6">BAB 6</option>
+                                    <option value="BAB 7">BAB 7</option><option value="BAB 8">BAB 8</option><option value="BAB 9">BAB 9</option>
+                                    <option value="BAB 10">BAB 10</option><option value="BAB 11">BAB 11</option><option value="BAB 12">BAB 12</option>
+                                    <option value="BAB 13">BAB 13</option><option value="BAB 14">BAB 14</option><option value="BAB 15">BAB 15</option>
+                                    <option value="BAB 16">BAB 16</option><option value="BAB 17">BAB 17</option><option value="BAB 18">BAB 18</option>
+                                    <option value="BAB 19">BAB 19</option><option value="BAB 20">BAB 20</option><option value="BAB 21">BAB 21</option>
+                                    <option value="BAB 22">BAB 22</option><option value="BAB 23">BAB 23</option><option value="BAB 24">BAB 24</option>
+                                    <option value="BAB 25">BAB 25</option><option value="BAB 26">BAB 26</option><option value="BAB 27">BAB 27</option>
+                                    <option value="BAB 28">BAB 28</option><option value="BAB 29">BAB 29</option><option value="BAB 30">BAB 30</option>
                                 </select>
                                 <div id="vocab-selection-list" class="space-y-2 max-h-[400px] overflow-y-auto custom-scroll pr-2"></div>
                             </div>
                             <div class="md:col-span-4 glass-card p-6 flex flex-col h-fit sticky top-24">
-                                <h3 class="text-lg font-semibold mb-4 text-pink-600 dark:text-pink-400 flex items-center">
-                                    <i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i> Ringkasan
-                                </h3>
+                                <h3 class="text-lg font-semibold mb-4 text-pink-600 dark:text-pink-400 flex items-center"><i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i> Ringkasan</h3>
                                 <div class="flex justify-between items-center mb-4">
                                     <span class="text-sm text-gray-500">Kata Terpilih</span>
                                     <span id="selection-count" class="text-xl font-bold text-gray-800 dark:text-white">0</span>
                                 </div>
                                 <div id="selected-vocab-summary" class="text-sm text-gray-600 dark:text-gray-300 min-h-[100px] max-h-[200px] overflow-y-auto custom-scroll p-3 rounded-xl bg-gray-50/50 dark:bg-black/20 mb-4 border border-gray-100 dark:border-gray-700">Belum ada kata.</div>
-                                <button onclick="startQuiz()" id="start-quiz-btn" disabled class="btn-primary-gradient w-full py-4 text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
-                                    Mulai Latihan
-                                </button>
+                                <button onclick="startQuiz()" id="start-quiz-btn" disabled class="btn-primary-gradient w-full py-4 text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">Mulai Latihan</button>
                             </div>
                         </div>
                     </div>
-
                     <div id="quiz-mode" class="vocab-sub-tab hidden h-full flex flex-col relative overflow-y-auto">
                         <div class="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full mb-8 overflow-hidden relative">
                             <div id="quiz-progress-bar" class="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 transition-all duration-700 ease-out" style="width: 0%"></div>
@@ -250,24 +178,19 @@
                                 <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-500/20 rounded-full blur-3xl"></div>
                                 <span class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-4 block">Terjemahkan ke Indonesia</span>
                                 <div id="quiz-question" class="text-6xl font-black text-gray-800 dark:text-white font-korean mb-6 tracking-tight">...</div>
-                                <button id="quiz-speaker-btn" onclick="speak(document.getElementById('quiz-question').innerText)" class="btn-circle-soft mx-auto">
-                                    <i data-lucide="volume-2" class="w-6 h-6"></i>
-                                </button>
+                                <button id="quiz-speaker-btn" onclick="speak(document.getElementById('quiz-question').innerText)" class="btn-circle-soft mx-auto"><i data-lucide="volume-2" class="w-6 h-6"></i></button>
                             </div>
                             <div id="quiz-options" class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full mb-24 md:mb-0"></div>
                         </div>
                         <div class="fixed bottom-6 left-0 right-0 px-4 flex flex-col items-center pointer-events-none">
                             <div class="pointer-events-auto max-w-xl w-full glass-panel-solid p-4 rounded-2xl shadow-2xl flex flex-col items-center transform transition-all duration-300 translate-y-20 opacity-0" id="quiz-footer-container">
                                 <div id="quiz-feedback" class="text-base font-bold text-center mb-3"></div>
-                                <button onclick="nextQuestion()" id="next-question-btn" disabled class="btn-primary-gradient w-full py-3">
-                                    Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
-                                </button>
+                                <button onclick="nextQuestion()" id="next-question-btn" disabled class="btn-primary-gradient w-full py-3">Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i></button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. HANGEUL TAB -->
                 <div id="hangeul" class="tab-content hidden animate-slide-up space-y-6">
                     <div class="text-center mb-8">
                         <h2 class="text-3xl font-bold dark:text-white mb-2">Hangeul Mastery</h2>
@@ -276,7 +199,6 @@
                     <div id="hangeul-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-8"></div>
                 </div>
 
-                <!-- 3. GRAMMAR TAB -->
                 <div id="grammar" class="tab-content hidden animate-slide-up space-y-6">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
                         <div>
@@ -291,10 +213,8 @@
                     <div id="grammar-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
                 </div>
 
-                <!-- 4. CULTURE TAB -->
                 <div id="culture" class="tab-content hidden animate-slide-up space-y-6"></div>
 
-                <!-- 5. DOWNLOADS TAB -->
                 <div id="downloads" class="tab-content hidden animate-slide-up space-y-8">
                     <div class="text-center">
                         <h2 class="text-3xl font-bold dark:text-white mb-2">Pustaka Digital</h2>
@@ -310,7 +230,6 @@
                     <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12"></div>
                 </div>
 
-                <!-- 6. QUIZ HUB -->
                 <div id="quiz-hub" class="tab-content hidden animate-slide-up">
                     <div id="quizHubHeader" class="text-center mb-8">
                         <h2 class="text-3xl font-bold dark:text-white mb-2">Latihan Soal</h2>
@@ -331,9 +250,7 @@
                     <div id="quizTestWrap" class="hidden flex-col relative">
                         <div class="quiz-test-sticky-top">
                             <div class="flex items-center gap-3">
-                                <button id="quizTestExit" class="btn-icon-glass" title="Keluar">
-                                    <i data-lucide="arrow-left"></i>
-                                </button>
+                                <button id="quizTestExit" class="btn-icon-glass" title="Keluar"><i data-lucide="arrow-left"></i></button>
                                 <div class="flex-1 min-w-0">
                                     <div id="quizTestTitle" class="font-bold text-sm truncate"></div>
                                     <div id="quizTestSection"></div>
@@ -363,7 +280,7 @@
                                 </button>
                                 <button id="quizTestSubmit" class="quiz-nav-btn success flex-1 hidden">
                                     <i data-lucide="send" class="w-4 h-4"></i>
-                                    <span class="hidden sm:inline">Kirim Jawaban</span>
+                                    <span class="hidden sm:inline">Kirim</span>
                                 </button>
                             </div>
                         </div>
@@ -380,9 +297,7 @@
                             <div id="quizResultScore" class="mb-6"></div>
                             <div id="quizResultStats" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"></div>
                             <div id="quizResultActions" class="quiz-result-actions"></div>
-                            <div id="quizResultReviewWrap" class="mt-8">
-                                <div id="quizResultReview"></div>
-                            </div>
+                            <div id="quizResultReviewWrap" class="mt-8"><div id="quizResultReview"></div></div>
                             <button id="quizResultClose" class="btn-primary-gradient w-full mt-6 py-4 justify-center">
                                 <i data-lucide="check" class="w-5 h-5 mr-2"></i> Selesai
                             </button>
@@ -390,7 +305,7 @@
                     </div>
                 </div>
 
-                <!-- ================= 7. AI TUTOR TAB (NEW v2.0) ================= -->
+                <!-- ===================== AI TUTOR TAB ===================== -->
                 <div id="chat-ai" class="tab-content hidden chat-shell">
 
                     <!-- Header -->
@@ -400,66 +315,44 @@
                         </button>
                         <div class="chat-avatar">
                             <i id="ai-avatar-icon" data-lucide="bot"></i>
-                            <span class="chat-status-dot"></span>
+                            <span id="ai-status-dot" class="chat-status-dot"></span>
                         </div>
                         <div class="chat-header-info">
                             <h1 id="ai-header-name">Tutor AI Korea</h1>
-                            <span id="ai-status">Online • Siap membantu</span>
+                            <span id="ai-status">🔴 Offline • Setup API Key</span>
                         </div>
                         <div class="chat-header-actions">
-                            <button onclick="startCall()" title="Panggilan suara" class="chat-hdr-btn">
-                                <i data-lucide="phone"></i>
-                            </button>
-                            <button onclick="toggleChatSettings()" title="Pengaturan" class="chat-hdr-btn">
-                                <i data-lucide="settings-2"></i>
-                            </button>
-                            <button onclick="resetChat()" title="Reset chat" class="chat-hdr-btn">
-                                <i data-lucide="rotate-ccw"></i>
-                            </button>
+                            <button onclick="startCall()" title="Panggilan suara" class="chat-hdr-btn"><i data-lucide="phone"></i></button>
+                            <button id="ai-settings-btn" onclick="toggleChatSettings()" title="Pengaturan" class="chat-hdr-btn"><i data-lucide="settings-2"></i></button>
+                            <button onclick="resetChat()" title="Reset chat" class="chat-hdr-btn"><i data-lucide="rotate-ccw"></i></button>
                         </div>
                     </div>
 
                     <!-- Quick mode chips -->
                     <div class="chat-quick-modes" id="chatQuickModes" role="tablist">
-                        <button class="chat-chip active" data-mode="tutor" onclick="setQuickMode('tutor')">
-                            <span>🎓</span><span>Tutor</span>
-                        </button>
-                        <button class="chat-chip" data-mode="correct" onclick="setQuickMode('correct')">
-                            <span>✏️</span><span>Koreksi</span>
-                        </button>
-                        <button class="chat-chip" data-mode="explain" onclick="setQuickMode('explain')">
-                            <span>📖</span><span>Jelaskan</span>
-                        </button>
-                        <button class="chat-chip" data-mode="translate" onclick="setQuickMode('translate')">
-                            <span>🌐</span><span>Terjemah</span>
-                        </button>
-                        <button class="chat-chip" data-mode="practice" onclick="setQuickMode('practice')">
-                            <span>💬</span><span>Ngobrol</span>
-                        </button>
-                        <button class="chat-chip" data-mode="quiz" onclick="setQuickMode('quiz')">
-                            <span>🎯</span><span>Kuis</span>
-                        </button>
+                        <button class="chat-chip active" data-mode="tutor" onclick="setQuickMode('tutor')"><span>🎓</span><span>Tutor</span></button>
+                        <button class="chat-chip" data-mode="correct" onclick="setQuickMode('correct')"><span>✏️</span><span>Koreksi</span></button>
+                        <button class="chat-chip" data-mode="explain" onclick="setQuickMode('explain')"><span>📖</span><span>Jelaskan</span></button>
+                        <button class="chat-chip" data-mode="translate" onclick="setQuickMode('translate')"><span>🌐</span><span>Terjemah</span></button>
+                        <button class="chat-chip" data-mode="practice" onclick="setQuickMode('practice')"><span>💬</span><span>Ngobrol</span></button>
+                        <button class="chat-chip" data-mode="quiz" onclick="setQuickMode('quiz')"><span>🎯</span><span>Kuis</span></button>
                     </div>
 
                     <!-- Messages -->
                     <div id="chat-box" class="chat-messages"></div>
 
-                    <!-- Input area -->
+                    <!-- Input -->
                     <div class="chat-input-area">
                         <div class="chat-input-inner">
                             <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
-                            <button onclick="document.getElementById('image-upload').click()" class="chat-input-btn" title="Kirim foto">
-                                <i data-lucide="image-plus"></i>
-                            </button>
+                            <button onclick="document.getElementById('image-upload').click()" class="chat-input-btn" title="Kirim foto"><i data-lucide="image-plus"></i></button>
                             <textarea id="user-input" class="chat-input-field" placeholder="Ketik pesan atau kalimat Korea..." rows="1" onkeydown="handleChatEnter(event)" oninput="autoGrowTextarea(this)"></textarea>
-                            <button id="action-btn" onclick="toggleVoiceRecording()" class="chat-input-action" title="Rekam suara">
-                                <i data-lucide="mic"></i>
-                            </button>
+                            <button id="action-btn" onclick="toggleVoiceRecording()" class="chat-input-action" title="Rekam suara"><i data-lucide="mic"></i></button>
                         </div>
                     </div>
 
-                    <!-- Settings bottom sheet -->
-                    <div id="chat-settings" class="chat-settings-sheet">
+                    <!-- Settings sheet -->
+                    <div id="chat-settings">
                         <div class="chat-settings-backdrop" onclick="toggleChatSettings()"></div>
                         <div class="chat-settings-panel">
                             <div class="chat-settings-handle"></div>
@@ -469,10 +362,18 @@
                             </div>
                             <div class="chat-settings-body">
 
+                                <div id="ai-setup-warning" class="chat-setup-warning">
+                                    <i data-lucide="alert-triangle"></i>
+                                    <div>
+                                        <strong>Belum Terhubung</strong>
+                                        <p>Isi API Key untuk mulai menggunakan AI Tutor</p>
+                                    </div>
+                                </div>
+
                                 <div class="chat-settings-group">
                                     <label class="chat-settings-label">🤖 AI Provider</label>
                                     <select id="ai-provider-select" onchange="onProviderChange()" class="chat-settings-input"></select>
-                                    <p class="chat-settings-hint" id="ai-provider-desc">Pilih penyedia AI yang ingin digunakan</p>
+                                    <p class="chat-settings-hint" id="ai-provider-desc">Pilih penyedia AI</p>
                                 </div>
 
                                 <div class="chat-settings-group">
@@ -489,13 +390,9 @@
                                     <label class="chat-settings-label">🔑 API Key</label>
                                     <div class="chat-settings-key-row">
                                         <input type="password" id="ai-key-input" class="chat-settings-input" placeholder="Masukkan API Key...">
-                                        <button onclick="saveApiKeyMulti()" class="chat-settings-save-btn">
-                                            <i data-lucide="check"></i>
-                                        </button>
+                                        <button onclick="saveApiKeyMulti()" class="chat-settings-save-btn" title="Simpan"><i data-lucide="check"></i></button>
                                     </div>
-                                    <a id="ai-key-help" href="#" target="_blank" rel="noopener" class="chat-settings-help">
-                                        🔗 Cara mendapatkan API Key →
-                                    </a>
+                                    <a id="ai-key-help" href="#" target="_blank" rel="noopener" class="chat-settings-help">🔗 Cara mendapatkan API Key →</a>
                                     <p class="chat-settings-hint">🔒 Key disimpan lokal di browser Anda (LocalStorage).</p>
                                 </div>
 
@@ -504,7 +401,7 @@
                                         <label class="chat-settings-label">👤 Persona</label>
                                         <select id="chat-mode-select" onchange="updateChatMode()" class="chat-settings-input">
                                             <option value="tutor">🎓 Tutor Formal</option>
-                                            <option value="casual">👩🏻 Teman Santai (Ji-eun)</option>
+                                            <option value="casual">👩🏻 Ji-eun (Santai)</option>
                                         </select>
                                     </div>
                                     <div class="chat-settings-group">
@@ -517,6 +414,10 @@
                                     </div>
                                 </div>
 
+                                <button onclick="KR.ai.testConnection()" class="chat-settings-test-btn">
+                                    <i data-lucide="plug"></i> Test Koneksi AI
+                                </button>
+
                             </div>
                         </div>
                     </div>
@@ -526,9 +427,7 @@
                         <div class="chat-img-preview-card">
                             <div class="chat-img-preview-img-wrap">
                                 <img id="preview-img" alt="Preview">
-                                <button onclick="cancelImage()" class="chat-img-preview-close">
-                                    <i data-lucide="x"></i>
-                                </button>
+                                <button onclick="cancelImage()" class="chat-img-preview-close"><i data-lucide="x"></i></button>
                             </div>
                             <button onclick="sendImage()" class="btn-primary-gradient w-full py-3 mt-3">
                                 <i data-lucide="send" class="w-4 h-4 mr-2"></i> Kirim Foto
@@ -542,15 +441,11 @@
     </div>
 
     <!-- GLOBAL MODALS -->
-
-    <!-- Quiz Setup Modal -->
     <div id="quizSetupModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
         <div id="quizSetupBackdrop" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
         <div class="glass-panel-solid rounded-3xl shadow-2xl relative z-10 w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
             <div class="p-5 border-b border-gray-100 dark:border-gray-800 flex items-start gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center shrink-0">
-                    <i data-lucide="pencil-ruler" class="w-6 h-6 text-white"></i>
-                </div>
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center shrink-0"><i data-lucide="pencil-ruler" class="w-6 h-6 text-white"></i></div>
                 <div class="flex-1 min-w-0">
                     <h3 id="quizSetupTitle" class="font-bold text-lg text-gray-800 dark:text-white"></h3>
                     <p id="quizSetupDesc" class="text-xs text-gray-500 mt-1"></p>
@@ -559,13 +454,10 @@
             </div>
             <div id="quizSetupInfo" class="p-5 space-y-3 overflow-y-auto custom-scroll"></div>
             <div id="quizSetupFooter" class="p-4 border-t border-gray-100 dark:border-gray-800"></div>
-            <div class="p-4 pt-0">
-                <button id="quizSetupCancel" class="btn-ghost w-full justify-center">Tutup</button>
-            </div>
+            <div class="p-4 pt-0"><button id="quizSetupCancel" class="btn-ghost w-full justify-center">Tutup</button></div>
         </div>
     </div>
 
-    <!-- Call Modal -->
     <div id="call-modal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-[100] hidden flex flex-col items-center justify-between py-12 transition-all duration-500">
         <div class="text-center mt-10">
             <div class="w-32 h-32 rounded-full p-[2px] bg-gradient-to-tr from-indigo-500 to-pink-500 mx-auto mb-6">
@@ -585,26 +477,17 @@
             <span class="w-2 h-6 bg-white rounded-full animate-wave-1"></span>
         </div>
         <div class="flex gap-8 items-center pb-10">
-            <button id="mute-btn" onclick="toggleMute()" class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md">
-                <i data-lucide="mic"></i>
-            </button>
-            <button onclick="endCall()" class="w-20 h-20 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30 flex items-center justify-center transform hover:scale-110 transition duration-300">
-                <i data-lucide="phone-off" class="w-8 h-8 fill-current"></i>
-            </button>
-            <button class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md">
-                <i data-lucide="volume-2"></i>
-            </button>
+            <button id="mute-btn" onclick="toggleMute()" class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md"><i data-lucide="mic"></i></button>
+            <button onclick="endCall()" class="w-20 h-20 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/30 flex items-center justify-center transform hover:scale-110 transition duration-300"><i data-lucide="phone-off" class="w-8 h-8 fill-current"></i></button>
+            <button class="p-4 rounded-full bg-white/10 hover:bg-white/20 text-white transition backdrop-blur-md"><i data-lucide="volume-2"></i></button>
         </div>
     </div>
 
-    <!-- Quiz Finish Modal (legacy) -->
     <div id="quiz-finish-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="hideQuizFinishModal()"></div>
         <div class="glass-card p-8 w-full max-w-sm text-center relative z-10 animate-scale-in border-t-4 border-indigo-500">
             <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
-                <div class="w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-600 rounded-full flex items-center justify-center shadow-lg ring-4 ring-white dark:ring-gray-800">
-                    <i data-lucide="trophy" class="w-12 h-12 text-white fill-current"></i>
-                </div>
+                <div class="w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-600 rounded-full flex items-center justify-center shadow-lg ring-4 ring-white dark:ring-gray-800"><i data-lucide="trophy" class="w-12 h-12 text-white fill-current"></i></div>
             </div>
             <h3 class="text-2xl font-bold mt-10 text-gray-800 dark:text-white">Latihan Selesai!</h3>
             <p id="final-score-message" class="text-gray-500 dark:text-gray-400 text-sm mb-6">Kerja bagus, terus tingkatkan!</p>
@@ -614,39 +497,27 @@
                 <div class="text-sm font-medium text-gray-600 dark:text-gray-300 mt-2" id="final-score-detail">0 / 0 Benar</div>
             </div>
             <div class="space-y-3">
-                <button onclick="restartQuiz()" class="btn-primary-gradient w-full justify-center">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Ulangi Latihan
-                </button>
-                <button onclick="hideQuizFinishModal(); showVocabSubTab('vocab-selection')" class="btn-ghost w-full justify-center border border-gray-200 dark:border-gray-700">
-                    <i data-lucide="layout-grid" class="w-4 h-4 mr-2"></i> Pilih Materi Lain
-                </button>
+                <button onclick="restartQuiz()" class="btn-primary-gradient w-full justify-center"><i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Ulangi Latihan</button>
+                <button onclick="hideQuizFinishModal(); showVocabSubTab('vocab-selection')" class="btn-ghost w-full justify-center border border-gray-200 dark:border-gray-700"><i data-lucide="layout-grid" class="w-4 h-4 mr-2"></i> Pilih Materi Lain</button>
             </div>
         </div>
     </div>
 
-    <!-- CERTIFICATE MODAL -->
     <div id="certModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="KR.quiz.closeCertModal()"></div>
         <div class="relative z-10 max-w-5xl w-full max-h-[92vh] overflow-y-auto custom-scroll glass-panel-solid rounded-3xl p-4">
             <div class="flex items-center justify-between mb-3 px-2">
-                <h3 class="font-bold text-lg text-gray-800 dark:text-white flex items-center gap-2">
-                    <i data-lucide="award" class="w-5 h-5 text-amber-500"></i> Sertifikat Anda
-                </h3>
+                <h3 class="font-bold text-lg text-gray-800 dark:text-white flex items-center gap-2"><i data-lucide="award" class="w-5 h-5 text-amber-500"></i> Sertifikat Anda</h3>
                 <button onclick="KR.quiz.closeCertModal()" class="btn-icon-glass"><i data-lucide="x"></i></button>
             </div>
             <div id="certPreviewContainer" class="rounded-2xl overflow-hidden"></div>
             <div class="flex flex-wrap gap-3 mt-4">
-                <button onclick="KR.quiz.downloadCertificatePDF()" class="btn-primary-gradient flex-1 justify-center">
-                    <i data-lucide="file-down" class="w-5 h-5 mr-2"></i> Download PDF
-                </button>
-                <button onclick="KR.quiz.downloadCertificatePNG()" class="btn-ghost flex-1 justify-center border border-gray-200 dark:border-gray-700">
-                    <i data-lucide="image-down" class="w-5 h-5 mr-2"></i> Download PNG
-                </button>
+                <button onclick="KR.quiz.downloadCertificatePDF()" class="btn-primary-gradient flex-1 justify-center"><i data-lucide="file-down" class="w-5 h-5 mr-2"></i> Download PDF</button>
+                <button onclick="KR.quiz.downloadCertificatePNG()" class="btn-ghost flex-1 justify-center border border-gray-200 dark:border-gray-700"><i data-lucide="image-down" class="w-5 h-5 mr-2"></i> Download PNG</button>
             </div>
         </div>
     </div>
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="fixed inset-0 z-[400] hidden items-center justify-center bg-black/60 backdrop-blur-sm">
         <div class="glass-panel-solid p-6 rounded-2xl flex flex-col items-center gap-3">
             <div class="loader-kr"></div>
@@ -654,36 +525,26 @@
         </div>
     </div>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
     <div id="loginScreen" class="fixed inset-0 z-[3000] hidden items-center justify-center p-4 login-screen-bg">
         <div class="login-card glass-panel-solid rounded-3xl shadow-2xl p-8 w-full max-w-sm">
             <div class="text-center mb-6">
-                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-pink-500 mx-auto flex items-center justify-center shadow-lg mb-4">
-                    <i data-lucide="book-open" class="w-10 h-10 text-white"></i>
-                </div>
+                <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-indigo-500 to-pink-500 mx-auto flex items-center justify-center shadow-lg mb-4"><i data-lucide="book-open" class="w-10 h-10 text-white"></i></div>
                 <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600">KR-Dict</h1>
                 <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">Learning Hub</p>
             </div>
             <div id="loginUserForm">
                 <label class="text-xs font-bold uppercase text-gray-400 mb-2 block">Nama (opsional)</label>
                 <input id="loginUserName" type="text" class="login-input" placeholder="Masukkan nama Anda">
-                <button id="loginUserBtn" class="btn-primary-gradient w-full py-3 mt-4 justify-center">
-                    <i data-lucide="user" class="w-4 h-4 mr-2"></i> Masuk sebagai User
-                </button>
-                <button id="loginAdminBtn" class="btn-ghost w-full justify-center mt-3">
-                    <i data-lucide="shield" class="w-4 h-4 mr-2"></i> Login Admin
-                </button>
+                <button id="loginUserBtn" class="btn-primary-gradient w-full py-3 mt-4 justify-center"><i data-lucide="user" class="w-4 h-4 mr-2"></i> Masuk sebagai User</button>
+                <button id="loginAdminBtn" class="btn-ghost w-full justify-center mt-3"><i data-lucide="shield" class="w-4 h-4 mr-2"></i> Login Admin</button>
             </div>
             <div id="loginAdminForm" class="hidden">
-                <button id="adminBackBtn" class="text-xs text-gray-500 hover:text-indigo-500 mb-3 flex items-center">
-                    <i data-lucide="arrow-left" class="w-3 h-3 mr-1"></i> Kembali
-                </button>
+                <button id="adminBackBtn" class="text-xs text-gray-500 hover:text-indigo-500 mb-3 flex items-center"><i data-lucide="arrow-left" class="w-3 h-3 mr-1"></i> Kembali</button>
                 <label class="text-xs font-bold uppercase text-gray-400 mb-2 block">Password Admin</label>
                 <input id="loginAdminPass" type="password" class="login-input text-center" placeholder="••••••" autocomplete="current-password">
-                <button id="adminSubmitBtn" class="btn-primary-gradient w-full py-3 mt-4 justify-center">
-                    <i data-lucide="unlock" class="w-4 h-4 mr-2"></i> Masuk
-                </button>
-                <p class="text-[10px] text-gray-400 text-center mt-3">Default: admin123 (ubah segera!)</p>
+                <button id="adminSubmitBtn" class="btn-primary-gradient w-full py-3 mt-4 justify-center"><i data-lucide="unlock" class="w-4 h-4 mr-2"></i> Masuk</button>
+                <p class="text-[10px] text-gray-400 text-center mt-3">Default: admin123</p>
             </div>
         </div>
     </div>
@@ -715,10 +576,7 @@
                     <div class="admin-stat-card"><div class="admin-stat-icon stat-green"><i data-lucide="book"></i></div><div><div class="admin-stat-num" id="statVocabCount">0</div><div class="admin-stat-label">Kosakata</div></div></div>
                     <div class="admin-stat-card"><div class="admin-stat-icon stat-amber"><i data-lucide="github"></i></div><div><div class="admin-stat-num text-base" id="statGhStatus">—</div><div class="admin-stat-label">GitHub</div></div></div>
                 </div>
-                <div class="admin-info-box">
-                    <h3><i data-lucide="sparkles"></i> Selamat datang, Admin!</h3>
-                    <p>Kelola semua data aplikasi: Quiz, Kosakata, Grammar, Budaya, dan Materi.</p>
-                </div>
+                <div class="admin-info-box"><h3><i data-lucide="sparkles"></i> Selamat datang, Admin!</h3><p>Kelola semua data aplikasi.</p></div>
             </div>
             <div data-admin-panel="quiz" class="admin-panel hidden">
                 <div class="admin-toolbar">
@@ -730,12 +588,12 @@
                 <div id="qzContainer" class="admin-list"></div>
             </div>
             <div data-admin-panel="vocab" class="admin-panel hidden">
-                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Kosakata</h3><p>Perubahan otomatis tersimpan di browser.</p></div>
+                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Kosakata</h3><p>Perubahan otomatis tersimpan.</p></div>
                 <div id="vocabAdminToolbar" class="admin-toolbar"></div>
                 <div id="vocabAdminContainer" class="admin-list"></div>
             </div>
             <div data-admin-panel="grammar" class="admin-panel hidden">
-                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Tata Bahasa</h3><p>Kelola pola tata bahasa beserta contohnya.</p></div>
+                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Tata Bahasa</h3><p>Kelola pola grammar.</p></div>
                 <div id="grammarAdminToolbar" class="admin-toolbar"></div>
                 <div id="grammarAdminContainer" class="admin-list"></div>
             </div>
@@ -745,19 +603,19 @@
                 <div id="cultureAdminContainer" class="admin-list"></div>
             </div>
             <div data-admin-panel="downloads" class="admin-panel hidden">
-                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Pustaka Materi</h3><p>Link download PDF, audio, atau materi belajar.</p></div>
+                <div class="admin-info-box mb-4"><h3><i data-lucide="info"></i> Kelola Pustaka Materi</h3><p>Link download PDF, audio.</p></div>
                 <div id="downloadsAdminToolbar" class="admin-toolbar"></div>
                 <div id="downloadsAdminContainer" class="admin-list"></div>
             </div>
             <div data-admin-panel="settings" class="admin-panel hidden">
                 <div class="admin-section">
                     <h3 class="admin-section-title"><i data-lucide="github"></i> Konfigurasi GitHub</h3>
-                    <p class="admin-section-desc">Diperlukan untuk sync data antar device.</p>
+                    <p class="admin-section-desc">Sync data antar device.</p>
                     <div id="ghStatus" class="gh-status warn"><i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Belum dikonfigurasi</span></div>
                     <div class="admin-form-group"><label class="admin-label">GitHub Username</label><input type="text" id="ghOwner" class="admin-input-field" placeholder="username"></div>
                     <div class="admin-form-group"><label class="admin-label">Repository</label><input type="text" id="ghRepo" class="admin-input-field" placeholder="repo-name"></div>
                     <div class="admin-form-group"><label class="admin-label">Branch</label><input type="text" id="ghBranch" class="admin-input-field" value="main"></div>
-                    <div class="admin-form-group"><label class="admin-label">Personal Access Token</label><input type="password" id="ghToken" class="admin-input-field" placeholder="ghp_xxxxxx"><p class="admin-help">Token dari github.com/settings/tokens (scope: <code>repo</code>)</p></div>
+                    <div class="admin-form-group"><label class="admin-label">Personal Access Token</label><input type="password" id="ghToken" class="admin-input-field" placeholder="ghp_xxxxxx"></div>
                     <div class="flex gap-2 flex-wrap">
                         <button id="ghSaveBtn" class="admin-btn primary"><i data-lucide="save"></i> Simpan & Test</button>
                         <button id="ghTestBtn" class="admin-btn secondary"><i data-lucide="plug"></i> Test</button>
@@ -811,18 +669,22 @@
 
     <div id="toastContainer" class="fixed top-20 right-4 z-[2000] flex flex-col gap-2 pointer-events-none max-w-sm"></div>
 
-    <script src="assets/js/data.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script src="assets/js/github.js"></script>
-    <script src="assets/js/quiz.js"></script>
-    <script src="assets/js/admin.js"></script>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/data.js?v=9.2"></script>
+    <script src="assets/js/auth.js?v=9.2"></script>
+    <script src="assets/js/github.js?v=9.2"></script>
+    <script src="assets/js/quiz.js?v=9.2"></script>
+    <script src="assets/js/admin.js?v=9.2"></script>
+    <script src="assets/js/app.js?v=9.2"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            await KR.auth.init();
-            if (KR.quiz) KR.quiz.init();
-            if (KR.admin) KR.admin.init();
-            if (KR.ai) KR.ai.init();
+            try {
+                await KR.auth.init();
+                if (KR.quiz) KR.quiz.init();
+                if (KR.admin) KR.admin.init();
+                if (KR.ai) KR.ai.init();
+            } catch (err) {
+                console.error('[App Init Error]', err);
+            }
         });
     </script>
 </body>
