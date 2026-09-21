@@ -41,10 +41,11 @@
 
     <div id="app" class="main-layout transition-colors duration-500">
 
-        <!-- ================= HEADER (FIXED) ================= -->
-        <header class="glass-nav sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-20 gap-3">
+        <!-- ================= HEADER (MODERN v4.0) ================= -->
+        <header class="app-header">
+            <div class="header-glow"></div>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+                <div class="flex justify-between items-center h-[72px] gap-3">
 
                     <!-- Logo + Burger -->
                     <div class="flex items-center gap-3">
@@ -56,38 +57,38 @@
                                 <i data-lucide="book-open" class="w-6 h-6 text-white"></i>
                             </div>
                             <div class="leading-tight">
-                                <h1 class="text-xl md:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">KR-Dict</h1>
-                                <p class="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Study Hub</p>
+                                <h1 class="brand-title">KR-Dict</h1>
+                                <p class="brand-sub">STUDY HUB</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Desktop Nav (pakai .nav-pill, tidak lagi pakai .hidden md:flex) -->
-                    <nav class="nav-pill" aria-label="Navigasi utama">
-                        <button class="nav-link active" onclick="showTab('vocab-container', this)">
+                    <!-- Desktop Nav -->
+                    <nav class="nav-pill-modern" aria-label="Navigasi utama">
+                        <button class="nav-chip nav-chip-indigo active" onclick="showTab('vocab-container', this)">
                             <i data-lucide="book-open-text"></i><span>Kosakata</span>
                         </button>
-                        <button class="nav-link" onclick="showTab('hangeul', this)">
+                        <button class="nav-chip nav-chip-cyan" onclick="showTab('hangeul', this)">
                             <i data-lucide="scan"></i><span>Hangeul</span>
                         </button>
-                        <button class="nav-link" onclick="showTab('grammar', this)">
+                        <button class="nav-chip nav-chip-violet" onclick="showTab('grammar', this)">
                             <i data-lucide="sparkles"></i><span>Grammar</span>
                         </button>
-                        <button class="nav-link" onclick="showTab('culture', this)">
+                        <button class="nav-chip nav-chip-amber" onclick="showTab('culture', this)">
                             <i data-lucide="globe-2"></i><span>Budaya</span>
                         </button>
-                        <button class="nav-link" onclick="showTab('downloads', this)">
+                        <button class="nav-chip nav-chip-emerald" onclick="showTab('downloads', this)">
                             <i data-lucide="cloud-download"></i><span>Materi</span>
                         </button>
-                        <button class="nav-link" onclick="showTab('quiz-hub', this)">
+                        <button class="nav-chip nav-chip-rose" onclick="showTab('quiz-hub', this)">
                             <i data-lucide="pencil-ruler"></i><span>Latihan</span>
                         </button>
-                        <button class="nav-link special-ai-nav" onclick="showTab('chat-ai', this)">
+                        <button class="nav-chip nav-chip-ai" onclick="showTab('chat-ai', this)">
                             <i data-lucide="bot"></i><span>AI Tutor</span>
                         </button>
                     </nav>
 
-                    <!-- Role Badge + Theme Toggle -->
+                    <!-- Right actions -->
                     <div class="flex items-center gap-2">
                         <div id="roleBadge" class="flex items-center gap-2"></div>
                         <button onclick="toggleDarkMode()" class="theme-toggle-btn" aria-label="Ganti tema">
@@ -121,7 +122,7 @@
                     <div id="vocab-textbook" class="vocab-sub-tab space-y-6">
                         <div class="header-section glass-card p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6">
                             <div class="text-center md:text-left">
-                                <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">Textbook 2024</h2>
+                                <h2 class="text-3xl font-bold">Textbook 2024</h2>
                                 <p class="text-gray-500 dark:text-gray-400 mt-1">Mastering EPS-TOPIK Vocabulary</p>
                             </div>
                             <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
