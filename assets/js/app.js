@@ -2,17 +2,56 @@
 // KR-Dict — Main App
 // ==========================================
 
-/* ---------- LOAD OVERRIDE DARI ADMIN ---------- */
+/* ---------- LOAD OVERRIDE DARI ADMIN (FIXED) ---------- */
 (function loadOverrides() {
-  const get = (k) => { try { const v = localStorage.getItem('krdict:' + k); return v ? JSON.parse(v) : null; } catch { return null; } };
+  const get = (k) => {
+    try {
+      const v = localStorage.getItem('krdict:' + k);
+      if (!v) return null;
+      return JSON.parse(v);
+    } catch { return null; }
+  };
+
+  // 🔧 FIX: Cek juga array tidak boleh kosong (bug: [] itu truthy!)
   const vocabOvr = get('vocabOverride');
+  if (vocabOvr && Array.isArray(vocabOvr) && vocabOvr.length > 0) {
+    window.vocabTextbookData = vocabOvr;
+    console.log('[KR] ✅ Using vocab override:', vocabOvr.length, 'items');
+  } else if (vocabOvr && Array.isArray(vocabOvr) && vocabOvr.length === 0) {
+    console.warn('[KR] ⚠️ Empty vocab override detected, clearing...');
+    try { localStorage.removeItem('krdict:vocabOverride'); } catch {}
+  }
+
   const grammarOvr = get('grammarOverride');
+  if (grammarOvr && Array.isArray(grammarOvr) && grammarOvr.length > 0) {
+    window.grammarData = grammarOvr;
+    console.log('[KR] ✅ Using grammar override:', grammarOvr.length, 'items');
+  } else if (grammarOvr && Array.isArray(grammarOvr) && grammarOvr.length === 0) {
+    try { localStorage.removeItem('krdict:grammarOverride'); } catch {}
+  }
+
   const cultureOvr = get('cultureOverride');
+  if (cultureOvr && cultureOvr.babs && Array.isArray(cultureOvr.babs) && cultureOvr.babs.length > 0) {
+    window.CULTURE_DATA = cultureOvr;
+    console.log('[KR] ✅ Using culture override:', cultureOvr.babs.length, 'babs');
+  } else if (cultureOvr && cultureOvr.babs && cultureOvr.babs.length === 0) {
+    try { localStorage.removeItem('krdict:cultureOverride'); } catch {}
+  }
+
   const downloadsOvr = get('downloadsOverride');
-  if (vocabOvr) window.vocabTextbookData = vocabOvr;
-  if (grammarOvr) window.grammarData = grammarOvr;
-  if (cultureOvr) window.CULTURE_DATA = cultureOvr;
-  if (downloadsOvr) window.downloadsData = downloadsOvr;
+  if (downloadsOvr && Array.isArray(downloadsOvr) && downloadsOvr.length > 0) {
+    window.downloadsData = downloadsOvr;
+    console.log('[KR] ✅ Using downloads override:', downloadsOvr.length, 'items');
+  } else if (downloadsOvr && Array.isArray(downloadsOvr) && downloadsOvr.length === 0) {
+    try { localStorage.removeItem('krdict:downloadsOverride'); } catch {}
+  }
+
+  // Log final data count untuk debug
+  console.log('[KR] Final data loaded:');
+  console.log('  - Vocab:', window.vocabTextbookData?.length || 0);
+  console.log('  - Grammar:', window.grammarData?.length || 0);
+  console.log('  - Culture Babs:', window.CULTURE_DATA?.babs?.length || 0);
+  console.log('  - Downloads:', window.downloadsData?.length || 0);
 })();
 
 /* ---------- TOAST SYSTEM ---------- */
@@ -21,16 +60,17 @@ KR.toast = (function () {
   let container;
   function show(msg, type = 'info', duration = 3000) {
     if (!container) container = document.getElementById('toastContainer');
-    if (!container) return;
+    if (!container) {
+      console.warn('[Toast]', msg);
+      return;
+    }
     const div = document.createElement('div');
-    div.className = 'toast-item toast-' + type;
-    div.innerHTML = `<div class="flex-1">${msg}</div>`;
+    div.className = 'toast ' + type;
+    div.innerHTML = `<div style="flex:1">${msg}</div>`;
     container.appendChild(div);
     setTimeout(() => {
-      div.style.transition = 'opacity 0.3s, transform 0.3s';
-      div.style.opacity = '0';
-      div.style.transform = 'translateX(30px)';
-      setTimeout(() => div.remove(), 300);
+      div.classList.add('removing');
+      setTimeout(() => div.remove(), 250);
     }, duration);
   }
   return {
@@ -66,34 +106,65 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   if (window.lucide) lucide.createIcons();
+
   renderHangeul();
   renderGrammar(window.grammarData || []);
 
   const savedKey = localStorage.getItem('gemini_api_key');
-  if (savedKey) document.getElementById('api-key-input').value = savedKey;
+  if (savedKey) {
+    const el = document.getElementById('api-key-input');
+    if (el) el.value = savedKey;
+  }
 
-  showTab('vocab-container', document.querySelector('.nav-link.active'));
+  // Default tab
+  const activeNav = document.querySelector('.nav-link.active') || document.querySelector('.nav-item.active');
+  showTab('vocab-container', activeNav);
   resetChat();
 
+  // Dynamic chat button
   const input = document.getElementById('user-input');
   const actionBtn = document.getElementById('action-btn');
+  if (input && actionBtn) {
+    input.addEventListener('input', () => {
+      if (input.value.trim().length > 0) {
+        actionBtn.innerHTML = '<i data-lucide="send" class="w-5 h-5 ml-1 fill-none"></i>';
+        actionBtn.onclick = () => sendMessage();
+        actionBtn.classList.remove('animate-pulse');
+      } else {
+        actionBtn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+        actionBtn.onclick = toggleVoiceRecording;
+      }
+      if (window.lucide) lucide.createIcons();
+    });
+  }
 
-  input?.addEventListener('input', () => {
-    if (input.value.trim().length > 0) {
-      actionBtn.innerHTML = '<i data-lucide="send" class="w-5 h-5 ml-1 fill-none"></i>';
-      actionBtn.onclick = () => sendMessage();
-      actionBtn.classList.remove('animate-pulse');
-    } else {
-      actionBtn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
-      actionBtn.onclick = toggleVoiceRecording;
-    }
-    if (window.lucide) lucide.createIcons();
+  // Event listener untuk update dari admin
+  window.addEventListener('vocab:updated', () => {
+    console.log('[App] Vocab updated, re-rendering...');
+    filterVocabTextbook();
+  });
+  window.addEventListener('grammar:updated', () => {
+    console.log('[App] Grammar updated, re-rendering...');
+    renderGrammar(window.grammarData || []);
+  });
+  window.addEventListener('culture:updated', () => {
+    const el = document.getElementById('culture');
+    if (el && !el.classList.contains('hidden')) renderCultureList();
+  });
+  window.addEventListener('downloads:updated', () => {
+    renderDownloads();
+  });
+
+  // Tab visibility optimization
+  document.addEventListener('visibilitychange', () => {
+    document.body.classList.toggle('tab-hidden', document.hidden);
   });
 });
 
 /* ---------- THEME ---------- */
 function initTheme() {
-  if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+  if (localStorage.getItem('color-theme') === 'dark' ||
+      (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
     document.documentElement.classList.add('dark');
     document.getElementById('theme-icon')?.setAttribute('data-lucide', 'sun');
   } else {
@@ -120,6 +191,7 @@ function toggleDarkMode() {
 function toggleMenu() {
   const menu = document.getElementById('mobile-menu');
   const btn = document.getElementById('burger-btn');
+  if (!menu || !btn) return;
   if (menu.classList.contains('open')) {
     menu.classList.remove('open');
     btn.innerHTML = '<i data-lucide="menu" class="w-6 h-6"></i>';
@@ -134,20 +206,25 @@ function toggleMenu() {
 function showTab(tabId, element) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   const target = document.getElementById(tabId);
-  if (!target) return;
+  if (!target) {
+    console.warn('[App] Tab not found:', tabId);
+    return;
+  }
   target.classList.remove('hidden');
   target.classList.remove('animate-slide-up');
   void target.offsetWidth;
   target.classList.add('animate-slide-up');
 
-  document.querySelectorAll('.nav-link, .nav-link-mobile').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.nav-link, .nav-link-mobile, .nav-item, .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
   if (element) {
     if (element.classList.contains('nav-link')) element.classList.add('active');
     if (element.classList.contains('nav-link-mobile')) element.classList.add('active');
+    if (element.classList.contains('nav-item')) element.classList.add('active');
+    if (element.classList.contains('mobile-nav-item')) element.classList.add('active');
   }
 
   const menu = document.getElementById('mobile-menu');
-  if (menu.classList.contains('open')) toggleMenu();
+  if (menu && menu.classList.contains('open')) toggleMenu();
 
   if (tabId === 'vocab-container') {
     showVocabSubTab('vocab-textbook');
@@ -173,7 +250,8 @@ function showVocabSubTab(subTabId) {
   sub.classList.add('animate-fade-in');
 
   if (subTabId === 'vocab-selection') {
-    document.getElementById('quiz-chapter-filter').value = '';
+    const filter = document.getElementById('quiz-chapter-filter');
+    if (filter) filter.value = '';
     renderQuizSelection();
   }
 }
@@ -196,7 +274,8 @@ function speak(text, lang = 'ko-KR', onEndCallback = null) {
 function renderHangeul() {
   const container = document.getElementById('hangeul-grid');
   if (!container) return;
-  const grouped = hangeulData.reduce((acc, item) => {
+  const data = window.hangeulData || [];
+  const grouped = data.reduce((acc, item) => {
     if (!acc[item.type]) acc[item.type] = [];
     acc[item.type].push(item);
     return acc;
@@ -206,28 +285,23 @@ function renderHangeul() {
 
   order.forEach(type => {
     if (grouped[type]) {
-      html += `<div class="col-span-full mt-6 mb-3"><h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 border-b-2 border-indigo-100 dark:border-gray-700 pb-2 inline-block">${type}</h3></div>`;
+      html += `<div class="col-span-full mt-6 mb-3">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-200 border-b-2 border-indigo-100 dark:border-gray-700 pb-2 inline-block">${type}</h3>
+      </div>`;
       grouped[type].forEach(item => {
         const details = item.awal
-          ? `<div class="grid grid-cols-2 gap-1 w-full text-[10px] mt-2 bg-gray-50 dark:bg-gray-800 rounded p-1.5 border border-gray-100 dark:border-gray-700">
-              <div class="text-center border-r border-gray-200 dark:border-gray-700">
-                <span class="block text-[9px] text-gray-400">Awal</span>
-                <span class="font-bold text-indigo-600 dark:text-indigo-400">${item.awal}</span>
-              </div>
-              <div class="text-center">
-                <span class="block text-[9px] text-gray-400">Akhir</span>
-                <span class="font-bold text-pink-600 dark:text-pink-400">${item.akhir}</span>
-              </div>
+          ? `<div class="hangeul-sub" style="display:flex; gap:8px; justify-content:center; font-size:0.68rem; margin-top:8px;">
+              <span><span style="color:var(--text-muted);">Awal:</span> <strong style="color:var(--primary);">${item.awal}</strong></span>
+              <span><span style="color:var(--text-muted);">Akhir:</span> <strong style="color:var(--accent);">${item.akhir}</strong></span>
              </div>`
-          : `<div class="mt-2 text-xs font-bold text-gray-400 tracking-widest">${item.rom}</div>`;
+          : `<div class="hangeul-sub">${item.rom}</div>`;
 
         html += `
-          <div class="glass-card p-4 flex flex-col items-center justify-between cursor-pointer hover-lift group h-full relative overflow-hidden" onclick="speak('${item.hangeul}')">
-            <div class="absolute inset-0 bg-gradient-to-br from-indigo-50 to-transparent dark:from-indigo-900/20 opacity-0 group-hover:opacity-100 transition duration-500"></div>
-            <div class="flex-grow flex items-center justify-center z-10">
-              <span class="text-4xl font-black text-gray-800 dark:text-white font-korean group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-500 group-hover:to-pink-500 transition-all">${item.hangeul}</span>
+          <div class="hangeul-card" onclick="speak('${item.hangeul}')">
+            <div style="flex:1; display:flex; align-items:center; justify-content:center;">
+              <span class="hangeul-char">${item.hangeul}</span>
             </div>
-            <div class="z-10 w-full text-center">${details}</div>
+            ${details}
           </div>`;
       });
     }
@@ -239,33 +313,43 @@ function renderHangeul() {
 function renderVocab(data) {
   const container = document.getElementById('vocab-textbook-list');
   if (!container) return;
-  if (data.length === 0) {
-    container.innerHTML = `<div class="p-10 text-center text-gray-400 glass-card border-dashed border-2 border-gray-300 dark:border-gray-700">Tidak ada data ditemukan.</div>`;
+
+  if (!data || data.length === 0) {
+    container.innerHTML = `
+      <div class="admin-empty" style="padding: 60px 20px;">
+        <i data-lucide="search-x" style="width:48px; height:48px; opacity:0.4;"></i>
+        <div style="font-weight:700; color:var(--text-secondary);">Tidak ada data ditemukan</div>
+        <div style="font-size:0.8rem; color:var(--text-muted);">Coba ubah filter atau kata kunci pencarian</div>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
     return;
   }
+
   const grouped = data.reduce((acc, item) => {
     if (!acc[item.bab]) acc[item.bab] = [];
     acc[item.bab].push(item);
     return acc;
   }, {});
+
   let html = '';
 
   for (const [bab, items] of Object.entries(grouped)) {
     html += `
       <div class="mb-6">
-        <h3 class="font-bold text-lg text-indigo-600 dark:text-indigo-400 mb-3 flex items-center bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 rounded-lg w-fit">
-          <i data-lucide="bookmark" class="w-4 h-4 mr-2"></i>${bab}
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bab-heading">
+          <i data-lucide="bookmark"></i>
+          ${bab} <span style="opacity:0.7; font-weight:600;">· ${items.length} kata</span>
+        </div>
+        <div class="vocab-grid-cards">
           ${items.map(item => `
-            <div class="glass-card p-5 flex justify-between items-center hover-lift group border-l-4 border-l-transparent hover:border-l-indigo-500">
-              <div>
-                <div class="text-2xl font-black text-gray-900 dark:text-white font-korean mb-1 tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">${item.hangeul}</div>
-                <div class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">${item.rom}</div>
-                <div class="text-lg font-bold text-gray-700 dark:text-gray-300">${item.arti}</div>
+            <div class="vocab-card">
+              <div class="vocab-card-body">
+                <div class="vocab-hangeul">${item.hangeul}</div>
+                <div class="vocab-rom">${item.rom || ''}</div>
+                <div class="vocab-arti">${item.arti}</div>
               </div>
-              <button class="btn-circle-soft shadow-sm" onclick="speak('${item.hangeul}')">
-                <i data-lucide="volume-2" class="w-5 h-5"></i>
+              <button class="speak-btn" onclick="speak('${item.hangeul}')" title="Dengarkan">
+                <i data-lucide="volume-2"></i>
               </button>
             </div>`).join('')}
         </div>
@@ -280,60 +364,66 @@ function filterVocabTextbook() {
   clearTimeout(vocabFilterTimer);
   vocabFilterTimer = setTimeout(() => {
     const chapter = document.getElementById('vocab-chapter-filter')?.value || '';
-    const search = (document.getElementById('vocab-textbook-search')?.value || '').toLowerCase();
+    const search = (document.getElementById('vocab-textbook-search')?.value || '').toLowerCase().trim();
     const data = window.vocabTextbookData || [];
+
+    console.log('[Vocab Filter] Total:', data.length, '| Chapter:', chapter || 'all', '| Search:', search || '-');
+
     const filtered = data.filter(item => {
       const matchBab = chapter === '' || item.bab === chapter;
-      const matchText = (item.hangeul || '').includes(search) ||
+      if (!matchBab) return false;
+      if (!search) return true;
+      const matchText = (item.hangeul || '').toLowerCase().includes(search) ||
                         (item.rom || '').toLowerCase().includes(search) ||
                         (item.arti || '').toLowerCase().includes(search);
-      return matchBab && matchText;
+      return matchText;
     });
-    // Limit render untuk performa
-    const limited = filtered.slice(0, 100);
-    renderVocab(limited);
-    if (filtered.length > 100) {
-      const container = document.getElementById('vocab-textbook-list');
-      container?.insertAdjacentHTML('beforeend',
-        `<div class="text-center text-sm text-gray-400 py-4 col-span-full">Menampilkan 100 dari ${filtered.length} hasil. Persempit pencarian untuk melihat lebih spesifik.</div>`);
-    }
-  }, 300);
+
+    console.log('[Vocab Filter] Filtered:', filtered.length);
+    renderVocab(filtered);
+  }, 200);
 }
 
 /* ---------- GRAMMAR ---------- */
 function renderGrammar(data) {
   const container = document.getElementById('grammar-list');
   if (!container) return;
+
   if (!data || !data.length) {
-    container.innerHTML = `<div class="col-span-full p-10 text-center text-gray-400 glass-card border-dashed border-2 border-gray-300 dark:border-gray-700">Belum ada data grammar.</div>`;
+    container.innerHTML = `
+      <div class="admin-empty" style="grid-column:1/-1; padding:60px 20px;">
+        <i data-lucide="search-x" style="width:48px; height:48px; opacity:0.4;"></i>
+        <div style="font-weight:700; color:var(--text-secondary);">Belum ada data grammar</div>
+      </div>`;
+    if (window.lucide) lucide.createIcons();
     return;
   }
-  container.innerHTML = data.map(item => {
-    let fungsiHTML = Array.isArray(item.fungsi)
-      ? item.fungsi.map(f => `<li class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-1 relative pl-4"><span class="absolute left-0 top-2 w-1.5 h-1.5 rounded-full bg-indigo-400"></span>${f}</li>`).join('')
-      : `<p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">${item.fungsi || ''}</p>`;
 
-    let contohHTML = (item.contoh || []).map(c => `
-      <div class="bg-indigo-50/50 dark:bg-gray-800 rounded-xl p-3 border border-indigo-100 dark:border-gray-700">
-        <div class="flex justify-between items-start">
-          <p class="text-indigo-800 dark:text-indigo-300 font-bold font-korean text-lg">${c.kalimat}</p>
-          <button onclick="speak('${c.kalimat.replace(/'/g, "\\'")}')" class="text-gray-400 hover:text-indigo-600 transition"><i data-lucide="volume-2" class="w-4 h-4"></i></button>
+  container.innerHTML = data.map(item => {
+    const fungsiHTML = Array.isArray(item.fungsi)
+      ? item.fungsi.map(f => `<li>${f}</li>`).join('')
+      : `<li>${item.fungsi || ''}</li>`;
+
+    const contohHTML = (item.contoh || []).map(c => `
+      <div class="example-item">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <div class="example-text">${c.kalimat}</div>
+          <button onclick="speak('${c.kalimat.replace(/'/g, "\\'")}')" style="color:var(--text-muted); background:none; border:none; cursor:pointer; padding:4px;" title="Dengarkan">
+            <i data-lucide="volume-2" style="width:16px; height:16px;"></i>
+          </button>
         </div>
-        <p class="text-sm text-gray-600 dark:text-gray-400 italic mt-1 border-t border-indigo-100 dark:border-gray-700 pt-1">${c.arti}</p>
+        <div class="example-arti">${c.arti}</div>
       </div>`).join('');
 
     return `
-      <div class="glass-card p-6 relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-indigo-100 to-transparent dark:from-indigo-900/30 rounded-bl-full -mr-10 -mt-10 opacity-60 transition-transform group-hover:scale-110"></div>
-        <div class="relative z-10">
-          <span class="inline-block px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-3">Tata Bahasa</span>
-          <h3 class="text-2xl font-black text-gray-800 dark:text-white font-korean mb-1">${item.struktur}</h3>
-          <p class="text-base font-bold text-gray-600 dark:text-gray-300 mb-4 pb-2 border-b border-gray-200 dark:border-gray-700">${item.arti}</p>
-          <ul class="mb-5 space-y-1">${fungsiHTML}</ul>
-          <div class="space-y-2">
-            <h4 class="text-xs font-bold text-gray-400 uppercase">Contoh Kalimat</h4>
-            ${contohHTML}
-          </div>
+      <div class="grammar-card">
+        <div style="display:inline-block; padding:4px 12px; border-radius:999px; background:var(--primary-soft); color:var(--primary); font-size:0.68rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:10px;">Tata Bahasa</div>
+        <div class="grammar-struktur">${item.struktur}</div>
+        <div class="grammar-arti">${item.arti}</div>
+        <ul class="grammar-list">${fungsiHTML}</ul>
+        <div>
+          <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Contoh Kalimat</div>
+          ${contohHTML}
         </div>
       </div>`;
   }).join('');
@@ -341,7 +431,7 @@ function renderGrammar(data) {
 }
 
 function filterGrammar() {
-  const query = (document.getElementById('grammar-search')?.value || '').toLowerCase();
+  const query = (document.getElementById('grammar-search')?.value || '').toLowerCase().trim();
   const data = window.grammarData || [];
   const filtered = data.filter(item =>
     (item.struktur || '').toLowerCase().includes(query) ||
@@ -357,29 +447,29 @@ function renderCultureList() {
   const data = window.CULTURE_DATA || { babs: [] };
 
   let html = `
-    <div class="header-section glass-card p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
-      <div class="text-center md:text-left">
-        <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-600 dark:from-indigo-400 dark:to-pink-400">Budaya & Informasi</h2>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">Pelajari Budaya dan Informasi Textbook 2024</p>
-      </div>
-      <div class="glass-input-wrapper relative w-full md:w-80">
-        <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-        <input type="text" id="culture-search" oninput="filterCulture()" placeholder="Cari bab budaya..." class="glass-input pl-10">
+    <div class="page-header" style="text-align:center;">
+      <h2 class="display-2">Budaya & Informasi</h2>
+      <p>Pelajari Budaya dan Informasi Textbook 2024</p>
+    </div>
+    <div style="max-width:400px; margin:0 auto var(--sp-6);">
+      <div class="glass-input-wrapper">
+        <i data-lucide="search"></i>
+        <input type="text" id="culture-search" oninput="filterCulture()" placeholder="Cari bab budaya..." class="glass-input">
       </div>
     </div>
-    <div id="culture-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">`;
+    <div id="culture-grid" style="display:grid; grid-template-columns:1fr; gap:16px;">`;
 
   (data.babs || []).forEach(bab => {
+    const pageCount = (bab.pages || []).length;
     html += `
-      <div class="glass-card p-6 flex flex-col justify-between h-full group hover-lift relative overflow-hidden cursor-pointer" onclick="renderCultureDetail(${bab.id})" data-title="${(bab.title || '').toLowerCase()}" data-id="${bab.id}">
-        <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
-        <div class="culture-card-top">
-          <span class="chapter-badge">BAB ${bab.id}</span>
-          <div class="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+      <div class="card hoverable" style="cursor:pointer;" onclick="renderCultureDetail(${bab.id})" data-title="${(bab.title || '').toLowerCase()}" data-id="${bab.id}">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px;">
+          <span class="chip primary"><i data-lucide="bookmark"></i>BAB ${bab.id}</span>
+          <span class="chip neutral"><i data-lucide="file-text"></i>${pageCount} hal</span>
         </div>
-        <h3 class="font-bold text-gray-800 dark:text-white text-lg leading-tight line-clamp-3 mb-4">${bab.title}</h3>
-        <div class="mt-auto flex items-center text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-          Mulai Belajar <i data-lucide="arrow-right" class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1"></i>
+        <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); line-height:1.35; margin-bottom:16px;">${bab.title}</h3>
+        <div style="display:flex; align-items:center; gap:6px; color:var(--primary); font-weight:700; font-size:0.85rem;">
+          Mulai Belajar <i data-lucide="arrow-right" style="width:16px; height:16px;"></i>
         </div>
       </div>`;
   });
@@ -392,8 +482,8 @@ function renderCultureList() {
 function filterCulture() {
   const query = (document.getElementById('culture-search')?.value || '').toLowerCase();
   document.querySelectorAll('#culture-grid > div').forEach(card => {
-    const title = card.getAttribute('data-title');
-    const id = card.getAttribute('data-id');
+    const title = card.getAttribute('data-title') || '';
+    const id = card.getAttribute('data-id') || '';
     if (title.includes(query) || id.includes(query)) card.classList.remove('hidden');
     else card.classList.add('hidden');
   });
@@ -406,13 +496,13 @@ function renderCultureDetail(babId) {
   if (!bab) return;
 
   let html = `
-    <div class="max-w-3xl mx-auto animate-slide-up">
-      <button onclick="renderCultureList()" class="btn-ghost mb-6 pl-0 hover:bg-transparent hover:text-indigo-500">
-        <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i> Kembali ke Daftar
+    <div style="max-width:800px; margin:0 auto;">
+      <button onclick="renderCultureList()" class="btn btn-ghost" style="margin-bottom:16px;">
+        <i data-lucide="arrow-left"></i> Kembali ke Daftar
       </button>
-      <div class="text-center mb-10">
-        <span class="chapter-badge mb-2 inline-block">BAB ${bab.id}</span>
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">${bab.title}</h2>
+      <div style="text-align:center; margin-bottom:32px;">
+        <span class="chip primary" style="margin-bottom:8px; display:inline-flex;"><i data-lucide="bookmark"></i>BAB ${bab.id}</span>
+        <h2 class="display-2">${bab.title}</h2>
       </div>`;
 
   (bab.pages || []).forEach((page, idx) => {
@@ -420,45 +510,43 @@ function renderCultureDetail(babId) {
     const vocabId = `culture-vocab-${bab.id}-${idx}`;
 
     let vocabHtml = `
-      <div class="vocab-grid vocab-header">
-        <div class="v-term">Bagian Kalimat</div>
-        <div class="v-func">Fungsi / Grammar</div>
-        <div class="v-def">Arti</div>
+      <div class="vocab-header">
+        <div>Bagian Kalimat</div>
+        <div>Fungsi / Grammar</div>
+        <div>Arti</div>
       </div>`;
 
     if (page.arti_per_kata && page.arti_per_kata.length > 0) {
       page.arti_per_kata.forEach(v => {
         vocabHtml += `
-          <div class="vocab-grid border-t border-dashed border-gray-200 dark:border-gray-700 pt-2 mt-2">
+          <div class="vocab-grid">
             <div class="v-term">${v.bagian}</div>
             <div class="v-func">${v.fungsi || '-'}</div>
             <div class="v-def">${v.arti}</div>
           </div>`;
       });
     } else {
-      vocabHtml = `<p class="v-def text-center text-gray-500 italic py-4">Tidak ada detail kosakata.</p>`;
+      vocabHtml = `<p class="v-def" style="text-align:center; color:var(--text-muted); font-style:italic; padding:16px;">Tidak ada detail kosakata.</p>`;
     }
 
     html += `
-      <div class="glass-card p-6 md:p-8 mb-8 relative">
-        <div class="text-2xl font-medium font-korean text-gray-800 dark:text-gray-100 leading-relaxed mb-6">
-          ${page.korean}
-        </div>
-        <div class="flex flex-wrap gap-3 mb-4">
+      <div class="culture-page">
+        <div class="culture-korean">${page.korean}</div>
+        <div class="culture-actions">
           <button class="pill-btn" onclick="playAudio('${(page.korean || '').replace(/'/g, "\\'")}', this)">
-            <i data-lucide="volume-2" class="w-4 h-4"></i> Dengar
+            <i data-lucide="volume-2"></i> Dengar
           </button>
           <button class="pill-btn" onclick="toggleCultureSection('${transId}', this)">
-            <i data-lucide="languages" class="w-4 h-4"></i> Arti
+            <i data-lucide="languages"></i> Arti
           </button>
           <button class="pill-btn" onclick="toggleCultureSection('${vocabId}', this)">
-            <i data-lucide="list-tree" class="w-4 h-4"></i> Rincian
+            <i data-lucide="list-tree"></i> Rincian
           </button>
         </div>
         <div id="${transId}" class="reveal-box trans">
-          <p class="font-medium text-gray-800 dark:text-gray-200">${page.arti_full}</p>
+          <p style="font-weight:500; color:var(--text); margin:0;">${page.arti_full}</p>
         </div>
-        <div id="${vocabId}" class="reveal-box vocab overflow-x-auto">
+        <div id="${vocabId}" class="reveal-box vocab" style="overflow-x:auto;">
           ${vocabHtml}
         </div>
       </div>`;
@@ -488,6 +576,9 @@ function playAudio(text, btn) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ko-KR';
     u.rate = 0.85;
+    const voices = window.speechSynthesis.getVoices();
+    const koVoice = voices.find(v => v.lang.startsWith('ko'));
+    if (koVoice) u.voice = koVoice;
     if (btn) btn.classList.add('playing');
     u.onend = () => { if (btn) btn.classList.remove('playing'); };
     window.speechSynthesis.speak(u);
@@ -502,34 +593,36 @@ function renderDownloads() {
   const container = document.getElementById('downloads-grid');
   if (!container) return;
   const data = window.downloadsData || [];
-  const filtered = currentDownloadFilter === 'all' ? data : data.filter(d => d.category === currentDownloadFilter);
+  const filtered = currentDownloadFilter === 'all'
+    ? data
+    : data.filter(d => d.category === currentDownloadFilter);
 
-  container.innerHTML = filtered.map(item => {
-    let colorClass = 'text-indigo-600';
-    if (item.color === 'purple') colorClass = 'text-purple-600';
-    if (item.color === 'green') colorClass = 'text-emerald-600';
-    if (item.color === 'orange') colorClass = 'text-orange-600';
-
-    return `
-      <div class="glass-card p-6 flex flex-col justify-between h-full group hover-lift relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-gray-100 to-transparent dark:from-gray-700 rounded-bl-full -mr-12 -mt-12 transition-all duration-300 group-hover:scale-150"></div>
-        <div>
-          <div class="flex items-center gap-4 mb-5">
-            <div class="w-14 h-14 rounded-2xl bg-gray-50 dark:bg-gray-700/50 flex items-center justify-center shadow-inner ${colorClass}">
-              <i data-lucide="${item.icon}" class="w-7 h-7"></i>
-            </div>
-            <div>
-              <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md mb-1 inline-block">${item.category}</span>
-              <h4 class="font-bold text-gray-800 dark:text-white text-lg leading-tight line-clamp-2">${item.title}</h4>
-            </div>
-          </div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 leading-relaxed border-t border-gray-100 dark:border-gray-700 pt-4">${item.desc}</p>
-        </div>
-        <a href="${item.link}" target="_blank" class="mt-auto w-full bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-500 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-lg">
-          Download <i data-lucide="download-cloud" class="w-4 h-4"></i>
-        </a>
+  if (!filtered.length) {
+    container.innerHTML = `
+      <div class="admin-empty" style="grid-column:1/-1; padding:60px 20px;">
+        <i data-lucide="download" style="width:48px; height:48px; opacity:0.4;"></i>
+        <div style="font-weight:700; color:var(--text-secondary);">Belum ada materi</div>
       </div>`;
-  }).join('');
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = filtered.map(item => `
+    <div class="card hoverable" style="display:flex; flex-direction:column;">
+      <div style="display:flex; gap:12px; margin-bottom:16px;">
+        <div class="card-icon" style="background:var(--primary-soft); color:var(--primary);">
+          <i data-lucide="${item.icon || 'file'}"></i>
+        </div>
+        <div style="flex:1; min-width:0;">
+          <span class="chip neutral" style="margin-bottom:6px;">${item.category}</span>
+          <h4 style="font-size:1rem; font-weight:800; line-height:1.3; margin-top:4px;">${item.title}</h4>
+        </div>
+      </div>
+      <p style="font-size:0.83rem; color:var(--text-tertiary); line-height:1.55; flex:1; margin-bottom:16px;">${item.desc}</p>
+      <a href="${item.link}" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;">
+        Download <i data-lucide="download-cloud"></i>
+      </a>
+    </div>`).join('');
   if (window.lucide) lucide.createIcons();
 }
 
@@ -540,15 +633,16 @@ function filterDownloads(category, btnElement) {
   renderDownloads();
 }
 
-/* ---------- QUIZ KOSAKATA (LAMA) ---------- */
+/* ---------- QUIZ KOSAKATA (LEGACY) ---------- */
 function shuffle(array) {
-  let currentIndex = array.length, randomIndex;
+  const a = array.slice();
+  let currentIndex = a.length, randomIndex;
   while (currentIndex !== 0) {
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    [a[currentIndex], a[randomIndex]] = [a[randomIndex], a[currentIndex]];
   }
-  return array;
+  return a;
 }
 
 function renderQuizSelection() {
@@ -559,31 +653,29 @@ function renderQuizSelection() {
   const filteredData = chapter ? data.filter(item => item.bab === chapter) : data;
 
   if (filteredData.length === 0) {
-    container.innerHTML = `<div class="p-4 text-center text-sm text-gray-400 italic">Tidak ada kosakata di bab ini.</div>`;
+    container.innerHTML = `<div style="padding:24px; text-align:center; font-size:0.85rem; color:var(--text-muted); font-style:italic;">Tidak ada kosakata di bab ini.</div>`;
     updateQuizSelectionSummary();
     return;
   }
 
   const selectedIds = selectedVocabForQuiz.map(v => v.id);
-  const showData = filteredData.slice(0, 200); // limit
+  const showData = filteredData.slice(0, 200);
 
   container.innerHTML = showData.map(item => `
-    <label class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-indigo-50 dark:hover:bg-gray-700/50 transition cursor-pointer group">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-500 group-hover:bg-indigo-200 group-hover:text-indigo-700 transition-colors">
-          ${item.id}
-        </div>
-        <div class="flex flex-col">
-          <span class="font-bold text-gray-800 dark:text-gray-200 font-korean text-lg leading-none mb-1">${item.hangeul}</span>
-          <span class="text-xs text-gray-500 dark:text-gray-400">${item.arti}</span>
+    <label style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-radius:12px; border:1px solid var(--border); cursor:pointer; transition:all 0.15s; margin-bottom:6px;" onmouseover="this.style.background='var(--bg-subtle)'" onmouseout="this.style.background='var(--bg-elev)'">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:32px; height:32px; border-radius:50%; background:var(--bg-subtle); display:grid; place-items:center; font-size:0.7rem; font-weight:800; color:var(--text-tertiary);">${item.id}</div>
+        <div style="display:flex; flex-direction:column;">
+          <span style="font-family:'Noto Sans KR',sans-serif; font-weight:700; font-size:1rem; line-height:1; margin-bottom:4px; color:var(--text);">${item.hangeul}</span>
+          <span style="font-size:0.75rem; color:var(--text-tertiary);">${item.arti}</span>
         </div>
       </div>
-      <input type="checkbox" data-id="${item.id}" onchange="toggleVocabSelection(this, ${item.id})" class="form-checkbox h-5 w-5 text-indigo-600 rounded-md border-gray-300 focus:ring-indigo-500 transition" ${selectedIds.includes(item.id) ? 'checked' : ''}>
+      <input type="checkbox" data-id="${item.id}" onchange="toggleVocabSelection(this, ${item.id})" style="width:18px; height:18px; accent-color:var(--primary); cursor:pointer;" ${selectedIds.includes(item.id) ? 'checked' : ''}>
     </label>`).join('');
 
   if (filteredData.length > 200) {
     container.insertAdjacentHTML('beforeend',
-      `<div class="p-3 text-center text-xs text-gray-400 italic">Menampilkan 200 dari ${filteredData.length} item. Pilih bab tertentu untuk lebih spesifik.</div>`);
+      `<div style="padding:12px; text-align:center; font-size:0.78rem; color:var(--text-muted); font-style:italic;">Menampilkan 200 dari ${filteredData.length} item. Pilih bab tertentu untuk lebih spesifik.</div>`);
   }
 
   updateQuizSelectionSummary();
@@ -605,6 +697,7 @@ function toggleVocabSelection(checkbox, id) {
 function bulkSelectVocab(shouldSelect) {
   const container = document.getElementById('vocab-selection-list');
   const data = window.vocabTextbookData || [];
+  if (!container) return;
   const checkboxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
   const visibleIds = checkboxes.map(cb => parseInt(cb.getAttribute('data-id')));
 
@@ -634,15 +727,17 @@ function updateQuizSelectionSummary() {
   if (count > 0) {
     if (summaryContainer) {
       summaryContainer.innerHTML = selectedVocabForQuiz.slice(0, 50).map(v =>
-        `<span class="inline-block bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-xs font-bold mr-1 mb-1 px-2 py-1 rounded-md shadow-sm">${v.hangeul}</span>`
-      ).join('') + (count > 50 ? `<div class="text-xs text-gray-400 mt-2">+${count - 50} lainnya...</div>` : '');
+        `<span class="chip primary" style="margin:2px;">${v.hangeul}</span>`
+      ).join('') + (count > 50 ? `<div style="font-size:0.72rem; color:var(--text-muted); margin-top:8px;">+${count - 50} lainnya...</div>` : '');
     }
     if (startBtn) {
       startBtn.disabled = false;
       startBtn.innerHTML = `Mulai Latihan (${count})`;
     }
   } else {
-    if (summaryContainer) summaryContainer.innerHTML = '<span class="italic opacity-50">Belum ada kata yang dipilih.</span>';
+    if (summaryContainer) {
+      summaryContainer.innerHTML = '<span style="font-style:italic; opacity:0.6;">Belum ada kata yang dipilih.</span>';
+    }
     if (startBtn) {
       startBtn.disabled = true;
       startBtn.innerHTML = `Pilih Kata Dulu`;
@@ -663,14 +758,16 @@ function startQuiz() {
   quizQuestions = shuffle(selectedVocabForQuiz.map(createQuestion));
   currentQuestionIndex = 0;
   currentScore = 0;
-  document.getElementById('total-questions-count').innerText = quizQuestions.length;
+  const totalEl = document.getElementById('total-questions-count');
+  if (totalEl) totalEl.innerText = quizQuestions.length;
   showVocabSubTab('quiz-mode');
   renderQuestion(currentQuestionIndex);
 }
 
 function renderQuestion(index) {
   if (index >= quizQuestions.length) { showQuizFinishModal(); return; }
-  document.getElementById('quiz-progress-bar').style.width = `${(index / quizQuestions.length) * 100}%`;
+  const progressBar = document.getElementById('quiz-progress-bar');
+  if (progressBar) progressBar.style.width = `${(index / quizQuestions.length) * 100}%`;
   const question = quizQuestions[index];
 
   document.getElementById('current-question-index').innerText = index + 1;
@@ -682,11 +779,9 @@ function renderQuestion(index) {
 
   const optionsContainer = document.getElementById('quiz-options');
   optionsContainer.innerHTML = question.options.map((option, i) => `
-    <button class="quiz-option w-full bg-white/50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-lg font-bold text-gray-700 dark:text-gray-200 text-left shadow-sm flex items-center group hover:bg-white dark:hover:bg-gray-700" data-answer="${option}" onclick="checkAnswer(this, '${question.correctAnswer}')">
-      <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-500 flex items-center justify-center font-bold text-sm mr-4 group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
-        ${['A', 'B', 'C', 'D'][i]}
-      </div>
-      <span class="flex-1">${option}</span>
+    <button class="quiz-option" data-answer="${option}" onclick="checkAnswer(this, '${question.correctAnswer.replace(/'/g, "\\'")}')">
+      <div>${['A', 'B', 'C', 'D'][i]}</div>
+      <span style="flex:1; font-weight:600;">${option}</span>
     </button>`).join('');
 
   setTimeout(() => {
@@ -708,10 +803,11 @@ function checkAnswer(selectedElement, correctAnswer) {
   const allOptions = document.querySelectorAll('#quiz-options .quiz-option');
 
   allOptions.forEach(btn => {
-    btn.classList.add('pointer-events-none', 'opacity-60');
+    btn.classList.add('pointer-events-none');
+    btn.style.opacity = '0.6';
     btn.onclick = null;
   });
-  selectedElement.classList.remove('opacity-60');
+  selectedElement.style.opacity = '1';
 
   const feedbackEl = document.getElementById('quiz-feedback');
   const footerContainer = document.getElementById('quiz-footer-container');
@@ -720,14 +816,14 @@ function checkAnswer(selectedElement, correctAnswer) {
   if (isCorrect) {
     currentScore++;
     selectedElement.classList.add('correct');
-    feedbackEl.innerHTML = '<span class="text-green-600 dark:text-green-400 flex items-center justify-center gap-2"><i data-lucide="check-circle-2" class="w-6 h-6"></i> Benar! Excellent.</span>';
+    feedbackEl.innerHTML = '<span style="color:#059669; display:flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="check-circle-2" style="width:20px; height:20px;"></i> Benar! Excellent.</span>';
   } else {
     selectedElement.classList.add('incorrect');
-    feedbackEl.innerHTML = `<span class="text-red-600 dark:text-red-400 flex items-center justify-center gap-2"><i data-lucide="x-circle" class="w-6 h-6"></i> Salah. Jawaban: ${correctAnswer}</span>`;
+    feedbackEl.innerHTML = `<span style="color:#dc2626; display:flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="x-circle" style="width:20px; height:20px;"></i> Salah. Jawaban: ${correctAnswer}</span>`;
     allOptions.forEach(btn => {
       if (btn.getAttribute('data-answer') === correctAnswer) {
         btn.classList.add('correct');
-        btn.classList.remove('opacity-60');
+        btn.style.opacity = '1';
       }
     });
   }
@@ -740,14 +836,17 @@ function checkAnswer(selectedElement, correctAnswer) {
 function nextQuestion() { renderQuestion(++currentQuestionIndex); }
 
 function showQuizFinishModal() {
-  document.getElementById('quiz-progress-bar').style.width = `100%`;
+  const progressBar = document.getElementById('quiz-progress-bar');
+  if (progressBar) progressBar.style.width = `100%`;
   const total = quizQuestions.length;
   const score = Math.round((currentScore / total) * 100);
   document.getElementById('final-score-number').innerText = score;
   document.getElementById('final-score-detail').innerText = `${currentScore} / ${total} Benar`;
   document.getElementById('quiz-finish-modal').classList.remove('hidden');
 }
-function hideQuizFinishModal() { document.getElementById('quiz-finish-modal').classList.add('hidden'); }
+function hideQuizFinishModal() {
+  document.getElementById('quiz-finish-modal').classList.add('hidden');
+}
 function restartQuiz() { hideQuizFinishModal(); startQuiz(); }
 
 /* ---------- CHAT AI ---------- */
@@ -768,40 +867,37 @@ function getTimeString() {
 }
 function addMessage(text, sender, isImage = false) {
   const chatBox = document.getElementById('chat-box');
+  if (!chatBox) return;
   const div = document.createElement('div');
   const time = getTimeString();
   const bubbleClass = sender === 'user' ? 'wa-bubble wa-bubble-user' : 'wa-bubble wa-bubble-ai';
-  const checkIcon = sender === 'user' ? '<i data-lucide="check-check" class="inline w-3 h-3 text-white/70 ml-1"></i>' : '';
+  const checkIcon = sender === 'user' ? '<i data-lucide="check-check" style="display:inline; width:12px; height:12px; margin-left:4px; opacity:0.7;"></i>' : '';
   let contentHtml = '';
   if (isImage) {
-    contentHtml = `<div class="mb-2 rounded-xl overflow-hidden shadow-sm"><img src="${text}" class="w-full h-auto max-h-64 object-cover"></div><div class="text-sm opacity-90">Koreksi foto ini.</div>`;
+    contentHtml = `<div style="margin-bottom:8px; border-radius:12px; overflow:hidden;"><img src="${text}" style="width:100%; height:auto; max-height:256px; object-fit:cover; display:block;"></div><div style="font-size:0.85rem; opacity:0.9;">Koreksi foto ini.</div>`;
   } else if (text.includes("[VOICE NOTE]")) {
     const cleanText = text.replace("[VOICE NOTE]", "").trim();
-    contentHtml = `<div class="flex items-center gap-3 min-w-[200px] py-1"><div class="w-10 h-10 rounded-full bg-black/10 dark:bg-white/10 flex items-center justify-center shrink-0"><i data-lucide="play" class="w-4 h-4 ml-0.5 fill-current"></i></div><div class="flex flex-col w-full"><div class="h-1 bg-black/10 dark:bg-white/10 rounded-full w-full overflow-hidden"><div class="h-full bg-current w-1/3 opacity-50"></div></div><span class="text-[10px] opacity-70 mt-1 font-mono">Audio • ${cleanText.substring(0, 15)}...</span></div></div>`;
+    contentHtml = `<div style="display:flex; align-items:center; gap:12px; min-width:200px; padding:4px 0;"><div style="width:40px; height:40px; border-radius:50%; background:rgba(0,0,0,0.1); display:grid; place-items:center; flex-shrink:0;"><i data-lucide="play" style="width:16px; height:16px; margin-left:2px;"></i></div><div style="flex:1;"><div style="height:4px; background:rgba(0,0,0,0.1); border-radius:999px; overflow:hidden;"><div style="height:100%; width:33%; background:currentColor; opacity:0.5;"></div></div><span style="font-size:0.65rem; opacity:0.7; margin-top:4px; display:block;">Audio • ${cleanText.substring(0, 15)}...</span></div></div>`;
   } else {
     contentHtml = text.replace(/\n/g, '<br>');
   }
   div.className = bubbleClass;
-  div.innerHTML = `<div class="font-korean">${contentHtml}</div><div class="wa-time">${time} ${checkIcon}</div>`;
+  div.innerHTML = `<div style="font-family:'Noto Sans KR',sans-serif;">${contentHtml}</div><div class="wa-time">${time} ${checkIcon}</div>`;
   chatBox.appendChild(div);
   chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
   if (window.lucide) lucide.createIcons();
 }
 function toggleChatSettings() {
   const settings = document.getElementById('chat-settings');
-  if (settings.classList.contains('translate-y-0')) {
-    settings.classList.remove('translate-y-0');
-    settings.classList.add('-translate-y-full');
-  } else {
-    settings.classList.remove('-translate-y-full');
-    settings.classList.add('translate-y-0');
-  }
+  if (!settings) return;
+  settings.classList.toggle('translate-y-0');
 }
 function updateChatMode() {
-  const mode = document.getElementById('chat-mode-select').value;
+  const mode = document.getElementById('chat-mode-select')?.value;
   const headerName = document.getElementById('ai-header-name');
   const status = document.getElementById('ai-status');
   const icon = document.getElementById('ai-avatar-icon');
+  if (!headerName || !status || !icon) return;
   if (mode === 'casual') {
     headerName.innerText = "Ji-eun (Teman Korea)";
     status.innerText = "Mode Santai";
@@ -823,11 +919,11 @@ function resetChat() {
   const chatBox = document.getElementById('chat-box');
   if (!chatBox) return;
   chatBox.innerHTML = `
-    <div class="flex justify-center my-6">
-      <span class="bg-gray-200/50 dark:bg-gray-800/50 backdrop-blur text-gray-500 dark:text-gray-400 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-gray-100 dark:border-gray-700">Hari Ini</span>
+    <div style="display:flex; justify-content:center; margin:24px 0 12px;">
+      <span style="background:var(--bg-subtle); color:var(--text-tertiary); font-size:0.65rem; padding:4px 12px; border-radius:999px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;">Hari Ini</span>
     </div>
     <div class="wa-bubble wa-bubble-ai">
-      <div class="font-korean leading-relaxed">${welcomeMsg}</div>
+      <div style="font-family:'Noto Sans KR',sans-serif; line-height:1.6;">${welcomeMsg}</div>
       <div class="wa-time">${getTimeString()}</div>
     </div>`;
 }
@@ -842,14 +938,16 @@ async function sendMessage(manualText = null) {
     return;
   }
   const input = document.getElementById('user-input');
-  const text = manualText || input.value.trim();
+  const text = manualText || (input ? input.value.trim() : '');
   const btn = document.getElementById('action-btn');
   if (!text && !selectedImageBase64) return;
 
   isTyping = true;
-  if (!manualText) input.value = '';
-  btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
-  btn.onclick = toggleVoiceRecording;
+  if (!manualText && input) input.value = '';
+  if (btn) {
+    btn.innerHTML = '<i data-lucide="mic" style="width:20px; height:20px;"></i>';
+    btn.onclick = toggleVoiceRecording;
+  }
   if (window.lucide) lucide.createIcons();
 
   if (selectedImageBase64) {
@@ -857,10 +955,11 @@ async function sendMessage(manualText = null) {
   } else {
     addMessage(text, 'user');
   }
-  document.getElementById('ai-status').innerText = 'Mengetik...';
+  const statusEl = document.getElementById('ai-status');
+  if (statusEl) statusEl.innerText = 'Mengetik...';
 
-  const mode = document.getElementById('chat-mode-select').value;
-  const level = document.getElementById('chat-level-select').value;
+  const mode = document.getElementById('chat-mode-select')?.value || 'tutor';
+  const level = document.getElementById('chat-level-select')?.value || 'pemula';
   let systemPrompt = mode === 'casual'
     ? `Anda adalah 'Ji-eun', teman Korea yang ramah dan gaul. Level teman: ${level}. Jangan kaku, gunakan banmal jika diajak santai. Koreksi hanya jika diminta.`
     : `Anda adalah Tutor Bahasa Korea profesional. Level murid: ${level}. Koreksi grammar/spelling yang salah, jelaskan sopan.`;
@@ -894,8 +993,8 @@ async function sendMessage(manualText = null) {
   } finally {
     isTyping = false;
     selectedImageBase64 = null;
-    document.getElementById('ai-status').innerText = mode === 'casual' ? 'Mode Santai' : 'Mode Tutor';
-    if (!manualText && window.innerWidth > 768) input.focus();
+    if (statusEl) statusEl.innerText = mode === 'casual' ? 'Mode Santai' : 'Mode Tutor';
+    if (!manualText && input && window.innerWidth > 768) input.focus();
   }
 }
 
@@ -905,18 +1004,19 @@ function handleImageSelect(e) {
   const reader = new FileReader();
   reader.onload = (ev) => {
     selectedImageBase64 = ev.target.result;
-    document.getElementById('preview-img').src = selectedImageBase64;
-    document.getElementById('image-preview-modal').classList.remove('hidden');
+    const previewImg = document.getElementById('preview-img');
+    if (previewImg) previewImg.src = selectedImageBase64;
+    document.getElementById('image-preview-modal')?.classList.remove('hidden');
   };
   reader.readAsDataURL(file);
   e.target.value = '';
 }
 function cancelImage() {
   selectedImageBase64 = null;
-  document.getElementById('image-preview-modal').classList.add('hidden');
+  document.getElementById('image-preview-modal')?.classList.add('hidden');
 }
 function sendImage() {
-  document.getElementById('image-preview-modal').classList.add('hidden');
+  document.getElementById('image-preview-modal')?.classList.add('hidden');
   sendMessage("Gambar terkirim");
 }
 
@@ -926,12 +1026,14 @@ function toggleVoiceRecording() {
     return;
   }
   const btn = document.getElementById('action-btn');
+  if (!btn) return;
+
   if (isRecording) {
     recognition.stop();
     isRecording = false;
-    btn.classList.remove('animate-pulse', 'bg-red-500');
-    btn.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-pink-600');
-    btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+    btn.classList.remove('animate-pulse');
+    btn.style.background = 'linear-gradient(135deg, #4f46e5, #f43f5e)';
+    btn.innerHTML = '<i data-lucide="mic" style="width:20px; height:20px;"></i>';
   } else {
     recognition = new webkitSpeechRecognition();
     recognition.lang = 'ko-KR';
@@ -939,9 +1041,9 @@ function toggleVoiceRecording() {
     recognition.maxAlternatives = 1;
     recognition.onstart = () => {
       isRecording = true;
-      btn.classList.remove('bg-gradient-to-r', 'from-indigo-600', 'to-pink-600');
-      btn.classList.add('animate-pulse', 'bg-red-500');
-      btn.innerHTML = '<i data-lucide="square" class="w-5 h-5 fill-current"></i>';
+      btn.style.background = '#ef4444';
+      btn.classList.add('animate-pulse');
+      btn.innerHTML = '<i data-lucide="square" style="width:20px; height:20px;"></i>';
       if (window.lucide) lucide.createIcons();
     };
     recognition.onresult = (event) => {
@@ -950,9 +1052,9 @@ function toggleVoiceRecording() {
     };
     recognition.onerror = () => {
       isRecording = false;
-      btn.classList.remove('animate-pulse', 'bg-red-500');
-      btn.classList.add('bg-gradient-to-r', 'from-indigo-600', 'to-pink-600');
-      btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+      btn.classList.remove('animate-pulse');
+      btn.style.background = 'linear-gradient(135deg, #4f46e5, #f43f5e)';
+      btn.innerHTML = '<i data-lucide="mic" style="width:20px; height:20px;"></i>';
       if (window.lucide) lucide.createIcons();
     };
     recognition.start();
@@ -964,35 +1066,35 @@ function toggleVoiceRecording() {
 function updateCallUI(state) {
   const statusEl = document.getElementById('call-status');
   const modal = document.getElementById('call-modal');
+  if (!statusEl || !modal) return;
   modal.classList.remove('call-listening', 'call-thinking', 'call-speaking');
   if (state === 'listening') {
     statusEl.innerText = "MENDENGARKAN ANDA...";
-    statusEl.className = "text-green-400 font-bold tracking-widest animate-pulse";
+    statusEl.style.color = '#4ade80';
     modal.classList.add('call-listening');
   } else if (state === 'thinking') {
     statusEl.innerText = "AI SEDANG BERPIKIR...";
-    statusEl.className = "text-yellow-400 font-bold tracking-widest animate-pulse";
+    statusEl.style.color = '#facc15';
     modal.classList.add('call-thinking');
   } else if (state === 'speaking') {
     statusEl.innerText = "AI BERBICARA...";
-    statusEl.className = "text-pink-400 font-bold tracking-widest";
+    statusEl.style.color = '#f472b6';
     modal.classList.add('call-speaking');
   } else {
     statusEl.innerText = "MENGHUBUNGKAN...";
-    statusEl.className = "text-indigo-400 font-mono text-sm tracking-widest";
+    statusEl.style.color = '#818cf8';
   }
 }
 function toggleMute() {
   userMuted = !userMuted;
   const btn = document.getElementById('mute-btn');
+  if (!btn) return;
   if (userMuted) {
-    btn.classList.add('bg-red-500', 'hover:bg-red-600');
-    btn.classList.remove('bg-white/10', 'hover:bg-white/20');
+    btn.style.background = '#ef4444';
     btn.innerHTML = '<i data-lucide="mic-off"></i>';
     if (callRecognition) callRecognition.stop();
   } else {
-    btn.classList.remove('bg-red-500', 'hover:bg-red-600');
-    btn.classList.add('bg-white/10', 'hover:bg-white/20');
+    btn.style.background = 'rgba(255,255,255,0.1)';
     btn.innerHTML = '<i data-lucide="mic"></i>';
     if (!isCallSpeaking && !isAIThinking) startListeningLoop();
   }
@@ -1013,7 +1115,7 @@ function startCall() {
   isCallSpeaking = false;
   isAIThinking = false;
   userMuted = false;
-  document.getElementById('call-modal').classList.remove('hidden');
+  document.getElementById('call-modal')?.classList.remove('hidden');
   updateCallUI('connecting');
 
   if (!callRecognition) {
@@ -1038,7 +1140,7 @@ function startCall() {
     };
   }
   setTimeout(() => {
-    const mode = document.getElementById('chat-mode-select').value;
+    const mode = document.getElementById('chat-mode-select')?.value || 'tutor';
     const greeting = mode === 'casual' ? "Annyeong! Jal jinaesseo?" : "Annyeonghaseyo! Sijak haebolkkayo?";
     speakInCall(greeting);
   }, 1000);
@@ -1051,7 +1153,7 @@ async function processCallResponse(userText) {
   callRecognition.stop();
   updateCallUI('thinking');
   const apiKey = getApiKey();
-  const mode = document.getElementById('chat-mode-select').value;
+  const mode = document.getElementById('chat-mode-select')?.value || 'tutor';
   const systemPrompt = mode === 'casual'
     ? "Jawab lisan yang pendek (max 2 kalimat) seperti teman Korea (Banmal)."
     : "Jawab lisan yang pendek (max 2 kalimat) sebagai tutor (Formal/Sopan).";
@@ -1083,6 +1185,9 @@ function speakInCall(text) {
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = 'ko-KR';
   utterance.rate = 1.0;
+  const voices = window.speechSynthesis.getVoices();
+  const koVoice = voices.find(v => v.lang.startsWith('ko'));
+  if (koVoice) utterance.voice = koVoice;
   utterance.onend = () => {
     isCallSpeaking = false;
     if (isCallActive) {
@@ -1097,20 +1202,5 @@ function endCall() {
   isCallSpeaking = false;
   if (callRecognition) callRecognition.stop();
   callSpeechSynth.cancel();
-  document.getElementById('call-modal').classList.add('hidden');
+  document.getElementById('call-modal')?.classList.add('hidden');
 }
-
-/* ---------- EVENT LISTENERS DARI ADMIN ---------- */
-window.addEventListener('vocab:updated', () => filterVocabTextbook());
-window.addEventListener('grammar:updated', () => renderGrammar(window.grammarData || []));
-window.addEventListener('culture:updated', () => {
-  const el = document.getElementById('culture');
-  if (el && !el.classList.contains('hidden') && !document.getElementById('culture-grid')) return;
-  if (el && !el.classList.contains('hidden')) renderCultureList();
-});
-window.addEventListener('downloads:updated', () => renderDownloads());
-
-/* ---------- OPTIMIZATION: TAB VISIBILITY ---------- */
-document.addEventListener('visibilitychange', () => {
-  document.body.classList.toggle('tab-hidden', document.hidden);
-});
