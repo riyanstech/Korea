@@ -107,6 +107,7 @@ KR.quiz = (function () {
       return;
     }
     _inited = true;
+    window.__KR_QUIZ_LISTENER_ADDED__ = window.__KR_QUIZ_LISTENER_ADDED__ || false;
 
     els = {
       list: document.getElementById('quizPackGrid'),
@@ -154,7 +155,11 @@ KR.quiz = (function () {
 
     bindEvents();
     await loadQuizzes();
-    window.addEventListener('quizzes:updated', loadQuizzes);
+    // ✅ FIXED: cegah listener duplikat kalau init dipanggil lagi
+    if (!window.__KR_QUIZ_LISTENER_ADDED__) {
+      window.addEventListener('quizzes:updated', loadQuizzes);
+      window.__KR_QUIZ_LISTENER_ADDED__ = true;
+    }
   }
 
   /* ==========================================
