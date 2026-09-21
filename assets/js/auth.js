@@ -1,9 +1,9 @@
 /* ==========================================
-   KR-Dict — Authentication Module v3.2 (FIXED)
+   KR-Dict — Authentication Module v3.2 (FINAL)
    + User & Admin login dengan SHA-256 hash
-   + FIXED: XSS prevention di updateBadge (escape lengkap)
+   + FIXED: XSS prevention di updateBadge
    + FIXED: Null safety pada event binding
-   + FIXED: Login admin form auto-reset saat back
+   + FIXED: Enter key submit di login user
    ========================================== */
 window.KR = window.KR || {};
 
@@ -39,7 +39,6 @@ KR.auth = (function () {
         .map(b => b.toString(16).padStart(2, '0'))
         .join('');
     }
-    // Fallback untuk browser lama (tidak aman, tapi tetap jalan)
     return btoa(unescape(encodeURIComponent(pwd + '::krdict')));
   }
 
@@ -118,9 +117,7 @@ KR.auth = (function () {
     if (app) app.style.visibility = 'visible';
   }
 
-  /* ==========================================
-     ✅ FIXED: Escape lengkap + null safety
-     ========================================== */
+  /* ---------- Escape Helper ---------- */
   function escapeHtml(str = '') {
     return String(str).replace(/[&<>"']/g, c => ({
       '&': '&amp;',
@@ -131,6 +128,7 @@ KR.auth = (function () {
     })[c]);
   }
 
+  /* ---------- Update Badge (FIXED XSS) ---------- */
   function updateBadge() {
     const badge = document.getElementById('roleBadge');
     if (!badge) return;
@@ -154,7 +152,6 @@ KR.auth = (function () {
 
     } else if (role === 'user') {
       const user = getUserData();
-      // ✅ FIX: Escape lengkap untuk mencegah XSS via title/name
       const safeName = escapeHtml(user?.name || 'User');
       const safeAttr = safeName.replace(/"/g, '&quot;');
       badge.innerHTML = `
@@ -181,7 +178,6 @@ KR.auth = (function () {
   async function init() {
     await ensureDefaultPassword();
 
-    // Bind login buttons
     document.getElementById('loginUserBtn')?.addEventListener('click', () => {
       const nameInput = document.getElementById('loginUserName');
       const name = nameInput?.value.trim() || 'Tamu';
@@ -197,7 +193,6 @@ KR.auth = (function () {
     document.getElementById('adminBackBtn')?.addEventListener('click', () => {
       document.getElementById('loginAdminForm')?.classList.add('hidden');
       document.getElementById('loginUserForm')?.classList.remove('hidden');
-      // ✅ FIX: Reset password field saat kembali
       const pass = document.getElementById('loginAdminPass');
       if (pass) pass.value = '';
     });
@@ -215,7 +210,7 @@ KR.auth = (function () {
       if (e.key === 'Enter') submitAdmin();
     });
 
-    // ✅ FIX: Enter juga submit untuk user login
+    // Enter di login user
     document.getElementById('loginUserName')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         const nameInput = document.getElementById('loginUserName');
@@ -224,7 +219,6 @@ KR.auth = (function () {
       }
     });
 
-    // Check session
     const role = getRole();
     if (role === 'admin' || role === 'user') {
       hideLogin();
