@@ -1,6 +1,7 @@
 // ==========================================
-// KR-Dict — Main App v9.3
-// + Fixed navbar not clickable
+// KR-Dict — Main App v9.4 (FIXED)
+// + Fixed: override kosong tidak lagi dihapus
+// + Fixed: handleImageSelect selalu clear input
 // + Bulletproof AI settings toggle
 // + Multi-Provider AI Tutor
 // ==========================================
@@ -10,37 +11,30 @@
   const get = (k) => {
     try {
       const v = localStorage.getItem('krdict:' + k);
-      if (!v) return null;
+      if (v === null) return null;
       return JSON.parse(v);
     } catch { return null; }
   };
 
+  // ✅ FIX: Jangan hapus override meskipun kosong (admin sengaja menghapus semua data)
   const vocabOvr = get('vocabOverride');
-  if (vocabOvr && Array.isArray(vocabOvr) && vocabOvr.length > 0) {
+  if (vocabOvr && Array.isArray(vocabOvr)) {
     window.vocabTextbookData = vocabOvr;
-  } else if (vocabOvr && Array.isArray(vocabOvr) && vocabOvr.length === 0) {
-    try { localStorage.removeItem('krdict:vocabOverride'); } catch {}
   }
 
   const grammarOvr = get('grammarOverride');
-  if (grammarOvr && Array.isArray(grammarOvr) && grammarOvr.length > 0) {
+  if (grammarOvr && Array.isArray(grammarOvr)) {
     window.grammarData = grammarOvr;
-  } else if (grammarOvr && Array.isArray(grammarOvr) && grammarOvr.length === 0) {
-    try { localStorage.removeItem('krdict:grammarOverride'); } catch {}
   }
 
   const cultureOvr = get('cultureOverride');
-  if (cultureOvr && cultureOvr.babs && Array.isArray(cultureOvr.babs) && cultureOvr.babs.length > 0) {
+  if (cultureOvr && cultureOvr.babs && Array.isArray(cultureOvr.babs)) {
     window.CULTURE_DATA = cultureOvr;
-  } else if (cultureOvr && cultureOvr.babs && cultureOvr.babs.length === 0) {
-    try { localStorage.removeItem('krdict:cultureOverride'); } catch {}
   }
 
   const downloadsOvr = get('downloadsOverride');
-  if (downloadsOvr && Array.isArray(downloadsOvr) && downloadsOvr.length > 0) {
+  if (downloadsOvr && Array.isArray(downloadsOvr)) {
     window.downloadsData = downloadsOvr;
-  } else if (downloadsOvr && Array.isArray(downloadsOvr) && downloadsOvr.length === 0) {
-    try { localStorage.removeItem('krdict:downloadsOverride'); } catch {}
   }
 })();
 
@@ -341,9 +335,13 @@ KR.ai = (function () {
       KR.toast?.error('Isi API Key dulu');
       return;
     }
+    if (cfg.provider === 'custom' && !cfg.customEndpoint) {
+      KR.toast?.error('Isi Custom Endpoint dulu');
+      return;
+    }
     KR.toast?.info('Testing koneksi...');
     try {
-      const reply = await callAIProvider({
+      await callAIProvider({
         provider: cfg.provider,
         apiKey: cfg.apiKey,
         model: cfg.model,
@@ -719,6 +717,8 @@ KR.ai = (function () {
 
   function handleImageSelect(e) {
     const file = e.target.files[0];
+    // ✅ FIX: Selalu clear input value — supaya bisa pilih file yang sama 2x
+    e.target.value = '';
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
       KR.toast?.error('Gambar terlalu besar (max 5MB)');
@@ -732,7 +732,6 @@ KR.ai = (function () {
       document.getElementById('image-preview-modal')?.classList.remove('hidden');
     };
     reader.readAsDataURL(file);
-    e.target.value = '';
   }
   function cancelImage() {
     selectedImageBase64 = null;
@@ -753,8 +752,7 @@ KR.ai = (function () {
 })();
 
 /* ==========================================
-   ✅ BULLETPROOF SETTINGS TOGGLE (v9.3)
-   Display-based approach — tidak ada inline style
+   ✅ BULLETPROOF SETTINGS TOGGLE
    ========================================== */
 function toggleChatSettings() {
   const sheet = document.getElementById('chat-settings');
@@ -764,9 +762,7 @@ function toggleChatSettings() {
   }
   const isOpen = sheet.classList.contains('open');
   if (isOpen) {
-    sheet.classList.remove('open');
-    sheet.classList.remove('show');
-    sheet.classList.remove('active');
+    sheet.classList.remove('open', 'show', 'active');
     console.log('[AI] Settings closed');
   } else {
     sheet.classList.add('open');
@@ -1103,27 +1099,22 @@ function toggleMenu() {
 }
 
 /* ==========================================
-   ✅ NAVIGATION v9.3 — WITH KILL SWITCH
-   Bersihkan state chat sebelum pindah tab
+   NAVIGATION v9.4
    ========================================== */
 function showTab(tabId, element) {
-  // ✅ CLEANUP: pastikan semua state bersih dulu
   document.body.classList.remove('chat-open');
 
-  // Force-hide chat-shell kalau bukan tab aktif
   const chatShellEl = document.getElementById('chat-ai');
   if (chatShellEl && tabId !== 'chat-ai') {
     chatShellEl.classList.add('hidden');
   }
 
-  // Force-close settings kalau ada yang nyangkut
   const settingsEl = document.getElementById('chat-settings');
   if (settingsEl) {
     settingsEl.classList.remove('open', 'show', 'active');
-    settingsEl.removeAttribute('style'); // bersihkan inline style lama
+    settingsEl.removeAttribute('style');
   }
 
-  // Switch tab
   document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   const target = document.getElementById(tabId);
   if (!target) {
@@ -1135,7 +1126,6 @@ function showTab(tabId, element) {
   void target.offsetWidth;
   target.classList.add('animate-slide-up');
 
-  // Update active state
   document.querySelectorAll('.nav-chip, .nav-link, .nav-link-mobile, .nav-item, .mobile-nav-item').forEach(btn => btn.classList.remove('active'));
   if (element) {
     if (element.classList.contains('nav-chip')) element.classList.add('active');
@@ -1145,16 +1135,13 @@ function showTab(tabId, element) {
     if (element.classList.contains('mobile-nav-item')) element.classList.add('active');
   }
 
-  // Close mobile menu
   const menu = document.getElementById('mobile-menu');
   if (menu && menu.classList.contains('open')) toggleMenu();
 
-  // Handle chat-ai body class
   if (tabId === 'chat-ai') {
     document.body.classList.add('chat-open');
   }
 
-  // Init tab-specific
   if (tabId === 'vocab-container') {
     showVocabSubTab('vocab-textbook');
     filterVocabTextbook();
@@ -1347,7 +1334,7 @@ function renderGrammar(data) {
       <div class="example-item">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
           <div class="example-text">${c.kalimat}</div>
-          <button onclick="speak('${c.kalimat.replace(/'/g, "\\'")}')" style="color:var(--text-muted); background:none; border:none; cursor:pointer; padding:4px;" title="Dengarkan">
+          <button onclick="speak('${c.kalimat.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')" style="color:var(--text-muted); background:none; border:none; cursor:pointer; padding:4px;" title="Dengarkan">
             <i data-lucide="volume-2" style="width:16px; height:16px;"></i>
           </button>
         </div>
@@ -1471,7 +1458,7 @@ function renderCultureDetail(babId) {
       <div class="culture-page">
         <div class="culture-korean">${page.korean}</div>
         <div class="culture-actions">
-          <button class="pill-btn" onclick="playAudio('${(page.korean || '').replace(/'/g, "\\'")}', this)">
+          <button class="pill-btn" onclick="playAudio('${(page.korean || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', this)">
             <i data-lucide="volume-2"></i> Dengar
           </button>
           <button class="pill-btn" onclick="toggleCultureSection('${transId}', this)">
@@ -1700,8 +1687,10 @@ function renderQuestion(index) {
   footerContainer.classList.add('translate-y-20', 'opacity-0');
   document.getElementById('next-question-btn').disabled = true;
   const optionsContainer = document.getElementById('quiz-options');
+  // ✅ FIX: Escape lebih lengkap untuk mencegah injection
+  const safeAnswer = question.correctAnswer.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   optionsContainer.innerHTML = question.options.map((option, i) => `
-    <button class="quiz-option" data-answer="${option}" onclick="checkAnswer(this, '${question.correctAnswer.replace(/'/g, "\\'")}')">
+    <button class="quiz-option" data-answer="${String(option).replace(/"/g, '&quot;')}" onclick="checkAnswer(this, '${safeAnswer}')">
       <div>${['A', 'B', 'C', 'D'][i]}</div>
       <span style="flex:1; font-weight:600;">${option}</span>
     </button>`).join('');
