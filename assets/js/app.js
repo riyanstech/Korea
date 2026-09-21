@@ -1,13 +1,23 @@
 // ==========================================
-// KR-Dict — Main App v9.4 (FIXED)
-// + Fixed: override kosong tidak lagi dihapus
-// + Fixed: handleImageSelect selalu clear input
-// + Bulletproof AI settings toggle
-// + Multi-Provider AI Tutor
+// KR-Dict — Main App v9.5 (FINAL)
+// + FIXED: override kosong tidak lagi dihapus (data admin aman)
+// + FIXED: __KR_ORIGINAL__ untuk reset yang benar
+// + FIXED: XSS prevention di toast (whitelist tag)
+// + FIXED: safeOnclickString untuk prevent injection di onclick
+// + FIXED: handleImageSelect selalu clear input
+// + FIXED: scroll target pakai main.app-main
 // ==========================================
 
 /* ---------- LOAD OVERRIDE DARI ADMIN ---------- */
 (function loadOverrides() {
+  // ✅ Simpan data ORIGINAL sebelum di-override (untuk fitur Reset)
+  window.__KR_ORIGINAL__ = {
+    vocab: (window.vocabTextbookData || []).slice(),
+    grammar: (window.grammarData || []).slice(),
+    culture: window.CULTURE_DATA ? JSON.parse(JSON.stringify(window.CULTURE_DATA)) : { babs: [] },
+    downloads: (window.downloadsData || []).slice(),
+  };
+
   const get = (k) => {
     try {
       const v = localStorage.getItem('krdict:' + k);
@@ -16,7 +26,7 @@
     } catch { return null; }
   };
 
-  // ✅ FIX: Jangan hapus override meskipun kosong (admin sengaja menghapus semua data)
+  // ✅ FIX: Jangan hapus override kosong — admin mungkin sengaja menghapus semua
   const vocabOvr = get('vocabOverride');
   if (vocabOvr && Array.isArray(vocabOvr)) {
     window.vocabTextbookData = vocabOvr;
@@ -38,7 +48,7 @@
   }
 })();
 
-/* ---------- TOAST ---------- */
+/* ---------- TOAST (whitelist tag aman) ---------- */
 window.KR = window.KR || {};
 KR.toast = (function () {
   let container;
@@ -47,7 +57,12 @@ KR.toast = (function () {
     if (!container) { console.warn('[Toast]', msg); return; }
     const div = document.createElement('div');
     div.className = 'toast ' + type;
-    div.innerHTML = `<div style="flex:1">${msg}</div>`;
+    // ✅ FIX: whitelist tag aman (strong, em, br, code), sisanya dihapus
+    const cleaned = String(msg).replace(
+      /<(?!\/?(strong|em|br|code)\b)[^>]*>/gi,
+      ''
+    );
+    div.innerHTML = `<div style="flex:1">${cleaned}</div>`;
     container.appendChild(div);
     setTimeout(() => {
       div.classList.add('removing');
@@ -61,6 +76,24 @@ KR.toast = (function () {
     info: (m, d) => show(m, 'info', d),
   };
 })();
+
+/* ---------- SAFE HELPERS ---------- */
+// ✅ FIX: Escape string untuk dipakai di dalam onclick attribute JS
+function safeOnclickString(str) {
+  return String(str || '')
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\r?\n/g, ' ')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '\\x3c');
+}
+
+// ✅ FIX: Escape HTML untuk dirender ke dalam tag text
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
+}
 
 /* ---------- STATE ---------- */
 let selectedVocabForQuiz = [];
@@ -336,7 +369,7 @@ KR.ai = (function () {
       return;
     }
     if (cfg.provider === 'custom' && !cfg.customEndpoint) {
-      KR.toast?.error('Isi Custom Endpoint dulu');
+      KR.toast?.error('Isi Custom Endpoint URL dulu');
       return;
     }
     KR.toast?.info('Testing koneksi...');
@@ -353,7 +386,7 @@ KR.ai = (function () {
       updateStatusFromConfig();
     } catch (err) {
       console.error('[Test]', err);
-      KR.toast?.error('❌ Gagal: ' + err.message);
+      KR.toast?.error('❌ Gagal: ' + escapeHtml(err.message));
     }
   }
 
@@ -398,10 +431,6 @@ KR.ai = (function () {
   function getTimeString() {
     const now = new Date();
     return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-  }
-
-  function escapeHtml(str = '') {
-    return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
 
   function formatAIResponse(text) {
@@ -752,7 +781,7 @@ KR.ai = (function () {
 })();
 
 /* ==========================================
-   ✅ BULLETPROOF SETTINGS TOGGLE
+   BULLETPROOF SETTINGS TOGGLE
    ========================================== */
 function toggleChatSettings() {
   const sheet = document.getElementById('chat-settings');
@@ -1099,7 +1128,7 @@ function toggleMenu() {
 }
 
 /* ==========================================
-   NAVIGATION v9.4
+   NAVIGATION v9.5
    ========================================== */
 function showTab(tabId, element) {
   document.body.classList.remove('chat-open');
@@ -1213,8 +1242,9 @@ function renderHangeul() {
               <span><span style="color:var(--text-muted);">Akhir:</span> <strong style="color:var(--accent);">${item.akhir}</strong></span>
              </div>`
           : `<div class="hangeul-sub">${item.rom}</div>`;
+        // ✅ FIX: pakai safeOnclickString
         html += `
-          <div class="hangeul-card" onclick="speak('${item.hangeul}')">
+          <div class="hangeul-card" onclick="speak('${safeOnclickString(item.hangeul)}')">
             <div style="flex:1; display:flex; align-items:center; justify-content:center;">
               <span class="hangeul-char">${item.hangeul}</span>
             </div>
@@ -1283,7 +1313,7 @@ function renderVocab(data) {
                 <div class="vocab-modern-rom">${item.rom || ''}</div>
                 <div class="vocab-modern-arti">${item.arti}</div>
               </div>
-              <button class="vocab-modern-speak" onclick="event.stopPropagation(); speak('${item.hangeul}')" title="Dengarkan">
+              <button class="vocab-modern-speak" onclick="event.stopPropagation(); speak('${safeOnclickString(item.hangeul)}')" title="Dengarkan">
                 <i data-lucide="volume-2"></i>
               </button>
             </div>`).join('')}
@@ -1334,7 +1364,7 @@ function renderGrammar(data) {
       <div class="example-item">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
           <div class="example-text">${c.kalimat}</div>
-          <button onclick="speak('${c.kalimat.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')" style="color:var(--text-muted); background:none; border:none; cursor:pointer; padding:4px;" title="Dengarkan">
+          <button onclick="speak('${safeOnclickString(c.kalimat)}')" style="color:var(--text-muted); background:none; border:none; cursor:pointer; padding:4px;" title="Dengarkan">
             <i data-lucide="volume-2" style="width:16px; height:16px;"></i>
           </button>
         </div>
@@ -1392,7 +1422,7 @@ function renderCultureList() {
     const pageCount = (bab.pages || []).length;
     const p = palettes[i % palettes.length];
     html += `
-      <div class="card hoverable" style="cursor:pointer; position:relative; overflow:hidden;" onclick="renderCultureDetail(${bab.id})" data-title="${(bab.title || '').toLowerCase()}" data-id="${bab.id}">
+      <div class="card hoverable" style="cursor:pointer; position:relative; overflow:hidden;" onclick="renderCultureDetail(${bab.id})" data-title="${escapeHtml((bab.title || '').toLowerCase())}" data-id="${bab.id}">
         <div style="position:absolute; top:-40px; right:-40px; width:140px; height:140px; border-radius:50%; background:radial-gradient(circle, ${p.from}, transparent 70%); opacity:0.12; filter:blur(20px); pointer-events:none;"></div>
         <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:12px; position:relative; z-index:1;">
           <span class="chip" style="background:linear-gradient(135deg, ${p.from}, ${p.to}); color:#fff; border:none;"><i data-lucide="bookmark"></i>BAB ${bab.id}</span>
@@ -1454,11 +1484,12 @@ function renderCultureDetail(babId) {
     } else {
       vocabHtml = `<p class="v-def" style="text-align:center; color:var(--text-muted); font-style:italic; padding:16px;">Tidak ada detail kosakata.</p>`;
     }
+    // ✅ FIX: pakai safeOnclickString untuk page.korean
     html += `
       <div class="culture-page">
         <div class="culture-korean">${page.korean}</div>
         <div class="culture-actions">
-          <button class="pill-btn" onclick="playAudio('${(page.korean || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', this)">
+          <button class="pill-btn" onclick="playAudio('${safeOnclickString(page.korean)}', this)">
             <i data-lucide="volume-2"></i> Dengar
           </button>
           <button class="pill-btn" onclick="toggleCultureSection('${transId}', this)">
@@ -1479,7 +1510,8 @@ function renderCultureDetail(babId) {
   html += `</div>`;
   container.innerHTML = html;
   if (window.lucide) lucide.createIcons();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // ✅ FIX: scroll ke main container, bukan window
+  document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function toggleCultureSection(id, btn) {
@@ -1687,10 +1719,10 @@ function renderQuestion(index) {
   footerContainer.classList.add('translate-y-20', 'opacity-0');
   document.getElementById('next-question-btn').disabled = true;
   const optionsContainer = document.getElementById('quiz-options');
-  // ✅ FIX: Escape lebih lengkap untuk mencegah injection
-  const safeAnswer = question.correctAnswer.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  // ✅ FIX: pakai safeOnclickString + escape attribute value
+  const safeAnswer = safeOnclickString(question.correctAnswer);
   optionsContainer.innerHTML = question.options.map((option, i) => `
-    <button class="quiz-option" data-answer="${String(option).replace(/"/g, '&quot;')}" onclick="checkAnswer(this, '${safeAnswer}')">
+    <button class="quiz-option" data-answer="${escapeHtml(option)}" onclick="checkAnswer(this, '${safeAnswer}')">
       <div>${['A', 'B', 'C', 'D'][i]}</div>
       <span style="flex:1; font-weight:600;">${option}</span>
     </button>`).join('');
@@ -1722,7 +1754,7 @@ function checkAnswer(selectedElement, correctAnswer) {
     feedbackEl.innerHTML = '<span style="color:#059669; display:flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="check-circle-2" style="width:20px; height:20px;"></i> Benar! Excellent.</span>';
   } else {
     selectedElement.classList.add('incorrect');
-    feedbackEl.innerHTML = `<span style="color:#dc2626; display:flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="x-circle" style="width:20px; height:20px;"></i> Salah. Jawaban: ${correctAnswer}</span>`;
+    feedbackEl.innerHTML = `<span style="color:#dc2626; display:flex; align-items:center; justify-content:center; gap:8px;"><i data-lucide="x-circle" style="width:20px; height:20px;"></i> Salah. Jawaban: ${escapeHtml(correctAnswer)}</span>`;
     allOptions.forEach(btn => {
       if (btn.getAttribute('data-answer') === correctAnswer) {
         btn.classList.add('correct');
