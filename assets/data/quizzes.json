@@ -198,8 +198,8 @@
             {
               "id": "q2",
               "type": "listening",
-              "text": "침대가 있어요?",
-              "audioText": "안녕하세요",
+              "text": "침대가 __________?",
+              "audioText": "침대가 있어요?",
               "audioTarget": "question",
               "options": [
                 {
