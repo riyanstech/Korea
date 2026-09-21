@@ -198,28 +198,37 @@
             {
               "id": "q2",
               "type": "listening",
-              "text": "Apa yang diucapkan?",
+              "text": "침대가 있어요?",
               "audioText": "안녕하세요",
               "audioTarget": "question",
               "options": [
                 {
                   "id": "A",
-                  "text": "Selamat pagi"
+                  "text": "없어요",
+                  "audioText": "",
+                  "image": ""
                 },
                 {
                   "id": "B",
-                  "text": "Halo"
+                  "text": "있어요",
+                  "audioText": "",
+                  "image": ""
                 },
                 {
                   "id": "C",
-                  "text": "Terima kasih"
+                  "text": "많아요",
+                  "audioText": "",
+                  "image": ""
                 },
                 {
                   "id": "D",
-                  "text": "Selamat malam"
+                  "text": "적어요",
+                  "audioText": "",
+                  "image": ""
                 }
               ],
-              "correct": "B"
+              "correct": "B",
+              "image": ""
             }
           ]
         }
