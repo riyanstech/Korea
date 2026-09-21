@@ -2492,3 +2492,307 @@ main.app-main {
   content-visibility: auto;
   contain-intrinsic-size: 80px;
 }
+/* ============================================================
+   🔧 FIX v4.2 — SCROLLING + RESULT ACTIONS + CERTIFICATE
+   ============================================================ */
+
+/* FIX #1: main-layout pakai height (bukan min-height) agar main bisa scroll internal */
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden; /* cegah double scroll */
+}
+
+/* FIX #2: main scroll internal */
+main.app-main {
+  flex: 1;
+  min-height: 0; /* CRITICAL: agar flex child bisa shrink */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* FIX #3: sticky header & footer di quiz test */
+.quiz-test-sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  padding: 14px 16px;
+  margin: 0 -16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.dark .quiz-test-sticky-top {
+  background: rgba(15, 23, 42, 0.92);
+}
+@media (min-width: 768px) {
+  .quiz-test-sticky-top {
+    padding: 16px 24px;
+    margin: 0 -24px 16px;
+  }
+}
+
+.quiz-test-question-area {
+  /* No fixed height, flow naturally */
+  padding-bottom: 20px;
+  min-height: 40vh;
+}
+
+.quiz-test-sticky-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  padding: 12px 16px 14px;
+  margin: 20px -16px -16px;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 24px -12px rgba(15, 23, 42, 0.15);
+}
+.dark .quiz-test-sticky-bottom {
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 -8px 24px -12px rgba(0, 0, 0, 0.5);
+}
+@media (min-width: 768px) {
+  .quiz-test-sticky-bottom {
+    padding: 14px 24px;
+    margin: 20px -24px -24px;
+  }
+}
+
+.quiz-test-nav-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  max-height: 60px;
+  overflow-y: auto;
+  padding: 4px 0 10px;
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   ✅ RESULT ACTION BUTTONS
+   ============================================================ */
+.quiz-result-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+@media (min-width: 640px) {
+  .quiz-result-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.quiz-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+}
+.quiz-action-btn svg {
+  width: 28px; height: 28px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.quiz-action-btn > div {
+  position: relative;
+  z-index: 1;
+}
+.quiz-action-btn-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+.quiz-action-btn-sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.quiz-action-btn.primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+  background-size: 200% 200%;
+  color: #fff;
+  box-shadow: 0 10px 24px -8px rgba(99,102,241,0.5);
+}
+.quiz-action-btn.primary:hover {
+  background-position: 100% 100%;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -8px rgba(99,102,241,0.6);
+}
+
+.quiz-action-btn.gold {
+  background: linear-gradient(135deg, #d4af37 0%, #b8860b 50%, #8b6508 100%);
+  color: #fff;
+  box-shadow: 0 10px 24px -8px rgba(184,134,11,0.5);
+}
+.quiz-action-btn.gold:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -8px rgba(184,134,11,0.65);
+}
+.quiz-action-btn.gold::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: linear-gradient(45deg,
+    transparent 30%, rgba(255,255,255,0.35) 50%, transparent 70%);
+  transform: rotate(30deg);
+  animation: certShine 3s ease-in-out infinite;
+}
+@keyframes certShine {
+  0%, 100% { transform: translateX(-100%) rotate(30deg); }
+  50% { transform: translateX(100%) rotate(30deg); }
+}
+
+.quiz-action-btn:active { transform: scale(0.98) translateY(0); }
+
+/* ============================================================
+   ✅ REVIEW TABS (Salah / Benar / Semua)
+   ============================================================ */
+.quiz-review-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 4px;
+  background: var(--bg-subtle);
+  border-radius: 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.quiz-review-tabs::-webkit-scrollbar { display: none; }
+
+.quiz-review-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 180ms;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.quiz-review-tab svg { width: 14px; height: 14px; }
+.quiz-review-tab:hover { color: var(--text); }
+.quiz-review-tab.active {
+  background: var(--bg-elev);
+  color: var(--primary);
+  box-shadow: 0 2px 6px -2px rgba(15,23,42,0.1);
+}
+
+.quiz-review-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.quiz-review-empty svg {
+  width: 48px; height: 48px;
+  opacity: 0.5;
+}
+
+/* ============================================================
+   ✅ CERTIFICATE MODAL
+   ============================================================ */
+#certModal {
+  z-index: 200;
+}
+#certPreviewContainer {
+  max-width: 100%;
+  overflow-x: auto;
+}
+#certPreviewContainer > * {
+  min-width: 700px;
+}
+
+/* Mobile responsive untuk sertifikat preview */
+@media (max-width: 900px) {
+  #certPreviewContainer #certRender {
+    transform: scale(0.7);
+    transform-origin: top left;
+  }
+}
+
+/* ============================================================
+   ✅ LOADING OVERLAY
+   ============================================================ */
+#loadingOverlay {
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+#loadingOverlay > div {
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,0.3);
+}
+
+/* ============================================================
+   ✅ FIX MOBILE — quiz nav buttons
+   ============================================================ */
+@media (max-width: 640px) {
+  .quiz-nav-btn {
+    padding: 12px 14px;
+    font-size: 0.82rem;
+  }
+  .quiz-nav-btn svg { width: 15px; height: 15px; }
+  .quiz-test-nav-dots {
+    max-height: 52px;
+    gap: 5px;
+  }
+  .quiz-nav-dot {
+    width: 26px; height: 26px;
+    font-size: 0.68rem;
+  }
+  .quiz-test-sticky-bottom {
+    padding: 10px 14px 12px;
+  }
+}
+
+/* ============================================================
+   ✅ SAFE AREA (iPhone notch)
+   ============================================================ */
+@supports (padding: max(0px)) {
+  .quiz-test-sticky-bottom {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+}
+
+/* ============================================================
+   ✅ Scrollbar untuk main scroll
+   ============================================================ */
+main.app-main::-webkit-scrollbar { width: 8px; }
+main.app-main::-webkit-scrollbar-track { background: transparent; }
+main.app-main::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+main.app-main::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
