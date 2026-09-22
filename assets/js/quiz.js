@@ -140,7 +140,10 @@ async function init() {
     if (KR.github && KR.github.isConfigured()) {
       KR.github.uploadFile('assets/data/quizzes.json', JSON.stringify({ packages: quizzes }, null, 2), 'chore: update quizzes')
         .then(() => KR.toast?.success('✅ Tersimpan ke GitHub'))
-        .catch(e => console.warn('[GitHub]', e));
+        .catch(e => {
+          console.warn('[GitHub]', e);
+          KR.toast?.error(`⚠️ Gagal sync ke GitHub: ${e.message || 'Unknown error'}`);
+        });
     }
   }
 
