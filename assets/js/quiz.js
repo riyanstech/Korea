@@ -2372,6 +2372,75 @@ function escMultiline(s = '') {
     });
   }
 
+  /* ==========================================
+     ✅ MODAL: Soal Belum Lengkap
+     ========================================== */
+  function showIncompleteModal(unanswered, answered, total) {
+    // Hapus modal lama kalau ada
+    document.getElementById('quizIncompleteModal')?.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'quizIncompleteModal';
+    modal.className = 'fixed inset-0 z-[200] flex items-center justify-center p-4';
+    modal.innerHTML = `
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('quizIncompleteModal')?.remove()"></div>
+      <div class="relative z-10 glass-panel-solid rounded-3xl p-6 max-w-md w-full shadow-2xl">
+        <div class="flex items-start gap-4 mb-4">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+            <i data-lucide="alert-triangle" class="w-6 h-6 text-white"></i>
+          </div>
+          <div class="flex-1">
+            <h3 class="font-bold text-lg dark:text-white">Soal Belum Lengkap</h3>
+            <p class="text-sm text-gray-500 mt-1">Anda harus menjawab semua soal sebelum mengirim</p>
+          </div>
+        </div>
+        <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Progress Jawaban</span>
+            <span class="text-sm font-bold text-amber-800 dark:text-amber-300">${answered} / ${total}</span>
+          </div>
+          <div class="h-2 bg-amber-200 dark:bg-amber-900 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500" style="width: ${(answered / total) * 100}%"></div>
+          </div>
+        </div>
+        <div class="mb-4">
+          <div class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Soal yang Belum Dijawab</div>
+          <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scroll">
+            ${unanswered.map(n => `
+              <button class="quiz-unanswered-chip" data-qidx="${n - 1}">
+                Soal ${n}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button id="quizIncompleteOk" class="btn-primary-gradient w-full py-3 justify-center">
+            <i data-lucide="check" class="w-4 h-4 mr-2"></i> Mengerti
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Event: klik chip soal → lompat ke soal
+    modal.querySelectorAll('.quiz-unanswered-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qidx = parseInt(btn.dataset.qidx);
+        modal.remove();
+        activeSession.currentIdx = qidx;
+        renderQuestion();
+        if (window.lucide) lucide.createIcons();
+      });
+    });
+
+    // Event: tombol OK
+    document.getElementById('quizIncompleteOk')?.addEventListener('click', () => {
+      modal.remove();
+    });
+
+    if (window.lucide) lucide.createIcons();
+  }
+
   return {
     init, reload: loadQuizzes,
     playAudio, speakText,
