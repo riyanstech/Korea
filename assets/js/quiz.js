@@ -22,70 +22,21 @@ KR.quiz = (function () {
   /* ==========================================
      TIER CONFIGURATION
      ========================================== */
-  const CERT_TIERS = {
-    diamond: {
-      id: 'diamond',
-      name: 'DIAMOND',
-      title: 'Certificate of Excellence',
-      icon: '💎',
-      wrongRange: 'Flawless · 0–1 Wrong',
-      primary: '#7c3aed',
-      secondary: '#06b6d4',
-      accent: '#c4b5fd',
-      deep: '#4c1d95',
-      bg1: '#faf8ff',
-      bg2: '#f0f9ff',
-      watermark: 'EXCELLENCE',
-      borderOuter: '#7c3aed',
-      borderInner: '#c4b5fd',
-      borderAccent: '#06b6d4',
-      sealColors: ['#c4b5fd', '#a78bfa', '#7c3aed', '#4c1d95'],
-      tierGradient: ['#7c3aed', '#a78bfa', '#06b6d4'],
-    },
-    gold: {
-      id: 'gold',
-      name: 'GOLD',
-      title: 'Certificate of Achievement',
-      icon: '🏆',
-      wrongRange: 'Excellent · 2 Wrong',
-      primary: '#b8860b',
-      secondary: '#d4af37',
-      accent: '#f5d67b',
-      deep: '#78350f',
-      bg1: '#fdfcf7',
-      bg2: '#faf7f0',
-      watermark: 'ACHIEVEMENT',
-      borderOuter: '#b8860b',
-      borderInner: '#d4af37',
-      borderAccent: '#f5d67b',
-      sealColors: ['#f5d67b', '#d4af37', '#b8860b', '#8b6508'],
-      tierGradient: ['#b8860b', '#d4af37', '#f5d67b'],
-    },
-    silver: {
-      id: 'silver',
-      name: 'SILVER',
-      title: 'Certificate of Completion',
-      icon: '🥈',
-      wrongRange: 'Good · 3 Wrong',
-      primary: '#64748b',
-      secondary: '#94a3b8',
-      accent: '#cbd5e1',
-      deep: '#334155',
-      bg1: '#fafbfc',
-      bg2: '#f1f5f9',
-      watermark: 'COMPLETION',
-      borderOuter: '#64748b',
-      borderInner: '#94a3b8',
-      borderAccent: '#cbd5e1',
-      sealColors: ['#e2e8f0', '#cbd5e1', '#94a3b8', '#64748b'],
-      tierGradient: ['#475569', '#94a3b8', '#cbd5e1'],
-    },
+  /* ==========================================
+     CERTIFICATE CONFIG — Single tier
+     ========================================== */
+  const CERT_TIER = {
+    id: 'official',
+    name: 'Certificate of Achievement',
+    title: 'Korean Language Competency',
+    primary: '#c9a961',
+    accent: '#e6d9b3',
+    sealColors: ['#e6d9b3', '#c9a961', '#9d7f45', '#6d5530'],
+    tierGradient: ['#c9a961', '#9d7f45', '#6d5530'],
   };
 
-  function getCertTier(wrong) {
-    if (wrong <= 1) return CERT_TIERS.diamond;
-    if (wrong === 2) return CERT_TIERS.gold;
-    return CERT_TIERS.silver;
+  function getCertTier() {
+    return CERT_TIER;
   }
 
   let quizzes = [];
@@ -1729,32 +1680,6 @@ function escMultiline(s = '') {
       ctx.drawImage(flagImg, 940 - flW / 2, 200 - flH / 2, flW, flH);
       ctx.restore();
     }
-     
-    // 3b. Pagoda silhouette (kiri bawah)
-    ctx.save();
-    ctx.globalAlpha = 0.055;
-    ctx.strokeStyle = NAVY;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(40, 570);
-    ctx.quadraticCurveTo(180, 505, 320, 570);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(105, 570); ctx.lineTo(105, 605);
-    ctx.moveTo(255, 570); ctx.lineTo(255, 605);
-    ctx.moveTo(75, 605); ctx.lineTo(285, 605);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(20, 665);
-    ctx.quadraticCurveTo(180, 595, 340, 665);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(95, 665); ctx.lineTo(95, 715);
-    ctx.moveTo(265, 665); ctx.lineTo(265, 715);
-    ctx.moveTo(65, 715); ctx.lineTo(295, 715);
-    ctx.stroke();
-    ctx.restore();
 
     // 3c. Mountains (dasar)
     ctx.save();
