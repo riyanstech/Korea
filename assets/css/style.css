@@ -2530,5 +2530,60 @@ select.chat-settings-input {
 .dark .chat-settings-panel { background: var(--bg-elev); }
 
 /* ============================================================
+   27. QUIZ MARKUP — Underline, Bold, Italic
+   ============================================================ */
+.quiz-question-text u,
+.quiz-option-text u,
+.quiz-review-q u,
+.quiz-review-val u {
+  text-decoration: underline;
+  text-decoration-color: #6366f1;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+.dark .quiz-question-text u,
+.dark .quiz-option-text u,
+.dark .quiz-review-q u,
+.dark .quiz-review-val u {
+  text-decoration-color: #a5b4fc;
+  color: #c7d2fe;
+}
+
+.quiz-question-text strong,
+.quiz-option-text strong {
+  font-weight: 800;
+  color: #dc2626;
+}
+
+.quiz-question-text em,
+.quiz-option-text em {
+  font-style: italic;
+  color: #059669;
+}
+
+/* Live preview option di admin panel */
+.opt-preview u {
+  text-decoration: underline;
+  text-decoration-color: #6366f1;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+.opt-preview strong {
+  font-weight: 800;
+  color: #dc2626;
+}
+
+.opt-preview em {
+  font-style: italic;
+  color: #059669;
+}
+
+/* ============================================================
    END OF FILE
    ============================================================ */
