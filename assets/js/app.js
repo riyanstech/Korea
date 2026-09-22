@@ -1,21 +1,113 @@
 // ==========================================
-// KR-Dict — Main App v9.7 (FINAL)
-// + Expose functions ke window untuk admin.js
+// KR-Dict — Main App v9.8 (FINAL)
+// + FIXED CRITICAL: Fetch JSON files dari server
+//   (agar update admin muncul di semua device)
+// + FIXED: Expose functions ke window
 // + FIXED: override kosong tidak lagi dihapus
-// + FIXED: __KR_ORIGINAL__ untuk reset
-// + FIXED: XSS prevention di toast (whitelist)
+// + FIXED: __KR_ORIGINAL__ update setelah fetch
+// + FIXED: XSS prevention di toast
 // + FIXED: safeOnclickString untuk onclick
 // + FIXED: handleImageSelect clear input
 // + FIXED: scroll target main.app-main
-// + FIXED: formatHTTPError untuk pesan error jelas
-// + FIXED: Network error handling di semua provider
+// + FIXED: formatHTTPError
+// + FIXED: Network error handling
 // + FIXED: testConnection dengan detail log
-// + FIXED: Groq models (openai/gpt-oss-120b, qwen, dll)
-// + FIXED: Gemini models (gemini-3.8-flash, dll)
+// + FIXED: Groq & Gemini models terbaru
 // ==========================================
 
-/* ---------- LOAD OVERRIDE DARI ADMIN ---------- */
-(function loadOverrides() {
+/* ==========================================
+   SNAPSHOT DATA AWAL (dari data.js)
+   Ini akan di-update setelah fetch JSON selesai
+   ========================================== */
+window.__KR_ORIGINAL__ = {
+  vocab: (window.vocabTextbookData || []).slice(),
+  grammar: (window.grammarData || []).slice(),
+  culture: window.CULTURE_DATA ? JSON.parse(JSON.stringify(window.CULTURE_DATA)) : { babs: [] },
+  downloads: (window.downloadsData || []).slice(),
+};
+
+/* ==========================================
+   LOAD REMOTE DATA (vocab, grammar, culture, downloads)
+   Prioritas: localStorage override > JSON file > data.js
+   ========================================== */
+async function loadRemoteData() {
+  console.log('[Load] Fetching remote data from JSON files...');
+
+  const fetchJSON = async (path) => {
+    try {
+      const res = await fetch(path + '?t=' + Date.now());
+      if (!res.ok) {
+        console.warn('[Load] File not found:', path, '→ fallback ke data.js');
+        return null;
+      }
+      const data = await res.json();
+      console.log('[Load] ✅ Loaded:', path);
+      return data;
+    } catch (e) {
+      console.warn('[Load] ❌ Gagal fetch', path, e);
+      return null;
+    }
+  };
+
+  // Fetch semua JSON paralel
+  const [vocabData, grammarData, cultureData, downloadsData] = await Promise.all([
+    fetchJSON('assets/data/vocab.json'),
+    fetchJSON('assets/data/grammar.json'),
+    fetchJSON('assets/data/culture.json'),
+    fetchJSON('assets/data/downloads.json'),
+  ]);
+
+  // Terapkan JSON file jika ada (ini data dari server — paling terbaru)
+  if (vocabData && Array.isArray(vocabData.items) && vocabData.items.length > 0) {
+    window.vocabTextbookData = vocabData.items;
+    console.log('[Load] vocab loaded from JSON:', vocabData.items.length, 'items');
+  }
+  if (grammarData && Array.isArray(grammarData.items) && grammarData.items.length > 0) {
+    window.grammarData = grammarData.items;
+    console.log('[Load] grammar loaded from JSON:', grammarData.items.length, 'items');
+  }
+  if (cultureData && cultureData.babs && Array.isArray(cultureData.babs) && cultureData.babs.length > 0) {
+    window.CULTURE_DATA = cultureData;
+    console.log('[Load] culture loaded from JSON:', cultureData.babs.length, 'babs');
+  }
+  if (downloadsData && Array.isArray(downloadsData.items) && downloadsData.items.length > 0) {
+    window.downloadsData = downloadsData.items;
+    console.log('[Load] downloads loaded from JSON:', downloadsData.items.length, 'items');
+  }
+
+  // Terapkan localStorage override (prioritas tertinggi — untuk device admin)
+  const getOverride = (k) => {
+    try {
+      const v = localStorage.getItem('krdict:' + k);
+      return v ? JSON.parse(v) : null;
+    } catch { return null; }
+  };
+
+  const vocabOvr = getOverride('vocabOverride');
+  if (vocabOvr && Array.isArray(vocabOvr) && vocabOvr.length > 0) {
+    window.vocabTextbookData = vocabOvr;
+    console.log('[Load] vocab override aktif (localStorage):', vocabOvr.length);
+  }
+
+  const grammarOvr = getOverride('grammarOverride');
+  if (grammarOvr && Array.isArray(grammarOvr) && grammarOvr.length > 0) {
+    window.grammarData = grammarOvr;
+    console.log('[Load] grammar override aktif:', grammarOvr.length);
+  }
+
+  const cultureOvr = getOverride('cultureOverride');
+  if (cultureOvr && cultureOvr.babs && Array.isArray(cultureOvr.babs) && cultureOvr.babs.length > 0) {
+    window.CULTURE_DATA = cultureOvr;
+    console.log('[Load] culture override aktif');
+  }
+
+  const downloadsOvr = getOverride('downloadsOverride');
+  if (downloadsOvr && Array.isArray(downloadsOvr) && downloadsOvr.length > 0) {
+    window.downloadsData = downloadsOvr;
+    console.log('[Load] downloads override aktif:', downloadsOvr.length);
+  }
+
+  // Update __KR_ORIGINAL__ ke state server (untuk fitur Reset)
   window.__KR_ORIGINAL__ = {
     vocab: (window.vocabTextbookData || []).slice(),
     grammar: (window.grammarData || []).slice(),
@@ -23,26 +115,9 @@
     downloads: (window.downloadsData || []).slice(),
   };
 
-  const get = (k) => {
-    try {
-      const v = localStorage.getItem('krdict:' + k);
-      if (v === null) return null;
-      return JSON.parse(v);
-    } catch { return null; }
-  };
-
-  const vocabOvr = get('vocabOverride');
-  if (vocabOvr && Array.isArray(vocabOvr)) window.vocabTextbookData = vocabOvr;
-
-  const grammarOvr = get('grammarOverride');
-  if (grammarOvr && Array.isArray(grammarOvr)) window.grammarData = grammarOvr;
-
-  const cultureOvr = get('cultureOverride');
-  if (cultureOvr && cultureOvr.babs && Array.isArray(cultureOvr.babs)) window.CULTURE_DATA = cultureOvr;
-
-  const downloadsOvr = get('downloadsOverride');
-  if (downloadsOvr && Array.isArray(downloadsOvr)) window.downloadsData = downloadsOvr;
-})();
+  console.log('[Load] ✅ Semua data siap. Vocab:', window.vocabTextbookData?.length || 0);
+  return true;
+}
 
 /* ---------- TOAST (whitelist tag aman) ---------- */
 window.KR = window.KR || {};
@@ -383,9 +458,6 @@ KR.ai = (function () {
     }
   }
 
-  /* ==========================================
-     TEST CONNECTION — dengan log detail
-     ========================================== */
   async function testConnection() {
     const cfg = getAIConfig();
     if (!cfg.apiKey) {
@@ -1137,12 +1209,13 @@ function endCall() {
 }
 
 /* ==========================================
-   MAIN INIT
+   MAIN INIT — dengan Remote Data Loading
    ========================================== */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   if (window.lucide) lucide.createIcons();
 
+  // Render initial dengan data.js (fallback)
   renderHangeul();
   renderGrammar(window.grammarData || []);
 
@@ -1160,6 +1233,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('visibilitychange', () => {
     document.body.classList.toggle('tab-hidden', document.hidden);
   });
+
+  // ✅ FETCH REMOTE DATA — update semua data dengan JSON dari server
+  console.log('[Init] Loading remote data...');
+  await loadRemoteData();
+  console.log('[Init] ✅ Remote data loaded. Re-rendering UI...');
+
+  // Re-render dengan data terbaru
+  filterVocabTextbook();
+  renderGrammar(window.grammarData || []);
+  renderDownloads();
+
+  console.log('[Init] ✅ App ready!');
 });
 
 /* ---------- THEME ---------- */
@@ -1204,7 +1289,7 @@ function toggleMenu() {
 }
 
 /* ==========================================
-   NAVIGATION v9.7
+   NAVIGATION v9.8
    ========================================== */
 function showTab(tabId, element) {
   document.body.classList.remove('chat-open');
@@ -1854,9 +1939,7 @@ function hideQuizFinishModal() { document.getElementById('quiz-finish-modal').cl
 function restartQuiz() { hideQuizFinishModal(); startQuiz(); }
 
 /* ==========================================
-   ✅ PATCH v9.7: Expose functions ke window
-   supaya admin.js bisa panggil dari luar
-   (untuk refresh user view saat admin close)
+   Expose functions ke window untuk admin.js
    ========================================== */
 window.filterVocabTextbook = filterVocabTextbook;
 window.renderGrammar = renderGrammar;
