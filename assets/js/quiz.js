@@ -338,15 +338,36 @@ KR.quiz = (function () {
   function esc(s = '') {
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   }
+/* ==========================================
+   ✅ Format Markup Quiz
+   Support: [[underline]] **bold** __underline__ *italic*
+   Aman dari XSS karena escape dulu sebelum convert
+   ========================================== */
+function formatQuizMarkup(text) {
+  if (text === null || text === undefined) return '';
+  let s = String(text);
+  s = s.replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[c]);
 
-  function escMultiline(s = '') {
-    let text = String(s || '');
-    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    if (!text.includes('\n')) {
-      text = text.replace(/([.?!])\s+(?=[가-힣ㄱ-ㅎㅏ-ㅣ\d\[(])/g, '$1\n');
-    }
-    return esc(text).replace(/\n/g, '<br>');
+  s = s.replace(/\[\[([^\]]+?)\]\]/g, '<u>$1</u>');
+  s = s.replace(/__([^_]+?)__/g, '<u>$1</u>');
+  s = s.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
+
+  s = s.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  s = s.replace(/\n/g, '<br>');
+
+  return s;
+}
+
+function escMultiline(s = '') {
+  let text = String(s || '');
+  if (!text.includes('\n')) {
+    text = text.replace(/([.?!])\s+(?=[가-힣ㄱ-ㅎㅏ-ㅣ\d\[(])/g, '$1\n');
   }
+  return formatQuizMarkup(text);
+}
 
   function speak(text, lang = 'ko-KR') {
     if (!('speechSynthesis' in window)) return;
@@ -1743,5 +1764,6 @@ KR.quiz = (function () {
     getQuizzes: () => quizzes,
     saveQuizzes,
     setQuizzes: (arr) => { quizzes = arr; saveQuizzes(); renderList(); },
+    formatQuizMarkup,
   };
 })();
