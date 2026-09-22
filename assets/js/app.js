@@ -128,8 +128,15 @@ const AI_PROVIDERS = {
     name: 'Groq (Gratis & Cepat)',
     icon: '⚡',
     endpoint: 'https://api.groq.com/openai/v1/chat/completions',
-    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it'],
-    defaultModel: 'llama-3.3-70b-versatile',
+    models: [
+      'openai/gpt-oss-120b',
+      'qwen/qwen3.8-27b',
+      'openai/gpt-oss-20b',
+      'groq/compound',
+      'groq/compound-mini',
+      'allam-2-7b'
+    ],
+    defaultModel: 'openai/gpt-oss-120b',
     keyUrl: 'https://console.groq.com/keys',
     desc: 'Gratis, sangat cepat, limit tinggi',
     format: 'openai',
