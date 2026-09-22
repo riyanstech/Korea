@@ -1718,17 +1718,18 @@ function escMultiline(s = '') {
     ctx.rect(paperX, paperY, paperW, paperH);
     ctx.clip();
 
-    // 3a. Korean flag (subtle, pakai gambar PNG) — DIPERBESAR
+    // 3a. Korean flag (subtle) — geser ke atas-kanan
     if (flagImg) {
       ctx.save();
       ctx.globalCompositeOperation = 'multiply';
-      ctx.globalAlpha = 0.18;
-      const flW = 420;
+      ctx.globalAlpha = 0.16;
+      const flW = 400;
       const flH = flW * (flagImg.height / flagImg.width);
-      ctx.drawImage(flagImg, 850 - flW / 2, 330 - flH / 2, flW, flH);
+      // Posisikan di area kanan-atas (sedikit ke luar frame supaya terlihat natural)
+      ctx.drawImage(flagImg, 940 - flW / 2, 200 - flH / 2, flW, flH);
       ctx.restore();
     }
-
+     
     // 3b. Pagoda silhouette (kiri bawah)
     ctx.save();
     ctx.globalAlpha = 0.055;
@@ -2105,28 +2106,28 @@ function escMultiline(s = '') {
     const sealCx = 970;
     const sealCy = 638;
     const sealR = 42;
-    const ribbonLen = 42;
+    const ribbonLen = 26;
 
     // ---------- Ribbons (behind seal) ----------
     ctx.save();
-    // Left ribbon
+    // Left ribbon — top mepet ke seal, bottom lebih pendek
     ctx.fillStyle = NAVY_DARK;
     ctx.beginPath();
-    ctx.moveTo(sealCx - 21, sealCy + sealR - 2);
-    ctx.lineTo(sealCx - 33, sealCy + sealR + ribbonLen);
-    ctx.lineTo(sealCx - 11, sealCy + sealR + ribbonLen - 8);
+    ctx.moveTo(sealCx - 22, sealCy + sealR - 14);
+    ctx.lineTo(sealCx - 32, sealCy + sealR + ribbonLen);
+    ctx.lineTo(sealCx - 11, sealCy + sealR + ribbonLen - 7);
     ctx.lineTo(sealCx, sealCy + sealR + ribbonLen);
-    ctx.lineTo(sealCx - 4, sealCy + sealR - 2);
+    ctx.lineTo(sealCx - 4, sealCy + sealR - 14);
     ctx.closePath();
     ctx.fill();
     // Right ribbon
     ctx.fillStyle = GOLD_DARK;
     ctx.beginPath();
-    ctx.moveTo(sealCx + 21, sealCy + sealR - 2);
-    ctx.lineTo(sealCx + 33, sealCy + sealR + ribbonLen);
-    ctx.lineTo(sealCx + 11, sealCy + sealR + ribbonLen - 8);
+    ctx.moveTo(sealCx + 22, sealCy + sealR - 14);
+    ctx.lineTo(sealCx + 32, sealCy + sealR + ribbonLen);
+    ctx.lineTo(sealCx + 11, sealCy + sealR + ribbonLen - 7);
     ctx.lineTo(sealCx, sealCy + sealR + ribbonLen);
-    ctx.lineTo(sealCx + 4, sealCy + sealR - 2);
+    ctx.lineTo(sealCx + 4, sealCy + sealR - 14);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
