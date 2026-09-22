@@ -696,9 +696,15 @@ KR.admin = (function () {
       </div>
 
       <div id="qAudioWrap" class="${type === 'listening' ? '' : 'hidden'}">
-        <div class="field"><label class="field-label"><i data-lucide="volume-2" style="width:12px;height:12px;display:inline"></i> Teks Audio (TTS)</label>
-          <textarea id="qAudioText" class="textarea" rows="2" placeholder="Contoh: 안녕하세요">${esc(q.audioText || '')}</textarea>
-          <p style="font-size:0.72rem;color:var(--text-muted);margin-top:4px">Tidak ditampilkan, hanya dibaca oleh sistem</p>
+        <div class="field">
+          <label class="field-label"><i data-lucide="volume-2" style="width:12px;height:12px;display:inline"></i> 🎙️ Teks Audio / Dialog</label>
+          <textarea id="qAudioText" class="textarea" rows="5" placeholder="Contoh 1 suara:&#10;안녕하세요, 만나서 반갑습니다.&#10;&#10;Contoh percakapan 2 orang:&#10;[W] 안녕하세요, 처음 뵙겠습니다.&#10;[M] 네, 반갑습니다. 저는 김민수입니다.&#10;[W] 저는 이지은입니다.&#10;[M] 만나서 반갑습니다.">${esc(q.audioText || '')}</textarea>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:6px;padding:10px 12px;background:rgba(139,92,246,0.08);border-radius:8px;border-left:3px solid #8b5cf6;line-height:1.7;">
+            <strong style="color:#6d28d9;">💡 Format Percakapan:</strong><br>
+            • <code style="background:#fce7f3;color:#be185d;padding:2px 6px;border-radius:4px;font-weight:700;">[W]</code> = suara <strong>wanita</strong> (nada tinggi)<br>
+            • <code style="background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:4px;font-weight:700;">[M]</code> = suara <strong>pria</strong> (nada rendah)<br>
+            • Tanpa marker = default suara wanita
+          </div>
         </div>
         <div class="field"><label class="field-label">Audio Muncul Di</label>
           <select id="qAudioTarget" class="select">
