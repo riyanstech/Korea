@@ -2537,51 +2537,51 @@ select.chat-settings-input {
 .quiz-review-q u,
 .quiz-review-val u {
   text-decoration: underline;
-  text-decoration-color: #6366f1;
+  text-decoration-color: currentColor;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
   font-weight: 700;
-  color: #4f46e5;
+  color: inherit;
 }
 
 .dark .quiz-question-text u,
 .dark .quiz-option-text u,
 .dark .quiz-review-q u,
 .dark .quiz-review-val u {
-  text-decoration-color: #a5b4fc;
-  color: #c7d2fe;
+  text-decoration-color: currentColor;
+  color: inherit;
 }
 
 .quiz-question-text strong,
 .quiz-option-text strong {
   font-weight: 800;
-  color: #dc2626;
+  color: inherit;
 }
 
 .quiz-question-text em,
 .quiz-option-text em {
   font-style: italic;
-  color: #059669;
+  color: inherit;
 }
 
 /* Live preview option di admin panel */
 .opt-preview u {
   text-decoration: underline;
-  text-decoration-color: #6366f1;
+  text-decoration-color: currentColor;
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
   font-weight: 700;
-  color: #4f46e5;
+  color: inherit;
 }
 
 .opt-preview strong {
   font-weight: 800;
-  color: #dc2626;
+  color: inherit;
 }
 
 .opt-preview em {
   font-style: italic;
-  color: #059669;
+  color: inherit;
 }
 
 /* ============================================================
