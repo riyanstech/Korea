@@ -75,6 +75,15 @@ async function loadRemoteData() {
     console.log('[Load] downloads loaded from JSON:', downloadsData.items.length, 'items');
   }
 
+  // ✅ PATCH: Simpan state server DULU sebagai __KR_ORIGINAL__ (untuk fitur Reset)
+  //    sebelum override lokal di-apply, supaya Reset benar-benar kembali ke data JSON.
+  window.__KR_ORIGINAL__ = {
+    vocab: (window.vocabTextbookData || []).slice(),
+    grammar: (window.grammarData || []).slice(),
+    culture: window.CULTURE_DATA ? JSON.parse(JSON.stringify(window.CULTURE_DATA)) : { babs: [] },
+    downloads: (window.downloadsData || []).slice(),
+  };
+
   // Terapkan localStorage override (prioritas tertinggi — untuk device admin)
   const getOverride = (k) => {
     try {
@@ -106,14 +115,6 @@ async function loadRemoteData() {
     window.downloadsData = downloadsOvr;
     console.log('[Load] downloads override aktif:', downloadsOvr.length);
   }
-
-  // Update __KR_ORIGINAL__ ke state server (untuk fitur Reset)
-  window.__KR_ORIGINAL__ = {
-    vocab: (window.vocabTextbookData || []).slice(),
-    grammar: (window.grammarData || []).slice(),
-    culture: window.CULTURE_DATA ? JSON.parse(JSON.stringify(window.CULTURE_DATA)) : { babs: [] },
-    downloads: (window.downloadsData || []).slice(),
-  };
 
   console.log('[Load] ✅ Semua data siap. Vocab:', window.vocabTextbookData?.length || 0);
   return true;
@@ -1399,10 +1400,10 @@ function renderHangeul() {
       grouped[type].forEach(item => {
         const details = item.awal
           ? `<div class="hangeul-sub" style="display:flex; gap:8px; justify-content:center; font-size:0.68rem; margin-top:8px;">
-              <span><span style="color:var(--text-muted);">Awal:</span> <strong style="color:var(--primary);">${item.awal}</strong></span>
-              <span><span style="color:var(--text-muted);">Akhir:</span> <strong style="color:var(--accent);">${item.akhir}</strong></span>
+              <span><span style="color:var(--text-muted);">Awal:</span> <strong style="color:var(--primary);">${escapeHtml(item.awal)}</strong></span>
+              <span><span style="color:var(--text-muted);">Akhir:</span> <strong style="color:var(--accent);">${escapeHtml(item.akhir)}</strong></span>
              </div>`
-          : `<div class="hangeul-sub">${item.rom}</div>`;
+          : `<div class="hangeul-sub">${escapeHtml(item.rom)}</div>`;
         html += `
           <div class="hangeul-card" onclick="speak('${safeOnclickString(item.hangeul)}')">
             <div style="flex:1; display:flex; align-items:center; justify-content:center;">
@@ -1469,9 +1470,9 @@ function renderVocab(data) {
             <div class="vocab-modern-card" style="--from:${p.from};--to:${p.to}">
               <div class="vocab-modern-accent"></div>
               <div class="vocab-modern-body">
-                <div class="vocab-modern-hangeul">${item.hangeul}</div>
-                <div class="vocab-modern-rom">${item.rom || ''}</div>
-                <div class="vocab-modern-arti">${item.arti}</div>
+                <div class="vocab-modern-hangeul">${escapeHtml(item.hangeul)}</div>
+                <div class="vocab-modern-rom">${escapeHtml(item.rom || '')}</div>
+                <div class="vocab-modern-arti">${escapeHtml(item.arti)}</div>
               </div>
               <button class="vocab-modern-speak" onclick="event.stopPropagation(); speak('${safeOnclickString(item.hangeul)}')" title="Dengarkan">
                 <i data-lucide="volume-2"></i>
@@ -1517,24 +1518,24 @@ function renderGrammar(data) {
     return;
   }
   container.innerHTML = data.map(item => {
-    const fungsiHTML = Array.isArray(item.fungsi)
-      ? item.fungsi.map(f => `<li>${f}</li>`).join('')
-      : `<li>${item.fungsi || ''}</li>`;
-    const contohHTML = (item.contoh || []).map(c => `
-      <div class="example-item">
+     const fungsiHTML = Array.isArray(item.fungsi)
+        ? item.fungsi.map(f => `<li>${escapeHtml(f)}</li>`).join('')
+        : `<li>${escapeHtml(item.fungsi || '')}</li>`;
+     const contohHTML = (item.contoh || []).map(c => `
+     <div class="example-item">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-          <div class="example-text">${c.kalimat}</div>
-          <button onclick="speak('${safeOnclickString(c.kalimat)}')" style="color:var(--text-muted); background:none; border:none; cursor:pointer; padding:4px;" title="Dengarkan">
-            <i data-lucide="volume-2" style="width:16px; height:16px;"></i>
+           <div class="example-text">${escapeHtml(c.kalimat)}</div>
+           <button onclick="speak('${safeOnclickString(c.kalimat)}')" style="color:var(--text-muted); background:none; border:none; cursor:pointer; padding:4px;" title="Dengarkan">
+              <i data-lucide="volume-2" style="width:16px; height:16px;"></i>
           </button>
         </div>
-        <div class="example-arti">${c.arti}</div>
-      </div>`).join('');
+       <div class="example-arti">${escapeHtml(c.arti)}</div>
+     </div>`).join('');
     return `
       <div class="grammar-card">
         <div style="display:inline-block; padding:4px 12px; border-radius:999px; background:linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12)); color:#6366f1; font-size:0.68rem; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:10px;">Tata Bahasa</div>
-        <div class="grammar-struktur">${item.struktur}</div>
-        <div class="grammar-arti">${item.arti}</div>
+        <div class="grammar-struktur">${escapeHtml(item.struktur)}</div>
+        <div class="grammar-arti">${escapeHtml(item.arti)}</div>
         <ul class="grammar-list">${fungsiHTML}</ul>
         <div>
           <div style="font-size:0.68rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">Contoh Kalimat</div>
@@ -1588,7 +1589,7 @@ function renderCultureList() {
           <span class="chip" style="background:linear-gradient(135deg, ${p.from}, ${p.to}); color:#fff; border:none;"><i data-lucide="bookmark"></i>BAB ${bab.id}</span>
           <span class="chip neutral"><i data-lucide="file-text"></i>${pageCount} hal</span>
         </div>
-        <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); line-height:1.35; margin-bottom:16px; position:relative; z-index:1;">${bab.title}</h3>
+        <h3 style="font-size:1.05rem; font-weight:800; color:var(--text); line-height:1.35; margin-bottom:16px; position:relative; z-index:1;">${escapeHtml(bab.title)}</h3>
         <div style="display:flex; align-items:center; gap:6px; font-weight:700; font-size:0.85rem; background:linear-gradient(135deg, ${p.from}, ${p.to}); -webkit-background-clip:text; background-clip:text; color:transparent; position:relative; z-index:1;">
           Mulai Belajar <i data-lucide="arrow-right" style="width:16px; height:16px; color:${p.from};"></i>
         </div>
@@ -1636,9 +1637,9 @@ function renderCultureDetail(babId) {
       page.arti_per_kata.forEach(v => {
         vocabHtml += `
           <div class="vocab-grid">
-            <div class="v-term">${v.bagian}</div>
-            <div class="v-func">${v.fungsi || '-'}</div>
-            <div class="v-def">${v.arti}</div>
+            <div class="v-term">${escapeHtml(v.bagian)}</div>
+            <div class="v-func">${escapeHtml(v.fungsi || '-')}</div>
+            <div class="v-def">${escapeHtml(v.arti)}</div>
           </div>`;
       });
     } else {
@@ -1646,7 +1647,7 @@ function renderCultureDetail(babId) {
     }
     html += `
       <div class="culture-page">
-        <div class="culture-korean">${page.korean}</div>
+        <div class="culture-korean">${escapeHtml(page.korean)}</div>
         <div class="culture-actions">
           <button class="pill-btn" onclick="playAudio('${safeOnclickString(page.korean)}', this)">
             <i data-lucide="volume-2"></i> Dengar
@@ -1659,7 +1660,7 @@ function renderCultureDetail(babId) {
           </button>
         </div>
         <div id="${transId}" class="reveal-box trans">
-          <p style="font-weight:500; color:var(--text); margin:0;">${page.arti_full}</p>
+          <p style="font-weight:500; color:var(--text); margin:0;">${escapeHtml(page.arti_full)}</p>
         </div>
         <div id="${vocabId}" class="reveal-box vocab" style="overflow-x:auto;">
           ${vocabHtml}
@@ -1725,11 +1726,11 @@ function renderDownloads() {
         </div>
         <div style="flex:1; min-width:0;">
           <span class="chip neutral" style="margin-bottom:6px;">${item.category}</span>
-          <h4 style="font-size:1rem; font-weight:800; line-height:1.3; margin-top:4px;">${item.title}</h4>
+          <h4 style="font-size:1rem; font-weight:800; line-height:1.3; margin-top:4px;">{escapeHtml(item.title)}</h4>
         </div>
       </div>
-      <p style="font-size:0.83rem; color:var(--text-tertiary); line-height:1.55; flex:1; margin-bottom:16px;">${item.desc}</p>
-      <a href="${item.link}" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;">
+      <p style="font-size:0.83rem; color:var(--text-tertiary); line-height:1.55; flex:1; margin-bottom:16px;">{escapeHtml(item.desc)}</p>
+      <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;">
         Download <i data-lucide="download-cloud"></i>
       </a>
     </div>`).join('');
