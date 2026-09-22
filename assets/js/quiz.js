@@ -1961,7 +1961,7 @@ function escMultiline(s = '') {
        10. SIGNATURE — di bawah footer text, line lebih pendek
        ============================================================ */
     const sigX = 155;
-    const sigY = 622;
+    const sigY = 635;
     const sigAreaW = 240;
     const sigMaxW = 240;
     const sigMaxH = 70;
