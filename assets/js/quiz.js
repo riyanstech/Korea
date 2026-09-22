@@ -2032,12 +2032,13 @@ function escMultiline(s = '') {
     });
 
     /* ============================================================
-       10. SIGNATURE — digeser ke tengah + sedikit lebih besar
+       10. SIGNATURE — di bawah footer text, line lebih pendek
        ============================================================ */
-    const sigX = 175;
-    const sigY = 575;
-    const sigMaxW = 300;
-    const sigMaxH = 95;
+    const sigX = 155;
+    const sigY = 622;
+    const sigAreaW = 240;
+    const sigMaxW = 240;
+    const sigMaxH = 70;
 
     if (signatureImg) {
       ctx.save();
@@ -2049,8 +2050,6 @@ function escMultiline(s = '') {
         drawH = sigMaxH;
         drawW = drawH * imgRatio;
       }
-      // Center the signature horizontally within its designated area
-      const sigAreaW = 260;
       const offsetX = (sigAreaW - drawW) / 2;
       ctx.drawImage(signatureImg, sigX + offsetX, sigY, drawW, drawH);
       ctx.restore();
@@ -2059,31 +2058,32 @@ function escMultiline(s = '') {
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(sigX, sigY + 55);
-      ctx.bezierCurveTo(sigX + 55, sigY + 15, sigX + 115, sigY + 75, sigX + 180, sigY + 30);
-      ctx.bezierCurveTo(sigX + 225, sigY + 5, sigX + 245, sigY + 60, sigX + 260, sigY + 40);
+      ctx.moveTo(sigX + 20, sigY + 50);
+      ctx.bezierCurveTo(sigX + 60, sigY + 15, sigX + 110, sigY + 65, sigX + 160, sigY + 30);
+      ctx.bezierCurveTo(sigX + 200, sigY + 5, sigX + 215, sigY + 55, sigX + 220, sigY + 40);
       ctx.stroke();
     }
 
-    // Signature line
-    const sigLineY = 690;
+    // Signature line — lebih pendek
+    const sigLineY = 700;
     ctx.strokeStyle = NAVY;
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(sigX, sigLineY);
-    ctx.lineTo(sigX + 260, sigLineY);
+    ctx.lineTo(sigX + sigAreaW, sigLineY);
     ctx.stroke();
 
-    // Labels
+    // Labels — center di atas line
+    const sigCenterX = sigX + sigAreaW / 2;
     ctx.textAlign = 'center';
     ctx.fillStyle = NAVY;
     ctx.font = '800 13px "Playfair Display", Georgia, serif';
-    ctx.fillText('Director', sigX + 130, sigLineY + 18);
+    ctx.fillText('Director', sigCenterX, sigLineY + 18);
 
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
     ctx.letterSpacing = '0.8px';
-    ctx.fillText('KR-DICT', sigX + 130, sigLineY + 33);
+    ctx.fillText('KR-DICT', sigCenterX, sigLineY + 33);
     ctx.letterSpacing = '0px';
 
     /* ============================================================
@@ -2103,28 +2103,29 @@ function escMultiline(s = '') {
        12. OFFICIAL SEAL — dengan laurel wreath yang tidak menutupi text
        ============================================================ */
     const sealCx = 970;
-    const sealCy = 655;
-    const sealR = 44;
+    const sealCy = 638;
+    const sealR = 42;
+    const ribbonLen = 42;
 
     // ---------- Ribbons (behind seal) ----------
     ctx.save();
     // Left ribbon
     ctx.fillStyle = NAVY_DARK;
     ctx.beginPath();
-    ctx.moveTo(sealCx - 22, sealCy + sealR - 2);
-    ctx.lineTo(sealCx - 34, sealCy + sealR + 52);
-    ctx.lineTo(sealCx - 12, sealCy + sealR + 44);
-    ctx.lineTo(sealCx, sealCy + sealR + 52);
+    ctx.moveTo(sealCx - 21, sealCy + sealR - 2);
+    ctx.lineTo(sealCx - 33, sealCy + sealR + ribbonLen);
+    ctx.lineTo(sealCx - 11, sealCy + sealR + ribbonLen - 8);
+    ctx.lineTo(sealCx, sealCy + sealR + ribbonLen);
     ctx.lineTo(sealCx - 4, sealCy + sealR - 2);
     ctx.closePath();
     ctx.fill();
     // Right ribbon
     ctx.fillStyle = GOLD_DARK;
     ctx.beginPath();
-    ctx.moveTo(sealCx + 22, sealCy + sealR - 2);
-    ctx.lineTo(sealCx + 34, sealCy + sealR + 52);
-    ctx.lineTo(sealCx + 12, sealCy + sealR + 44);
-    ctx.lineTo(sealCx, sealCy + sealR + 52);
+    ctx.moveTo(sealCx + 21, sealCy + sealR - 2);
+    ctx.lineTo(sealCx + 33, sealCy + sealR + ribbonLen);
+    ctx.lineTo(sealCx + 11, sealCy + sealR + ribbonLen - 8);
+    ctx.lineTo(sealCx, sealCy + sealR + ribbonLen);
     ctx.lineTo(sealCx + 4, sealCy + sealR - 2);
     ctx.closePath();
     ctx.fill();
