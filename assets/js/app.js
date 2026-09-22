@@ -25,6 +25,18 @@ window.__KR_ORIGINAL__ = {
   culture: window.CULTURE_DATA ? JSON.parse(JSON.stringify(window.CULTURE_DATA)) : { babs: [] },
   downloads: (window.downloadsData || []).slice(),
 };
+/* ==========================================
+   ✅ Helper: fetch dengan timeout
+   ========================================== */
+async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 /* ==========================================
    LOAD REMOTE DATA (vocab, grammar, culture, downloads)
@@ -35,7 +47,7 @@ async function loadRemoteData() {
 
   const fetchJSON = async (path) => {
     try {
-      const res = await fetch(path + '?t=' + Date.now());
+      const res = await fetchWithTimeout(path + '?t=' + Date.now(), {}, 12000);
       if (!res.ok) {
         console.warn('[Load] File not found:', path, '→ fallback ke data.js');
         return null;
@@ -548,9 +560,16 @@ KR.ai = (function () {
     let html = escapeHtml(text);
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/`([^`]+)`/g, '<code class="chat-code">$1</code>');
+
+    // Convert bullet lines to <li>
     html = html.replace(/^\s*[-•]\s+(.+)$/gm, '<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-    html = html.replace(/<\/ul>\s*<ul>/g, '');
+
+    // ✅ PATCH: Gabungkan <li> berurutan (yang dipisah hanya oleh newline)
+    //    menjadi satu <ul>, TANPA menelan elemen lain.
+    html = html.replace(/(?:<li>.*?<\/li>\s*)+/gs, (match) => {
+      return '<ul>' + match.replace(/\s+/g, ' ').trim() + '</ul>';
+    });
+
     html = html.replace(/\n/g, '<br>');
     return html;
   }
@@ -740,7 +759,7 @@ KR.ai = (function () {
 
     let res;
     try {
-      res = await fetch(endpoint + '?key=' + apiKey, {
+      res = await fetchWithTimeout(endpoint + '?key=' + apiKey, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1112,7 +1131,7 @@ async function callAIDirect(cfg, systemPrompt, messages) {
     }));
     let res;
     try {
-      res = await fetch(endpoint + '?key=' + cfg.apiKey, {
+      res = await fetchWithTimeout(endpoint + '?key=' + cfg.apiKey, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
