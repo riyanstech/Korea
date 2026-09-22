@@ -146,6 +146,9 @@ KR.quiz = (function () {
       certPreview: document.getElementById('certPreviewContainer'),
       loadingOverlay: document.getElementById('loadingOverlay'),
       loadingText: document.getElementById('loadingText'),
+      historyWrap: document.getElementById('quizHistoryWrap'),
+      historyContent: document.getElementById('quizHistoryContent'),
+      historyBtn: document.getElementById('quizHistoryBtn'),
     };
 
     if (!els.list) {
@@ -891,12 +894,309 @@ function escMultiline(s = '') {
 
   function closeResults() {
     els.resultWrap.classList.add('hidden');
-    els.listWrap.classList.remove('hidden');
-    els.hubHeader?.classList.remove('hidden');
     const old = document.querySelector('.quiz-cert-locked-info');
     if (old) old.remove();
     activeSession = null;
+
+    // ✅ Jika user sedang lihat detail dari riwayat, kembali ke history view
+    if (window.__KR_VIEWING_HISTORY__) {
+      window.__KR_VIEWING_HISTORY__ = false;
+      els.historyWrap?.classList.remove('hidden');
+      renderHistory();
+    } else {
+      els.listWrap.classList.remove('hidden');
+      els.hubHeader?.classList.remove('hidden');
+    }
     if (window.lucide) lucide.createIcons();
+  }
+
+  /* ==========================================
+     ✅ RIWAYAT HASIL — Fitur baru
+     ========================================== */
+  function showHistory() {
+    els.listWrap.classList.add('hidden');
+    els.hubHeader?.classList.add('hidden');
+    els.testWrap.classList.add('hidden');
+    els.testWrap.classList.remove('flex');
+    els.resultWrap.classList.add('hidden');
+    els.historyWrap.classList.remove('hidden');
+    renderHistory();
+    document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'auto' });
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function closeHistory() {
+    els.historyWrap.classList.add('hidden');
+    els.listWrap.classList.remove('hidden');
+    els.hubHeader?.classList.remove('hidden');
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function formatDateShort(ts) {
+    const d = new Date(ts);
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = months[d.getMonth()];
+    const year = d.getFullYear();
+    const hour = d.getHours().toString().padStart(2, '0');
+    const min = d.getMinutes().toString().padStart(2, '0');
+    return `${day} ${month} ${year}, ${hour}.${min}`;
+  }
+
+  function buildHistoryChart(history) {
+    // Ambil maksimal 20 terbaru, urut lama → baru (kiri → kanan)
+    const sorted = [...history]
+      .sort((a, b) => a.at - b.at)
+      .slice(-20);
+
+    const n = sorted.length;
+    const W = 600, H = 220;
+    const pad = { top: 24, right: 24, bottom: 34, left: 46 };
+    const innerW = W - pad.left - pad.right;
+    const innerH = H - pad.top - pad.bottom;
+
+    // Grid horizontal
+    let gridHtml = '';
+    [0, 25, 50, 75, 100].forEach(val => {
+      const y = pad.top + innerH - (val / 100) * innerH;
+      gridHtml += `<line x1="${pad.left}" y1="${y}" x2="${W - pad.right}" y2="${y}" stroke="rgba(148,163,184,0.25)" stroke-width="1" stroke-dasharray="3,3"/>`;
+      gridHtml += `<text x="${pad.left - 10}" y="${y + 4}" text-anchor="end" font-size="10" font-weight="700" fill="#94a3b8">${val}%</text>`;
+    });
+
+    // Titik-titik
+    const points = sorted.map((item, i) => {
+      const x = n === 1
+        ? pad.left + innerW / 2
+        : pad.left + (i / (n - 1)) * innerW;
+      const y = pad.top + innerH - (Math.max(0, Math.min(100, item.score)) / 100) * innerH;
+      return { x, y, score: item.score, at: item.at };
+    });
+
+    const polyline = points.map(p => `${p.x},${p.y}`).join(' ');
+
+    // Area gradient di bawah line
+    let areaPath = '';
+    if (points.length > 1) {
+      const first = points[0];
+      const last = points[points.length - 1];
+      areaPath = `M ${first.x},${pad.top + innerH} L ${points.map(p => `${p.x},${p.y}`).join(' L ')} L ${last.x},${pad.top + innerH} Z`;
+    }
+
+    // Dots + label
+    let dotsHtml = '';
+    const showLabel = n <= 10;
+    points.forEach((p, i) => {
+      const isLatest = i === points.length - 1;
+      dotsHtml += `<circle cx="${p.x}" cy="${p.y}" r="${isLatest ? 6 : 4}" fill="#6366f1" stroke="#ffffff" stroke-width="2.5"/>`;
+      if (showLabel) {
+        dotsHtml += `<text x="${p.x}" y="${p.y - 13}" text-anchor="middle" font-size="10" font-weight="800" fill="#4f46e5">${p.score}</text>`;
+      }
+    });
+
+    return `
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block;">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        ${gridHtml}
+        ${areaPath ? `<path d="${areaPath}" fill="url(#areaGrad)"/>` : ''}
+        ${points.length > 1 ? `<polyline points="${polyline}" fill="none" stroke="#6366f1" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>` : ''}
+        ${dotsHtml}
+      </svg>
+    `;
+  }
+
+  function renderHistory() {
+    const history = STORAGE.get(RESULT_KEY, []);
+    const container = els.historyContent;
+    if (!container) return;
+
+    // Empty state
+    if (!history.length) {
+      container.innerHTML = `
+        <div class="text-center mb-6">
+          <button onclick="KR.quiz.closeHistory()" class="btn-ghost mb-4 inline-flex items-center gap-2">
+            <i data-lucide="arrow-left"></i> Kembali
+          </button>
+          <h2 class="text-2xl font-bold dark:text-white">Riwayat Hasil</h2>
+          <p class="text-sm text-gray-500 mt-1">Perkembangan skor latihan Anda</p>
+        </div>
+        <div class="quiz-review-empty glass-card" style="padding:60px 20px;">
+          <i data-lucide="inbox"></i>
+          <div style="font-size:1rem;font-weight:800;margin-top:8px;">Belum Ada Riwayat</div>
+          <div style="font-size:0.85rem;color:var(--text-muted);">Selesaikan latihan pertamamu untuk melihat statistik di sini</div>
+        </div>
+      `;
+      if (window.lucide) lucide.createIcons();
+      return;
+    }
+
+    // Statistik
+    const total = history.length;
+    const best = Math.max(...history.map(h => h.score));
+    const avg = Math.round(history.reduce((s, h) => s + h.score, 0) / total);
+
+    // Sort dari terbaru untuk list
+    const sortedList = [...history].sort((a, b) => b.at - a.at);
+
+    // Render
+    container.innerHTML = `
+      <div class="flex items-center justify-between gap-3 mb-6 flex-wrap">
+        <button onclick="KR.quiz.closeHistory()" class="btn-ghost inline-flex items-center gap-2">
+          <i data-lucide="arrow-left"></i> Kembali
+        </button>
+        <button onclick="KR.quiz.clearAllHistory()" class="btn-ghost text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 inline-flex items-center gap-2">
+          <i data-lucide="trash-2"></i> Hapus Semua
+        </button>
+      </div>
+
+      <div class="text-center mb-8">
+        <h2 class="text-2xl font-bold dark:text-white">Riwayat Hasil</h2>
+        <p class="text-sm text-gray-500 mt-1">Perkembangan skor latihan Anda</p>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="quiz-history-stats">
+        <div class="quiz-history-stat">
+          <div class="quiz-history-stat-icon stat-purple"><i data-lucide="list-checks"></i></div>
+          <div>
+            <div class="quiz-history-stat-num">${total}</div>
+            <div class="quiz-history-stat-label">Total Percobaan</div>
+          </div>
+        </div>
+        <div class="quiz-history-stat">
+          <div class="quiz-history-stat-icon stat-green"><i data-lucide="trophy"></i></div>
+          <div>
+            <div class="quiz-history-stat-num">${best}%</div>
+            <div class="quiz-history-stat-label">Skor Terbaik</div>
+          </div>
+        </div>
+        <div class="quiz-history-stat">
+          <div class="quiz-history-stat-icon stat-amber"><i data-lucide="trending-up"></i></div>
+          <div>
+            <div class="quiz-history-stat-num">${avg}%</div>
+            <div class="quiz-history-stat-label">Rata-Rata</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart -->
+      <div class="quiz-history-chart-card">
+        <div class="quiz-history-chart-title">
+          <i data-lucide="line-chart"></i> Perkembangan Skor
+        </div>
+        ${total >= 2 ? buildHistoryChart(history) : `
+          <div class="quiz-review-empty" style="padding:32px 20px;">
+            <i data-lucide="line-chart"></i>
+            <div style="font-size:0.85rem;">Butuh minimal 2 hasil untuk menampilkan grafik</div>
+          </div>
+        `}
+      </div>
+
+      <!-- List Riwayat -->
+      <div class="mt-8">
+        <div class="quiz-history-chart-title" style="margin-bottom:14px;">
+          <i data-lucide="history"></i> Daftar Latihan
+        </div>
+        <div class="quiz-history-list">
+          ${sortedList.map(h => `
+            <div class="quiz-history-item">
+              <div class="quiz-history-score-badge ${h.score >= 80 ? 'good' : h.score >= 60 ? 'medium' : 'low'}">
+                ${h.score}<span>%</span>
+              </div>
+              <div class="quiz-history-body">
+                <div class="quiz-history-title">${esc(h.packageName || 'Latihan')}</div>
+                <div class="quiz-history-meta">
+                  <span class="chip ${h.mode === 'exam' ? 'primary' : 'success'}" style="font-size:0.65rem;">
+                    ${h.mode === 'exam' ? '📝 UJIAN' : '📚 LATIHAN'}
+                  </span>
+                  <span class="quiz-history-meta-text"><i data-lucide="clock" style="width:11px;height:11px;"></i>${formatDur(h.duration || 0)}</span>
+                  <span class="quiz-history-meta-text"><i data-lucide="calendar" style="width:11px;height:11px;"></i>${formatDateShort(h.at)}</span>
+                </div>
+                <div class="quiz-history-stats-mini">
+                  <span class="stat-mini correct"><i data-lucide="check" style="width:11px;height:11px;"></i>${h.correct}</span>
+                  <span class="stat-mini wrong"><i data-lucide="x" style="width:11px;height:11px;"></i>${h.wrong}</span>
+                  ${(h.total - h.correct - h.wrong) > 0 ? `<span class="stat-mini skip"><i data-lucide="minus" style="width:11px;height:11px;"></i>${h.total - h.correct - h.wrong}</span>` : ''}
+                </div>
+              </div>
+              <div class="quiz-history-actions">
+                <button class="btn-icon-xs primary" onclick="KR.quiz.viewHistoryDetail('${h.id}')" title="Lihat Detail">
+                  <i data-lucide="eye"></i>
+                </button>
+                <button class="btn-icon-xs danger" onclick="KR.quiz.deleteHistoryItem('${h.id}')" title="Hapus">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function viewHistoryDetail(id) {
+    const history = STORAGE.get(RESULT_KEY, []);
+    const item = history.find(h => h.id === id);
+    if (!item) {
+      KR.toast?.error('Riwayat tidak ditemukan');
+      return;
+    }
+
+    // Reconstruct result object dari history item
+    const r = {
+      pkg: { id: item.packageId, name: item.packageName },
+      mode: item.mode,
+      score: item.score,
+      correct: item.correct,
+      wrong: item.wrong,
+      total: item.total,
+      duration: item.duration,
+      details: item.details,
+      at: item.at,
+    };
+
+    // Set flag biar closeResults tahu ini dari history
+    window.__KR_VIEWING_HISTORY__ = true;
+
+    // Set lastResult supaya PDF & certificate masih bisa di-download
+    lastResult = r;
+
+    // Hide history, show result
+    els.historyWrap?.classList.add('hidden');
+    showResults(r);
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  function deleteHistoryItem(id) {
+    const history = STORAGE.get(RESULT_KEY, []);
+    const item = history.find(h => h.id === id);
+    if (!item) return;
+
+    const ok = confirm(`Hapus riwayat "${item.packageName}" (${item.score}%)?`);
+    if (!ok) return;
+
+    const newHistory = history.filter(h => h.id !== id);
+    STORAGE.set(RESULT_KEY, newHistory);
+    KR.toast?.success('Riwayat dihapus');
+    renderHistory();
+  }
+
+  function clearAllHistory() {
+    const history = STORAGE.get(RESULT_KEY, []);
+    if (!history.length) return;
+
+    const ok = confirm(`Hapus SEMUA ${history.length} riwayat latihan? Tindakan ini tidak bisa dibatalkan.`);
+    if (!ok) return;
+
+    STORAGE.set(RESULT_KEY, []);
+    KR.toast?.success('Semua riwayat dihapus');
+    renderHistory();
   }
 
   /* ==========================================
@@ -1765,5 +2065,11 @@ function escMultiline(s = '') {
     saveQuizzes,
     setQuizzes: (arr) => { quizzes = arr; saveQuizzes(); renderList(); },
     formatQuizMarkup,
+    showHistory,
+    closeHistory,
+    renderHistory,
+    viewHistoryDetail,
+    deleteHistoryItem,
+    clearAllHistory,
   };
 })();
