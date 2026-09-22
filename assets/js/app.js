@@ -331,7 +331,10 @@ function saveAIConfig({ provider, model, apiKey, customEndpoint }) {
   if (provider) localStorage.setItem('ai_provider', provider);
   if (model && provider) localStorage.setItem('ai_model_' + provider, model);
   if (apiKey !== undefined && provider) localStorage.setItem('ai_key_' + provider, apiKey);
-  if (customEndpoint !== undefined) localStorage.setItem('ai_custom_endpoint', customEndpoint);
+  // ✅ Selalu set endpoint (termasuk string kosong) supaya tidak menyisakan data lama
+  if (customEndpoint !== undefined) {
+    localStorage.setItem('ai_custom_endpoint', customEndpoint || '');
+  }
 }
 
 /* ==========================================
