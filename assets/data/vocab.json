@@ -1403,23 +1403,16 @@
     {
       "id": 201,
       "bab": "BAB 1",
-      "hangeul": "씨발",
-      "rom": "Ssibal",
-      "arti": "Bangsat"
+      "hangeul": "아습",
+      "rom": "Asep",
+      "arti": "Asep"
     },
     {
       "id": 202,
       "bab": "BAB 1",
-      "hangeul": "우딘",
-      "rom": "Udin",
-      "arti": "Udin"
-    },
-    {
-      "id": 203,
-      "bab": "BAB 1",
-      "hangeul": "컨베이어",
-      "rom": "컨베이어",
-      "arti": "Konveyor"
+      "hangeul": "Ayu",
+      "rom": "Ayu",
+      "arti": "Ayu"
     }
   ]
 }
