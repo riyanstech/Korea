@@ -1,0 +1,298 @@
+{
+  "items": [
+    {
+      "struktur": "~입니다 / ~입니까?",
+      "arti": "Adalah / Apakah (Formal)",
+      "fungsi": [
+        "Digunakan untuk menyatakan atau bertanya secara formal.",
+        "입니다 digunakan untuk menyatakan.",
+        "입니까? digunakan untuk bertanya."
+      ],
+      "contoh": [
+        {
+          "kalimat": "저는 학생입니다.",
+          "arti": "Saya adalah pelajar."
+        },
+        {
+          "kalimat": "어느 나라 사람입니까?",
+          "arti": "Anda orang negara mana?"
+        }
+      ]
+    },
+    {
+      "struktur": "~은/는",
+      "arti": "Partikel Penanda Topik",
+      "fungsi": [
+        "Partikel ini digunakan untuk menunjukkan subjek atau topik pembicaraan.",
+        "은 digunakan jika kata sebelumnya berakhiran konsonan.",
+        "는 digunakan jika kata sebelumnya berakhiran vokal."
+      ],
+      "contoh": [
+        {
+          "kalimat": "투안은 목수입니다.",
+          "arti": "Tuan adalah tukang kayu."
+        },
+        {
+          "kalimat": "리리는 중국 사람입니다.",
+          "arti": "Riri adalah orang Cina."
+        }
+      ]
+    },
+    {
+      "struktur": "~이/가",
+      "arti": "Partikel Penanda Subjek",
+      "fungsi": [
+        "Menunjukkan subjek dalam kalimat.",
+        "이 digunakan setelah konsonan.",
+        "가 digunakan setelah vokal."
+      ],
+      "contoh": [
+        {
+          "kalimat": "날씨가 좋습니다.",
+          "arti": "Cuacanya bagus."
+        },
+        {
+          "kalimat": "물이 차갑습니다.",
+          "arti": "Airnya dingin."
+        }
+      ]
+    },
+    {
+      "struktur": "~에",
+      "arti": "Partikel Waktu/Tempat",
+      "fungsi": [
+        "Menunjukkan waktu atau tempat.",
+        "Diletakkan setelah kata waktu atau tempat."
+      ],
+      "contoh": [
+        {
+          "kalimat": "아침에 운동합니다.",
+          "arti": "Saya olahraga di pagi hari."
+        },
+        {
+          "kalimat": "학교에 갑니다.",
+          "arti": "Saya pergi ke sekolah."
+        }
+      ]
+    },
+    {
+      "struktur": "~에서",
+      "arti": "Partikel Tempat Aktivitas",
+      "fungsi": [
+        "Menunjukkan tempat berlangsungnya aktivitas.",
+        "Berbeda dengan '~에' yang menunjukkan tujuan/arah."
+      ],
+      "contoh": [
+        {
+          "kalimat": "도서관에서 공부합니다.",
+          "arti": "Saya belajar di perpustakaan."
+        },
+        {
+          "kalimat": "시장에서 사요.",
+          "arti": "Saya beli di pasar."
+        }
+      ]
+    },
+    {
+      "struktur": "~하고 / ~와/과",
+      "arti": "Dan / Dengan",
+      "fungsi": [
+        "Menghubungkan dua kata benda.",
+        "하고 paling umum di percakapan.",
+        "와 setelah vokal, 과 setelah konsonan."
+      ],
+      "contoh": [
+        {
+          "kalimat": "사과하고 바나나를 사요.",
+          "arti": "Saya beli apel dan pisang."
+        },
+        {
+          "kalimat": "친구와 영화를 봐요.",
+          "arti": "Saya nonton film dengan teman."
+        }
+      ]
+    },
+    {
+      "struktur": "~았/었/였~",
+      "arti": "Bentuk Lampau",
+      "fungsi": [
+        "Menyatakan kejadian yang sudah terjadi.",
+        "았 setelah vokal ㅏ,ㅗ",
+        "었 setelah vokal lain.",
+        "였 setelah 하다."
+      ],
+      "contoh": [
+        {
+          "kalimat": "어제 영화를 봤어요.",
+          "arti": "Kemarin saya nonton film."
+        },
+        {
+          "kalimat": "밥을 먹었어요.",
+          "arti": "Saya sudah makan."
+        }
+      ]
+    },
+    {
+      "struktur": "~고 싶다",
+      "arti": "Ingin ~",
+      "fungsi": [
+        "Menyatakan keinginan melakukan sesuatu.",
+        "Diletakkan setelah kata kerja dasar."
+      ],
+      "contoh": [
+        {
+          "kalimat": "한국에 가고 싶어요.",
+          "arti": "Saya ingin pergi ke Korea."
+        },
+        {
+          "kalimat": "물을 마시고 싶어요.",
+          "arti": "Saya ingin minum air."
+        }
+      ]
+    },
+    {
+      "struktur": "~(으)세요",
+      "arti": "Silakan ~ / Tolong ~",
+      "fungsi": [
+        "Bentuk imperatif sopan.",
+        "Digunakan untuk meminta atau memerintah secara halus."
+      ],
+      "contoh": [
+        {
+          "kalimat": "여기 앉으세요.",
+          "arti": "Silakan duduk di sini."
+        },
+        {
+          "kalimat": "천천히 말씀하세요.",
+          "arti": "Tolong bicara pelan-pelan."
+        }
+      ]
+    },
+    {
+      "struktur": "~지 마세요",
+      "arti": "Jangan ~",
+      "fungsi": [
+        "Melarang melakukan sesuatu.",
+        "Bentuk negatif dari ~(으)세요."
+      ],
+      "contoh": [
+        {
+          "kalimat": "걱정하지 마세요.",
+          "arti": "Jangan khawatir."
+        },
+        {
+          "kalimat": "여기서 담배를 피우지 마세요.",
+          "arti": "Jangan merokok di sini."
+        }
+      ]
+    },
+    {
+      "struktur": "~(으)ㄹ 수 있다/없다",
+      "arti": "Bisa / Tidak bisa ~",
+      "fungsi": [
+        "Menyatakan kemampuan atau ketidakmampuan.",
+        "있다 berarti bisa, 없다 berarti tidak bisa."
+      ],
+      "contoh": [
+        {
+          "kalimat": "한국어를 할 수 있어요.",
+          "arti": "Saya bisa berbahasa Korea."
+        },
+        {
+          "kalimat": "운전할 수 없어요.",
+          "arti": "Saya tidak bisa menyetir."
+        }
+      ]
+    },
+    {
+      "struktur": "~아/어서",
+      "arti": "Karena / Sehingga",
+      "fungsi": [
+        "Menyatakan sebab-akibat.",
+        "Tidak boleh diikuti bentuk imperatif."
+      ],
+      "contoh": [
+        {
+          "kalimat": "비가 와서 집에 있었어요.",
+          "arti": "Karena hujan, saya di rumah."
+        },
+        {
+          "kalimat": "피곤해서 잤어요.",
+          "arti": "Karena lelah, saya tidur."
+        }
+      ]
+    },
+    {
+      "struktur": "~지만",
+      "arti": "Tetapi / Namun",
+      "fungsi": [
+        "Menyatakan kontras atau pertentangan.",
+        "Diletakkan setelah kata kerja/sifat dasar."
+      ],
+      "contoh": [
+        {
+          "kalimat": "비싸지만 좋아요.",
+          "arti": "Mahal tapi bagus."
+        },
+        {
+          "kalimat": "어렵지만 재미있어요.",
+          "arti": "Sulit tapi menyenangkan."
+        }
+      ]
+    },
+    {
+      "struktur": "~는데",
+      "arti": "Sedangkan / Sementara",
+      "fungsi": [
+        "Memberi latar belakang, kontras, atau alasan.",
+        "Bentuk serbaguna dalam percakapan."
+      ],
+      "contoh": [
+        {
+          "kalimat": "지금 바쁜데 나중에 만나요.",
+          "arti": "Sekarang saya sibuk, nanti kita bertemu."
+        },
+        {
+          "kalimat": "이건 좋은데 저건 별로예요.",
+          "arti": "Yang ini bagus, tapi yang itu kurang."
+        }
+      ]
+    },
+    {
+      "struktur": "~(으)ㄴ/는/(으)ㄹ",
+      "arti": "Modifier (kata sifat/kerja → sifat kata benda)",
+      "fungsi": [
+        "(으)ㄴ: kata sifat atau kata kerja lampau.",
+        "는: kata kerja sekarang.",
+        "(으)ㄹ: kata kerja akan datang."
+      ],
+      "contoh": [
+        {
+          "kalimat": "예쁜 꽃",
+          "arti": "Bunga yang cantik"
+        },
+        {
+          "kalimat": "먹는 음식",
+          "arti": "Makanan yang dimakan"
+        },
+        {
+          "kalimat": "갈 사람",
+          "arti": "Orang yang akan pergi"
+        }
+      ]
+    },
+    {
+      "struktur": "(으) ㄹ래요",
+      "arti": "Mau",
+      "fungsi": [
+        "Gitu deh"
+      ],
+      "contoh": [
+        {
+          "kalimat": "Hi",
+          "arti": ""
+        }
+      ]
+    }
+  ]
+}
