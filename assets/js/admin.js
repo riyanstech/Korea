@@ -1,5 +1,7 @@
 /* ==========================================
-   KR-Dict — Admin Dashboard v8.5 (FINAL)
+   KR-Dict — Admin Dashboard v8.6 (FINAL)
+   + FIXED: close() refresh semua user view (PATCH A)
+   + FIXED: debug log + verify di semua save functions (PATCH C)
    + FIXED: typo "contohs" → "contohs" (crash saat hapus contoh grammar)
    + FIXED: reset sekarang berfungsi (restore dari __KR_ORIGINAL__)
    + FIXED: collect() race condition (bind synchronous)
@@ -35,6 +37,40 @@ KR.admin = (function () {
     'BAB 16','BAB 17','BAB 18','BAB 19','BAB 20','BAB 21','BAB 22',
     'BAB 23','BAB 24','BAB 25','BAB 26','BAB 27','BAB 28','BAB 29','BAB 30'
   ];
+
+  /* ==========================================
+     PATCH A: Refresh semua user view
+     Dipanggil setiap kali admin close
+     ========================================== */
+  function refreshAllUserViews() {
+    try {
+      console.log('[Admin] Refreshing all user views...');
+
+      if (typeof window.filterVocabTextbook === 'function') {
+        window.filterVocabTextbook();
+      }
+      if (typeof window.renderGrammar === 'function') {
+        window.renderGrammar(window.grammarData || []);
+      }
+      if (typeof window.renderDownloads === 'function') {
+        window.renderDownloads();
+      }
+      if (typeof window.renderCultureList === 'function') {
+        const cultureEl = document.getElementById('culture');
+        if (cultureEl && !cultureEl.classList.contains('hidden')) {
+          const isDetailView = cultureEl.querySelector('.culture-page') !== null;
+          if (!isDetailView) {
+            window.renderCultureList();
+          }
+        }
+      }
+
+      if (window.lucide) lucide.createIcons();
+      console.log('[Admin] ✅ User views refreshed');
+    } catch (e) {
+      console.error('[Admin] Error refreshing user views:', e);
+    }
+  }
 
   /* ==========================================
      IMAGE COMPRESS HELPER
@@ -97,8 +133,19 @@ KR.admin = (function () {
     return DEFAULT_BABS.slice();
   }
 
+  /* ==========================================
+     PATCH C: Debug log + verify di save functions
+     ========================================== */
   function saveVocab(data) {
+    console.log('[Admin] 💾 Saving vocab:', data.length, 'items');
     STORAGE.set(KEYS.vocab, data);
+    const verify = STORAGE.get(KEYS.vocab);
+    if (verify && verify.length === data.length) {
+      console.log('[Admin] ✅ Vocab saved & verified:', verify.length, 'items');
+    } else {
+      console.error('[Admin] ❌ Vocab save FAILED! Expected:', data.length, 'Got:', verify?.length);
+      KR.toast?.error('Gagal menyimpan! Kuota browser mungkin penuh.');
+    }
     window.vocabTextbookData = data;
     window.dispatchEvent(new Event('vocab:updated'));
     syncGitHub('assets/data/vocab.json', { items: data }, 'chore: update vocab');
@@ -109,8 +156,17 @@ KR.admin = (function () {
     if (override && Array.isArray(override)) return override.slice();
     return (window.grammarData || []).slice();
   }
+
   function saveGrammar(data) {
+    console.log('[Admin] 💾 Saving grammar:', data.length, 'items');
     STORAGE.set(KEYS.grammar, data);
+    const verify = STORAGE.get(KEYS.grammar);
+    if (verify && verify.length === data.length) {
+      console.log('[Admin] ✅ Grammar saved & verified:', verify.length, 'items');
+    } else {
+      console.error('[Admin] ❌ Grammar save FAILED!');
+      KR.toast?.error('Gagal menyimpan grammar!');
+    }
     window.grammarData = data;
     window.dispatchEvent(new Event('grammar:updated'));
     syncGitHub('assets/data/grammar.json', { items: data }, 'chore: update grammar');
@@ -121,8 +177,17 @@ KR.admin = (function () {
     if (override && override.babs) return override;
     return JSON.parse(JSON.stringify(window.CULTURE_DATA || { babs: [] }));
   }
+
   function saveCulture(data) {
+    console.log('[Admin] 💾 Saving culture:', data.babs?.length || 0, 'babs');
     STORAGE.set(KEYS.culture, data);
+    const verify = STORAGE.get(KEYS.culture);
+    if (verify && verify.babs && verify.babs.length === (data.babs?.length || 0)) {
+      console.log('[Admin] ✅ Culture saved & verified');
+    } else {
+      console.error('[Admin] ❌ Culture save FAILED!');
+      KR.toast?.error('Gagal menyimpan budaya!');
+    }
     window.CULTURE_DATA = data;
     window.dispatchEvent(new Event('culture:updated'));
     syncGitHub('assets/data/culture.json', data, 'chore: update culture');
@@ -133,8 +198,17 @@ KR.admin = (function () {
     if (override && Array.isArray(override)) return override.slice();
     return (window.downloadsData || []).slice();
   }
+
   function saveDownloads(data) {
+    console.log('[Admin] 💾 Saving downloads:', data.length, 'items');
     STORAGE.set(KEYS.downloads, data);
+    const verify = STORAGE.get(KEYS.downloads);
+    if (verify && verify.length === data.length) {
+      console.log('[Admin] ✅ Downloads saved & verified:', verify.length, 'items');
+    } else {
+      console.error('[Admin] ❌ Downloads save FAILED!');
+      KR.toast?.error('Gagal menyimpan materi!');
+    }
     window.downloadsData = data;
     window.dispatchEvent(new Event('downloads:updated'));
     syncGitHub('assets/data/downloads.json', { items: data }, 'chore: update downloads');
@@ -209,9 +283,13 @@ KR.admin = (function () {
     switchTab('overview');
     if (window.lucide) lucide.createIcons();
   }
+
+  /* PATCH A: close() refresh semua user view */
   function close() {
+    console.log('[Admin] Closing admin, refreshing user views...');
     els.screen.classList.add('hidden');
     document.body.style.overflow = '';
+    refreshAllUserViews();
   }
 
   function switchTab(name) {
@@ -1167,7 +1245,7 @@ KR.admin = (function () {
     `;
   }
 
-  /* ✅ FIXED: typo "contohs" → "contohs" */
+  /* FIXED: typo "contohs" → "contohs" */
   function bindGrammarForm(initial) {
     let contohs = (initial && initial.length) ? JSON.parse(JSON.stringify(initial)) : [{ kalimat: '', arti: '' }];
     const renderContoh = () => {
@@ -1697,7 +1775,7 @@ KR.admin = (function () {
   }
 
   /* ==========================================
-     RESET (FIXED: restore dari __KR_ORIGINAL__)
+     RESET (restore dari __KR_ORIGINAL__)
      ========================================== */
   function resetCategory(key) {
     const labels = { vocab: 'Kosakata', grammar: 'Grammar', culture: 'Budaya', downloads: 'Materi' };
@@ -1820,5 +1898,17 @@ KR.admin = (function () {
     });
   }
 
-  return { init, open, close, switchTab, getVocab, getGrammar, getCulture, getDownloads, getBabList, updateQTextPreview };
+  return {
+    init,
+    open,
+    close,
+    switchTab,
+    getVocab,
+    getGrammar,
+    getCulture,
+    getDownloads,
+    getBabList,
+    updateQTextPreview,
+    refreshAllUserViews
+  };
 })();
