@@ -1,5 +1,6 @@
 // ==========================================
-// KR-Dict — Main App v9.6 (FINAL)
+// KR-Dict — Main App v9.7 (FINAL)
+// + Expose functions ke window untuk admin.js
 // + FIXED: override kosong tidak lagi dihapus
 // + FIXED: __KR_ORIGINAL__ untuk reset
 // + FIXED: XSS prevention di toast (whitelist)
@@ -9,7 +10,8 @@
 // + FIXED: formatHTTPError untuk pesan error jelas
 // + FIXED: Network error handling di semua provider
 // + FIXED: testConnection dengan detail log
-// + FIXED: Groq models (hapus mixtral deprecated)
+// + FIXED: Groq models (openai/gpt-oss-120b, qwen, dll)
+// + FIXED: Gemini models (gemini-3.8-flash, dll)
 // ==========================================
 
 /* ---------- LOAD OVERRIDE DARI ADMIN ---------- */
@@ -107,7 +109,7 @@ let userMuted = false;
    AI PROVIDERS CONFIG
    ========================================== */
 const AI_PROVIDERS = {
-    gemini: {
+  gemini: {
     name: 'Google Gemini',
     icon: '✨',
     endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
@@ -119,7 +121,7 @@ const AI_PROVIDERS = {
       'gemini-3.1-flash-lite',
       'gemini-flash-latest'
     ],
-    defaultModel: 'gemini-3.8-flash',
+    defaultModel: 'gemini-3.6-flash',
     keyUrl: 'https://aistudio.google.com/app/apikey',
     desc: 'Free tier generous, support gambar',
     format: 'gemini',
@@ -527,7 +529,7 @@ KR.ai = (function () {
 
     let welcomeMsg;
     if (!hasKey) {
-      welcomeMsg = `👋 Selamat datang di <strong>AI Tutor Korea</strong>!<br><br>⚠️ Anda belum mengatur API Key.<br><br>Klik ikon <strong>⚙️ Pengaturan</strong> di kanan atas untuk:<br>1. Pilih AI Provider (rekomendasi: <strong>Groq</strong> gratis & cepat)<br>2. Masukkan API Key<br>3. Test koneksi<br><br><em>Setelah itu Anda bisa mulai belajar!</em>`;
+      welcomeMsg = `👋 Selamat datang di <strong>AI Tutor Korea</strong>!<br><br>⚠️ Anda belum mengatur API Key.<br><br>Klik ikon <strong>⚙️ Pengaturan</strong> di kanan atas untuk:<br>1. Pilih AI Provider (rekomendasi: <strong>Gemini</strong> atau <strong>Groq</strong>)<br>2. Masukkan API Key<br>3. Test koneksi<br><br><em>Setelah itu Anda bisa mulai belajar!</em>`;
     } else if (mode === 'casual') {
       welcomeMsg = "안녕! 👋 Aku <strong>Ji-eun</strong>.<br>Mau cerita apa hari ini? Pakai <strong>banmal</strong> (santai) aja ya!";
     } else {
@@ -1202,7 +1204,7 @@ function toggleMenu() {
 }
 
 /* ==========================================
-   NAVIGATION v9.6
+   NAVIGATION v9.7
    ========================================== */
 function showTab(tabId, element) {
   document.body.classList.remove('chat-open');
@@ -1850,3 +1852,14 @@ function showQuizFinishModal() {
 }
 function hideQuizFinishModal() { document.getElementById('quiz-finish-modal').classList.add('hidden'); }
 function restartQuiz() { hideQuizFinishModal(); startQuiz(); }
+
+/* ==========================================
+   ✅ PATCH v9.7: Expose functions ke window
+   supaya admin.js bisa panggil dari luar
+   (untuk refresh user view saat admin close)
+   ========================================== */
+window.filterVocabTextbook = filterVocabTextbook;
+window.renderGrammar = renderGrammar;
+window.renderDownloads = renderDownloads;
+window.renderCultureList = renderCultureList;
+window.renderHangeul = renderHangeul;
