@@ -308,7 +308,6 @@
                 <!-- ===================== AI TUTOR TAB ===================== -->
                 <div id="chat-ai" class="tab-content hidden chat-shell">
 
-                    <!-- Header -->
                     <div class="chat-header">
                         <button onclick="showTab('vocab-container')" class="chat-back-btn md:hidden" aria-label="Kembali">
                             <i data-lucide="arrow-left"></i>
@@ -328,7 +327,6 @@
                         </div>
                     </div>
 
-                    <!-- Quick mode chips -->
                     <div class="chat-quick-modes" id="chatQuickModes" role="tablist">
                         <button class="chat-chip active" data-mode="tutor" onclick="setQuickMode('tutor')"><span>🎓</span><span>Tutor</span></button>
                         <button class="chat-chip" data-mode="correct" onclick="setQuickMode('correct')"><span>✏️</span><span>Koreksi</span></button>
@@ -338,10 +336,8 @@
                         <button class="chat-chip" data-mode="quiz" onclick="setQuickMode('quiz')"><span>🎯</span><span>Kuis</span></button>
                     </div>
 
-                    <!-- Messages -->
                     <div id="chat-box" class="chat-messages"></div>
 
-                    <!-- Input -->
                     <div class="chat-input-area">
                         <div class="chat-input-inner">
                             <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
@@ -351,7 +347,6 @@
                         </div>
                     </div>
 
-                    <!-- Settings sheet -->
                     <div id="chat-settings">
                         <div class="chat-settings-backdrop" onclick="toggleChatSettings()"></div>
                         <div class="chat-settings-panel">
@@ -422,7 +417,6 @@
                         </div>
                     </div>
 
-                    <!-- Image preview modal -->
                     <div id="image-preview-modal" class="chat-img-preview hidden">
                         <div class="chat-img-preview-card">
                             <div class="chat-img-preview-img-wrap">
