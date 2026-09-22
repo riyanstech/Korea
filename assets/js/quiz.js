@@ -1580,7 +1580,7 @@ function escMultiline(s = '') {
   }
 
   async function renderCertificateToCanvas({ name, pkgName, score, dateStr, certId, gradeText, wrong, details }) {
-    // Load signature (pakai multiply blend biar white bg jadi transparan)
+    // Load signature
     let signatureImg = null;
     try {
       signatureImg = await loadImage('assets/img/signature.png');
@@ -1588,7 +1588,7 @@ function escMultiline(s = '') {
       console.warn('[Cert] Signature tidak ditemukan:', e.message);
     }
 
-    // Hitung Reading & Listening dari details
+    // Compute stats
     const reading = { correct: 0, total: 0 };
     const listening = { correct: 0, total: 0 };
     (details || []).forEach(d => {
@@ -1603,9 +1603,8 @@ function escMultiline(s = '') {
     });
     const totalQuestions = reading.total + listening.total;
 
-    // ============ CANVAS SETUP ============
-    const W = 1123, H = 794;
-    const SCALE = 2;
+    // Canvas setup
+    const W = 1123, H = 794, SCALE = 2;
     const cvs = document.createElement('canvas');
     cvs.width = W * SCALE;
     cvs.height = H * SCALE;
@@ -1613,7 +1612,7 @@ function escMultiline(s = '') {
     ctx.scale(SCALE, SCALE);
     ctx.textBaseline = 'middle';
 
-    // ============ PALET WARNA ============
+    // Palette
     const NAVY = '#1e3a5f';
     const NAVY_DARK = '#152a44';
     const NAVY_LIGHT = '#2d4a70';
@@ -1625,8 +1624,13 @@ function escMultiline(s = '') {
     const CREAM_DARK = '#f4f1e8';
     const TEXT_DARK = '#1a2942';
     const TEXT_MUTED = '#5a6b82';
+    const KFLAG_RED = '#c8102e';
+    const KFLAG_BLUE = '#003478';
+    const KFLAG_BLACK = '#1a1a1a';
 
-    // ============ 1. NAVY BACKGROUND ============
+    /* ============================================================
+       1. NAVY OUTER BACKGROUND
+       ============================================================ */
     ctx.fillStyle = NAVY;
     ctx.fillRect(0, 0, W, H);
     const navyGrad = ctx.createLinearGradient(0, 0, W, H);
@@ -1636,12 +1640,12 @@ function escMultiline(s = '') {
     ctx.fillStyle = navyGrad;
     ctx.fillRect(0, 0, W, H);
 
-    // ============ 2. CREAM PAPER ============
+    /* ============================================================
+       2. CREAM PAPER
+       ============================================================ */
     const PAPER = 28;
-    const paperX = PAPER;
-    const paperY = PAPER;
-    const paperW = W - PAPER * 2;
-    const paperH = H - PAPER * 2;
+    const paperX = PAPER, paperY = PAPER;
+    const paperW = W - PAPER * 2, paperH = H - PAPER * 2;
 
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.35)';
@@ -1658,101 +1662,172 @@ function escMultiline(s = '') {
     ctx.fillStyle = paperGrad;
     ctx.fillRect(paperX, paperY, paperW, paperH);
 
-    // ============ 3. BACKGROUND PATTERNS (clipped) ============
+    /* ============================================================
+       3. BACKGROUND PATTERNS (clipped to paper)
+       ============================================================ */
     ctx.save();
     ctx.beginPath();
     ctx.rect(paperX, paperY, paperW, paperH);
     ctx.clip();
 
-    // 3a. Taegeuk kanan-atas (subtle, kecil)
-    ctx.save();
-    ctx.globalAlpha = 0.035;
-    drawTaegeuk(ctx, 940, 200, 85, NAVY, '#c8423a');
-    ctx.restore();
+    // ============ KOREAN FLAG (TAEGEUKGI) — proper drawing ============
+    const drawKoreanFlag = (cx, cy, size, alpha) => {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(cx, cy);
 
-    // 3b. Pagoda silhouette kiri-bawah (subtle)
+      const taeR = size * 0.40;
+
+      // Taegeuk: blue full circle
+      ctx.beginPath();
+      ctx.arc(0, 0, taeR, 0, Math.PI * 2);
+      ctx.fillStyle = KFLAG_BLUE;
+      ctx.fill();
+
+      // Red top half (through top)
+      ctx.beginPath();
+      ctx.arc(0, 0, taeR, Math.PI, 0, false);
+      ctx.closePath();
+      ctx.fillStyle = KFLAG_RED;
+      ctx.fill();
+
+      // Red lobe extends down (bottom-center)
+      ctx.beginPath();
+      ctx.arc(0, taeR / 2, taeR / 2, 0, Math.PI * 2);
+      ctx.fillStyle = KFLAG_RED;
+      ctx.fill();
+
+      // Blue lobe extends up (top-center)
+      ctx.beginPath();
+      ctx.arc(0, -taeR / 2, taeR / 2, 0, Math.PI * 2);
+      ctx.fillStyle = KFLAG_BLUE;
+      ctx.fill();
+
+      // ---- 4 TRIGRAMS ----
+      // Config: [angleDeg, pattern (top→bottom, 1=solid, 0=broken)]
+      const trigrams = [
+        { angleDeg: -135, pattern: [1, 1, 1] },  // Geon ☰  upper-left
+        { angleDeg: -45,  pattern: [0, 1, 0] },  // Gam  ☵  upper-right
+        { angleDeg: 45,   pattern: [0, 0, 0] },  // Gon  ☷  lower-right
+        { angleDeg: 135,  pattern: [1, 0, 1] },  // Ri   ☲  lower-left
+      ];
+
+      const trgDist = size * 0.72;
+      const barLen = size * 0.24;
+      const barH = size * 0.038;
+      const barGap = size * 0.055;
+
+      trigrams.forEach(cfg => {
+        const ang = cfg.angleDeg * Math.PI / 180;
+        const tx = Math.cos(ang) * trgDist;
+        const ty = Math.sin(ang) * trgDist;
+
+        ctx.save();
+        ctx.translate(tx, ty);
+        ctx.rotate(ang + Math.PI / 2);
+
+        const totalH = barH * 3 + barGap * 2;
+        const startY = -totalH / 2 + barH / 2;
+
+        for (let i = 0; i < 3; i++) {
+          const y = startY + i * (barH + barGap);
+          const solid = cfg.pattern[i] === 1;
+          ctx.fillStyle = KFLAG_BLACK;
+          if (solid) {
+            ctx.fillRect(-barLen / 2, y - barH / 2, barLen, barH);
+          } else {
+            const gapHalf = barLen * 0.16;
+            const halfLen = (barLen - gapHalf) / 2;
+            ctx.fillRect(-barLen / 2, y - barH / 2, halfLen, barH);
+            ctx.fillRect(gapHalf / 2, y - barH / 2, halfLen, barH);
+          }
+        }
+        ctx.restore();
+      });
+
+      ctx.restore();
+    };
+
+    // Draw Korean flag subtle in the background (right side, behind taegeuk area)
+    drawKoreanFlag(870, 330, 240, 0.075);
+
+    // ============ PAGODA silhouette (lower-left) ============
     ctx.save();
-    ctx.globalAlpha = 0.045;
+    ctx.globalAlpha = 0.06;
     ctx.strokeStyle = NAVY;
     ctx.lineCap = 'round';
     ctx.lineWidth = 3;
+
     // Atap atas
     ctx.beginPath();
-    ctx.moveTo(40, 580);
-    ctx.quadraticCurveTo(180, 510, 320, 580);
+    ctx.moveTo(40, 570);
+    ctx.quadraticCurveTo(180, 505, 320, 570);
     ctx.stroke();
-    // Tiang atap atas
     ctx.beginPath();
-    ctx.moveTo(105, 580); ctx.lineTo(105, 615);
-    ctx.moveTo(255, 580); ctx.lineTo(255, 615);
-    ctx.moveTo(75, 615); ctx.lineTo(285, 615);
+    ctx.moveTo(105, 570); ctx.lineTo(105, 605);
+    ctx.moveTo(255, 570); ctx.lineTo(255, 605);
+    ctx.moveTo(75, 605);  ctx.lineTo(285, 605);
     ctx.stroke();
+
     // Atap bawah
     ctx.beginPath();
-    ctx.moveTo(20, 670);
-    ctx.quadraticCurveTo(180, 600, 340, 670);
+    ctx.moveTo(20, 665);
+    ctx.quadraticCurveTo(180, 595, 340, 665);
     ctx.stroke();
-    // Tiang atap bawah
     ctx.beginPath();
-    ctx.moveTo(95, 670); ctx.lineTo(95, 720);
-    ctx.moveTo(265, 670); ctx.lineTo(265, 720);
-    ctx.moveTo(65, 720); ctx.lineTo(295, 720);
+    ctx.moveTo(95, 665); ctx.lineTo(95, 715);
+    ctx.moveTo(265, 665); ctx.lineTo(265, 715);
+    ctx.moveTo(65, 715);  ctx.lineTo(295, 715);
     ctx.stroke();
+
     ctx.restore();
 
-    // 3c. Mountain range dasar (subtle)
+    // ============ MOUNTAINS (bottom) ============
     ctx.save();
-    ctx.globalAlpha = 0.05;
+    ctx.globalAlpha = 0.055;
     ctx.fillStyle = NAVY;
     ctx.beginPath();
-    ctx.moveTo(0, H - 50);
-    ctx.lineTo(140, H - 120);
-    ctx.lineTo(280, H - 70);
-    ctx.lineTo(420, H - 150);
-    ctx.lineTo(580, H - 85);
-    ctx.lineTo(720, H - 135);
-    ctx.lineTo(880, H - 95);
-    ctx.lineTo(1050, H - 160);
-    ctx.lineTo(W, H - 90);
+    ctx.moveTo(0, H - 40);
+    ctx.lineTo(140, H - 115);
+    ctx.lineTo(280, H - 65);
+    ctx.lineTo(420, H - 145);
+    ctx.lineTo(580, H - 80);
+    ctx.lineTo(720, H - 130);
+    ctx.lineTo(880, H - 90);
+    ctx.lineTo(1050, H - 155);
+    ctx.lineTo(W, H - 85);
     ctx.lineTo(W, H);
     ctx.lineTo(0, H);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 
-    ctx.restore(); // end clip
+    ctx.restore(); // end paper clip
 
-    // ============ 4. GOLD DOUBLE FRAME ============
-    const FRAME_OUT = 45;
-    const FRAME_IN = 53;
-
+    /* ============================================================
+       4. GOLD DOUBLE FRAME + CORNER ORNAMENTS
+       ============================================================ */
+    const FRAME_OUT = 45, FRAME_IN = 53;
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 1.8;
     ctx.strokeRect(FRAME_OUT, FRAME_OUT, W - FRAME_OUT * 2, H - FRAME_OUT * 2);
-
     ctx.strokeStyle = GOLD_DARK;
     ctx.lineWidth = 0.6;
     ctx.strokeRect(FRAME_IN, FRAME_IN, W - FRAME_IN * 2, H - FRAME_IN * 2);
 
-    // Ornamen 4 corner
-    const cs = 28;
-    const cp = FRAME_OUT + 8;
+    const cs = 26, cp = FRAME_OUT + 9;
     drawOrnateCorner(ctx, cp, cp, cs, GOLD, false, false);
     drawOrnateCorner(ctx, W - cp, cp, cs, GOLD, true, false);
     drawOrnateCorner(ctx, cp, H - cp, cs, GOLD, false, true);
     drawOrnateCorner(ctx, W - cp, H - cp, cs, GOLD, true, true);
 
     /* ============================================================
-       SECTION 1: HEADER (y=70–105)
+       SECTION 1: HEADER (y=70–115)
        ============================================================ */
-    // Logo book icon (kiri)
-    const logoX = 78;
-    const logoY = 78;
-    const bkSize = 26;
-
+    // Logo book icon
+    const logoX = 80, logoY = 78, bkSize = 26;
     ctx.save();
     ctx.fillStyle = NAVY;
-    // Left page
     ctx.beginPath();
     ctx.moveTo(logoX, logoY + 4);
     ctx.lineTo(logoX, logoY + bkSize);
@@ -1760,7 +1835,6 @@ function escMultiline(s = '') {
     ctx.lineTo(logoX + bkSize / 2 - 2, logoY + 2);
     ctx.closePath();
     ctx.fill();
-    // Right page
     ctx.beginPath();
     ctx.moveTo(logoX + bkSize, logoY + 4);
     ctx.lineTo(logoX + bkSize, logoY + bkSize);
@@ -1768,8 +1842,7 @@ function escMultiline(s = '') {
     ctx.lineTo(logoX + bkSize / 2 + 2, logoY + 2);
     ctx.closePath();
     ctx.fill();
-    // Taegeuk accent dot
-    ctx.fillStyle = '#c8423a';
+    ctx.fillStyle = KFLAG_RED;
     ctx.beginPath();
     ctx.arc(logoX + bkSize / 2, logoY + bkSize / 2, 3, 0, Math.PI * 2);
     ctx.fill();
@@ -1777,7 +1850,6 @@ function escMultiline(s = '') {
 
     // Brand
     ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
     ctx.fillStyle = NAVY;
     ctx.font = '900 20px "Playfair Display", Georgia, serif';
     ctx.letterSpacing = '0.5px';
@@ -1786,66 +1858,61 @@ function escMultiline(s = '') {
 
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
-    ctx.letterSpacing = '0.4px';
+    ctx.letterSpacing = '0.3px';
     ctx.fillText('Learn Korean, Go Further', logoX + bkSize + 10, logoY + 24);
     ctx.letterSpacing = '0px';
 
-    // Korean title (kanan)
+    // Korean title
     ctx.textAlign = 'right';
     ctx.fillStyle = NAVY;
     ctx.font = '800 22px "Noto Sans KR", sans-serif';
-    ctx.fillText('한국어 능력 인증서', W - 76, 84);
+    ctx.fillText('한국어 능력 인증서', W - 80, 84);
 
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = '500 10px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Korean Language Competency Certificate', W - 76, 103);
+    ctx.fillText('Korean Language Competency Certificate', W - 80, 104);
 
-    // Underline tipis di bawah Korean title
+    // Underline
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 0.8;
     ctx.beginPath();
-    ctx.moveTo(W - 320, 115);
-    ctx.lineTo(W - 76, 115);
+    ctx.moveTo(W - 340, 116);
+    ctx.lineTo(W - 80, 116);
     ctx.stroke();
 
     /* ============================================================
-       SECTION 2: MAIN TITLE (y=130–230)
+       SECTION 2: TITLE (y=140–230)
        ============================================================ */
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-
-    // "CERTIFICATE"
     ctx.fillStyle = NAVY;
     ctx.font = '900 62px "Playfair Display", Georgia, serif';
     ctx.letterSpacing = '5px';
-    ctx.fillText('CERTIFICATE', W / 2, 165);
+    ctx.fillText('CERTIFICATE', W / 2, 168);
     ctx.letterSpacing = '0px';
 
-    // Subtitle
     ctx.fillStyle = GOLD_DARK;
     ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
     ctx.letterSpacing = '7px';
-    ctx.fillText('OF KOREAN LANGUAGE COMPETENCY', W / 2, 200);
+    ctx.fillText('OF KOREAN LANGUAGE COMPETENCY', W / 2, 202);
     ctx.letterSpacing = '0px';
 
-    // Ornamental divider
-    drawOrnamentalDivider(ctx, W / 2, 222, 380, GOLD);
+    drawOrnamentalDivider(ctx, W / 2, 224, 380, GOLD);
 
     /* ============================================================
-       SECTION 3: KOREAN SUB (y=245–270)
+       SECTION 3: KOREAN SUBTITLE (y=250–270)
        ============================================================ */
     ctx.fillStyle = NAVY;
     ctx.font = '700 18px "Noto Sans KR", sans-serif';
-    ctx.fillText('한국어 능력 인증서', W / 2, 255);
+    ctx.fillText('한국어 능력 인증서', W / 2, 254);
 
     /* ============================================================
-       SECTION 4: CERTIFICATION BLOCK (y=285–455)
+       SECTION 4: CERTIFICATION (y=285–455)
        ============================================================ */
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = 'italic 14px Georgia, "Times New Roman", serif';
     ctx.fillText('This is to certify that', W / 2, 292);
 
-    // Nama (clamp kalau panjang)
+    // Name
     const displayName = name.length > 30 ? name.slice(0, 28) + '…' : name;
     ctx.fillStyle = NAVY;
     ctx.font = '900 44px "Playfair Display", Georgia, serif';
@@ -1853,13 +1920,10 @@ function escMultiline(s = '') {
     ctx.fillText(displayName, W / 2, 340);
     ctx.letterSpacing = '0px';
 
-    // Underline nama dengan diamond di ujung
+    // Underline with diamonds
     const nw = ctx.measureText(displayName).width;
     const ulW = Math.min(Math.max(nw + 80, 280), 560);
-    const ulL = W / 2 - ulW / 2;
-    const ulR = W / 2 + ulW / 2;
-    const ulY = 372;
-
+    const ulL = W / 2 - ulW / 2, ulR = W / 2 + ulW / 2, ulY = 372;
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 1.2;
     ctx.beginPath();
@@ -1876,51 +1940,39 @@ function escMultiline(s = '') {
       ctx.restore();
     });
 
-    // Deskripsi 3 baris
+    // Description
     ctx.fillStyle = TEXT_DARK;
     ctx.font = '400 14px Georgia, "Times New Roman", serif';
-    ctx.fillText('has successfully completed the Korean Language Proficiency Test', W / 2, 400);
-    ctx.fillText('and demonstrated the required level of competence in', W / 2, 422);
+    ctx.fillText('has successfully completed the Korean Language Proficiency Test', W / 2, 402);
+    ctx.fillText('and demonstrated the required level of competence in', W / 2, 424);
 
     ctx.fillStyle = NAVY;
     ctx.font = '700 14px Georgia, "Times New Roman", serif';
-    ctx.fillText('Reading and Listening.', W / 2, 444);
+    ctx.fillText('Reading and Listening.', W / 2, 446);
 
     /* ============================================================
        SECTION 5: STATS BOX (y=465–555)
        ============================================================ */
-    const boxX = 175;
-    const boxW = 773;
-    const boxY = 465;
-    const boxH = 88;
+    const boxX = 175, boxW = 773, boxY = 465, boxH = 88;
 
-    // Background
-    ctx.save();
     ctx.fillStyle = '#f6f2e8';
     roundRect(ctx, boxX, boxY, boxW, boxH, 12);
     ctx.fill();
-    ctx.restore();
 
-    // Border gold
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 1.5;
     roundRect(ctx, boxX, boxY, boxW, boxH, 12);
     ctx.stroke();
 
-    // Inner double line
     ctx.strokeStyle = GOLD_DARK;
     ctx.lineWidth = 0.5;
     roundRect(ctx, boxX + 4, boxY + 4, boxW - 8, boxH - 8, 10);
     ctx.stroke();
 
-    // 3 kolom
-    const colCount = 3;
-    const colW = boxW / colCount;
-
-    // Divider vertikal
+    const colW = boxW / 3;
     ctx.strokeStyle = GOLD_DARK;
     ctx.lineWidth = 0.8;
-    for (let i = 1; i < colCount; i++) {
+    for (let i = 1; i < 3; i++) {
       const divX = boxX + colW * i;
       ctx.beginPath();
       ctx.moveTo(divX, boxY + 16);
@@ -1928,68 +1980,65 @@ function escMultiline(s = '') {
       ctx.stroke();
     }
 
-    // Data tiap kolom
-    const statsData = [
-      { label: 'Reading', correct: reading.correct, total: reading.total, icon: '📖' },
-      { label: 'Listening', correct: listening.correct, total: listening.total, icon: '🎧' },
-      { label: 'Total Score', correct: totalQuestions, total: totalQuestions, isTotal: true, score },
-    ];
+    // Kolom 1: Reading
+    const col1Cx = boxX + colW * 0.5;
+    const iconR = 19;
+    ctx.beginPath();
+    ctx.arc(col1Cx - 78, boxY + boxH / 2, iconR, 0, Math.PI * 2);
+    ctx.fillStyle = NAVY;
+    ctx.fill();
+    ctx.font = '20px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('📖', col1Cx - 78, boxY + boxH / 2 + 1);
 
-    statsData.forEach((stat, i) => {
-      const cx = boxX + colW * (i + 0.5);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = NAVY;
+    ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Reading', col1Cx - 48, boxY + 26);
+    ctx.font = '900 22px "Playfair Display", Georgia, serif';
+    ctx.fillText(`${reading.correct} / ${reading.total}`, col1Cx - 48, boxY + 52);
+    ctx.fillStyle = TEXT_MUTED;
+    ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
+    const rScore = (reading.correct * 50 / Math.max(1, reading.total));
+    ctx.fillText(`(${rScore.toFixed(1)} / 50.0)`, col1Cx - 48, boxY + 72);
 
-      if (stat.isTotal) {
-        // Kolom 3: Total Score (tanpa icon, center)
-        ctx.textAlign = 'center';
-        ctx.fillStyle = NAVY;
-        ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText('Total Score', cx, boxY + 26);
+    // Kolom 2: Listening
+    const col2Cx = boxX + colW * 1.5;
+    ctx.beginPath();
+    ctx.arc(col2Cx - 78, boxY + boxH / 2, iconR, 0, Math.PI * 2);
+    ctx.fillStyle = NAVY;
+    ctx.fill();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.font = '20px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+    ctx.fillText('🎧', col2Cx - 78, boxY + boxH / 2 + 1);
 
-        ctx.fillStyle = NAVY;
-        ctx.font = '900 32px "Playfair Display", Georgia, serif';
-        ctx.fillText(`${score} / 100`, cx, boxY + 52);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = NAVY;
+    ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Listening', col2Cx - 48, boxY + 26);
+    ctx.font = '900 22px "Playfair Display", Georgia, serif';
+    ctx.fillText(`${listening.correct} / ${listening.total}`, col2Cx - 48, boxY + 52);
+    ctx.fillStyle = TEXT_MUTED;
+    ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
+    const lScore = (listening.correct * 50 / Math.max(1, listening.total));
+    ctx.fillText(`(${lScore.toFixed(1)} / 50.0)`, col2Cx - 48, boxY + 72);
 
-        ctx.fillStyle = TEXT_MUTED;
-        ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(`(${score.toFixed(1)} / 100.0)`, cx, boxY + 72);
-      } else {
-        // Kolom 1 & 2: Reading / Listening
-        const iconCx = cx - 78;
-        const iconCy = boxY + boxH / 2;
-
-        // Icon circle
-        ctx.beginPath();
-        ctx.arc(iconCx, iconCy, 19, 0, Math.PI * 2);
-        ctx.fillStyle = NAVY;
-        ctx.fill();
-
-        // Emoji icon
-        ctx.font = '20px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(stat.icon, iconCx, iconCy + 1);
-
-        // Text
-        const textX = iconCx + 30;
-        ctx.textAlign = 'left';
-
-        ctx.fillStyle = NAVY;
-        ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(stat.label, textX, boxY + 26);
-
-        ctx.fillStyle = NAVY;
-        ctx.font = '900 22px "Playfair Display", Georgia, serif';
-        ctx.fillText(`${stat.correct} / ${stat.total}`, textX, boxY + 52);
-
-        ctx.fillStyle = TEXT_MUTED;
-        ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
-        const halfScore = (stat.correct * 50 / Math.max(1, stat.total));
-        ctx.fillText(`(${halfScore.toFixed(1)} / 50.0)`, textX, boxY + 72);
-      }
-    });
+    // Kolom 3: Total
+    const col3Cx = boxX + colW * 2.5;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = NAVY;
+    ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Total Score', col3Cx, boxY + 26);
+    ctx.font = '900 32px "Playfair Display", Georgia, serif';
+    ctx.fillText(`${score} / 100`, col3Cx, boxY + 52);
+    ctx.fillStyle = TEXT_MUTED;
+    ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText(`(${score.toFixed(1)} / 100.0)`, col3Cx, boxY + 72);
 
     /* ============================================================
-       SECTION 6: FOOTER INFO (y=575–630)
+       SECTION 6: FOOTER INFO (y=575–618)
        ============================================================ */
     const footerY = 585;
     const footColW = boxW / 4;
@@ -2019,10 +2068,9 @@ function escMultiline(s = '') {
       if (item.sub) {
         ctx.fillStyle = TEXT_MUTED;
         ctx.font = '500 8px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(item.sub, cx, footerY + 33);
+        ctx.fillText(item.sub, cx, footerY + 32);
       }
 
-      // Divider vertikal kecil
       if (i < footerItems.length - 1) {
         const divX = footStartX + footColW * (i + 1);
         ctx.strokeStyle = GOLD;
@@ -2035,18 +2083,16 @@ function escMultiline(s = '') {
     });
 
     /* ============================================================
-       SECTION 7: SIGNATURE (kiri bawah, y=650–730)
+       SECTION 7: SIGNATURE (bottom-left) — BIGGER + proper
        ============================================================ */
     const sigX = 90;
-    const sigY = 655;
-    const sigMaxW = 200;
-    const sigMaxH = 50;
+    const sigY = 615;
+    const sigMaxW = 270;
+    const sigMaxH = 70;
 
     if (signatureImg) {
-      // Pakai multiply blend biar background putih transparan
       ctx.save();
       ctx.globalCompositeOperation = 'multiply';
-
       const imgRatio = signatureImg.width / signatureImg.height;
       let drawW = sigMaxW;
       let drawH = drawW / imgRatio;
@@ -2057,130 +2103,196 @@ function escMultiline(s = '') {
       ctx.drawImage(signatureImg, sigX, sigY, drawW, drawH);
       ctx.restore();
     } else {
-      // Fallback: coretan garis
       ctx.strokeStyle = NAVY;
-      ctx.lineWidth = 1.8;
+      ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(sigX, sigY + 30);
-      ctx.bezierCurveTo(sigX + 40, sigY + 5, sigX + 80, sigY + 45, sigX + 120, sigY + 15);
-      ctx.bezierCurveTo(sigX + 150, sigY - 5, sigX + 170, sigY + 35, sigX + 190, sigY + 20);
+      ctx.moveTo(sigX, sigY + 40);
+      ctx.bezierCurveTo(sigX + 50, sigY + 5, sigX + 100, sigY + 60, sigX + 160, sigY + 20);
+      ctx.bezierCurveTo(sigX + 200, sigY - 5, sigX + 230, sigY + 45, sigX + 260, sigY + 28);
       ctx.stroke();
     }
 
-    // Garis bawah tanda tangan
-    const sigLineY = 710;
+    // Signature line
+    const sigLineY = 700;
     ctx.strokeStyle = NAVY;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(sigX, sigLineY);
-    ctx.lineTo(sigX + 200, sigLineY);
+    ctx.lineTo(sigX + 260, sigLineY);
     ctx.stroke();
 
-    // Label
+    // Labels
     ctx.textAlign = 'left';
     ctx.fillStyle = NAVY;
-    ctx.font = '800 12px "Playfair Display", Georgia, serif';
-    ctx.fillText('Director', sigX + 62, sigLineY + 18);
+    ctx.font = '800 13px "Playfair Display", Georgia, serif';
+    ctx.fillText('Director', sigX + 88, sigLineY + 20);
 
     ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
+    ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
     ctx.letterSpacing = '0.8px';
-    ctx.fillText('KR-DICT', sigX + 70, sigLineY + 33);
+    ctx.fillText('KR-DICT', sigX + 96, sigLineY + 38);
     ctx.letterSpacing = '0px';
 
     /* ============================================================
-       SECTION 8: SEAL MEDAL (kanan bawah)
+       SECTION 8: MOTTO (center bottom)
        ============================================================ */
-    const sealCx = 985;
-    const sealCy = 665;
-    const sealR = 42;
-
-    // Ribbon (2 pita di bawah seal)
-    ctx.save();
-    // Pita kiri (navy)
-    ctx.fillStyle = NAVY_DARK;
-    ctx.beginPath();
-    ctx.moveTo(sealCx - 26, sealCy + sealR - 3);
-    ctx.lineTo(sealCx - 38, sealCy + sealR + 48);
-    ctx.lineTo(sealCx - 12, sealCy + sealR + 40);
-    ctx.lineTo(sealCx, sealCy + sealR + 48);
-    ctx.lineTo(sealCx - 4, sealCy + sealR - 3);
-    ctx.closePath();
-    ctx.fill();
-
-    // Pita kanan (gold)
-    ctx.fillStyle = GOLD_DARK;
-    ctx.beginPath();
-    ctx.moveTo(sealCx + 26, sealCy + sealR - 3);
-    ctx.lineTo(sealCx + 38, sealCy + sealR + 48);
-    ctx.lineTo(sealCx + 12, sealCy + sealR + 40);
-    ctx.lineTo(sealCx, sealCy + sealR + 48);
-    ctx.lineTo(sealCx + 4, sealCy + sealR - 3);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    // Outer gold ring
-    ctx.beginPath();
-    ctx.arc(sealCx, sealCy, sealR + 3, 0, Math.PI * 2);
-    ctx.fillStyle = GOLD;
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(sealCx, sealCy, sealR, 0, Math.PI * 2);
-    ctx.fillStyle = GOLD_LIGHT;
-    ctx.fill();
-
-    // Inner navy circle
-    ctx.beginPath();
-    ctx.arc(sealCx, sealCy, sealR - 9, 0, Math.PI * 2);
-    ctx.fillStyle = NAVY;
-    ctx.fill();
-
-    // Gold ring dalam
-    ctx.beginPath();
-    ctx.arc(sealCx, sealCy, sealR - 11, 0, Math.PI * 2);
-    ctx.strokeStyle = GOLD;
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Book icon di tengah
-    ctx.fillStyle = GOLD;
-    ctx.beginPath();
-    ctx.moveTo(sealCx - 8, sealCy - 9);
-    ctx.lineTo(sealCx - 8, sealCy + 8);
-    ctx.lineTo(sealCx - 1.5, sealCy + 6);
-    ctx.lineTo(sealCx - 1.5, sealCy - 11);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(sealCx + 8, sealCy - 9);
-    ctx.lineTo(sealCx + 8, sealCy + 8);
-    ctx.lineTo(sealCx + 1.5, sealCy + 6);
-    ctx.lineTo(sealCx + 1.5, sealCy - 11);
-    ctx.closePath();
-    ctx.fill();
-
-    // Text KR-DICT
-    ctx.fillStyle = GOLD;
-    ctx.font = '900 8px "Playfair Display", Georgia, serif';
     ctx.textAlign = 'center';
-    ctx.letterSpacing = '1.2px';
-    ctx.fillText('KR-DICT', sealCx, sealCy + 18);
+    ctx.fillStyle = GOLD_DARK;
+    ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
+    ctx.letterSpacing = '4px';
+    ctx.fillText('YOUR KOREAN JOURNEY', W / 2, 655);
+    ctx.fillText('BUILDS A BRIGHTER FUTURE', W / 2, 675);
     ctx.letterSpacing = '0px';
 
-    // Bintang di ring
-    ctx.fillStyle = GOLD_LIGHT;
-    for (let i = 0; i < 8; i++) {
-      const ang = (i / 8) * Math.PI * 2 - Math.PI / 2;
-      const sx = sealCx + Math.cos(ang) * (sealR - 5);
-      const sy = sealCy + Math.sin(ang) * (sealR - 5);
+    drawOrnamentalDivider(ctx, W / 2, 700, 300, GOLD);
+
+    /* ============================================================
+       SECTION 9: OFFICIAL SEAL (bottom-right) — premium medal
+       ============================================================ */
+    const drawOfficialSeal = (cx, cy, r) => {
+      // ---- Ribbons (behind seal) ----
+      ctx.save();
+      // Left ribbon
+      ctx.fillStyle = NAVY_DARK;
       ctx.beginPath();
-      ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
+      ctx.moveTo(cx - r * 0.55, cy + r * 0.55);
+      ctx.lineTo(cx - r * 0.85, cy + r * 1.85);
+      ctx.lineTo(cx - r * 0.35, cy + r * 1.65);
+      ctx.lineTo(cx - r * 0.10, cy + r * 1.85);
+      ctx.lineTo(cx - r * 0.05, cy + r * 0.55);
+      ctx.closePath();
       ctx.fill();
-    }
+
+      // Right ribbon
+      ctx.beginPath();
+      ctx.moveTo(cx + r * 0.55, cy + r * 0.55);
+      ctx.lineTo(cx + r * 0.85, cy + r * 1.85);
+      ctx.lineTo(cx + r * 0.35, cy + r * 1.65);
+      ctx.lineTo(cx + r * 0.10, cy + r * 1.85);
+      ctx.lineTo(cx + r * 0.05, cy + r * 0.55);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      // ---- Scalloped gold edge (petals) ----
+      const petals = 24;
+      const petalR = r * 0.13;
+      const petalDist = r * 0.94;
+      ctx.fillStyle = GOLD;
+      for (let i = 0; i < petals; i++) {
+        const ang = (i / petals) * Math.PI * 2 - Math.PI / 2;
+        const px = cx + Math.cos(ang) * petalDist;
+        const py = cy + Math.sin(ang) * petalDist;
+        ctx.beginPath();
+        ctx.arc(px, py, petalR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // ---- Main gold ring ----
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.96, 0, Math.PI * 2);
+      ctx.fillStyle = GOLD;
+      ctx.fill();
+
+      // ---- Inner shadow ring ----
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.86, 0, Math.PI * 2);
+      ctx.fillStyle = GOLD_DARK;
+      ctx.fill();
+
+      // ---- Navy inner disc ----
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.82, 0, Math.PI * 2);
+      ctx.fillStyle = NAVY;
+      ctx.fill();
+
+      // ---- Thin gold inner ring ----
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.76, 0, Math.PI * 2);
+      ctx.strokeStyle = GOLD;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      // ---- Laurel wreath (2 arcs) ----
+      ctx.strokeStyle = GOLD;
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+
+      // Left branch (arc on left side)
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.62, Math.PI * 0.65, Math.PI * 1.15);
+      ctx.stroke();
+
+      // Right branch
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.62, -Math.PI * 0.15, Math.PI * 0.35);
+      ctx.stroke();
+
+      // Leaves (dots along arcs)
+      const leaves = 9;
+      ctx.fillStyle = GOLD;
+      for (let i = 0; i < leaves; i++) {
+        // Left side leaves
+        const la = Math.PI * 0.67 + (i / (leaves - 1)) * Math.PI * 0.46;
+        const lx = cx + Math.cos(la) * r * 0.62;
+        const ly = cy + Math.sin(la) * r * 0.62;
+        ctx.beginPath();
+        ctx.arc(lx, ly, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Right side leaves
+        const ra = -Math.PI * 0.13 + (i / (leaves - 1)) * Math.PI * 0.46;
+        const rx = cx + Math.cos(ra) * r * 0.62;
+        const ry = cy + Math.sin(ra) * r * 0.62;
+        ctx.beginPath();
+        ctx.arc(rx, ry, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // ---- Book icon in upper-center ----
+      const bkW = r * 0.42;
+      const bkH = r * 0.32;
+      const bkY = cy - r * 0.18;
+
+      ctx.fillStyle = GOLD;
+      // Left page
+      ctx.beginPath();
+      ctx.moveTo(cx - bkW / 2, bkY - bkH / 2);
+      ctx.lineTo(cx - bkW / 2, bkY + bkH / 2);
+      ctx.lineTo(cx - 1.2, bkY + bkH / 2 - 2);
+      ctx.lineTo(cx - 1.2, bkY - bkH / 2 - 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // Right page
+      ctx.beginPath();
+      ctx.moveTo(cx + bkW / 2, bkY - bkH / 2);
+      ctx.lineTo(cx + bkW / 2, bkY + bkH / 2);
+      ctx.lineTo(cx + 1.2, bkY + bkH / 2 - 2);
+      ctx.lineTo(cx + 1.2, bkY - bkH / 2 - 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // ---- "KR-DICT" text below book ----
+      ctx.fillStyle = GOLD;
+      ctx.font = '900 9px "Playfair Display", Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.letterSpacing = '1.5px';
+      ctx.fillText('KR-DICT', cx, cy + r * 0.42);
+      ctx.letterSpacing = '0px';
+
+      // ---- 3 small dots below text ----
+      ctx.fillStyle = GOLD;
+      for (let i = -1; i <= 1; i++) {
+        ctx.beginPath();
+        ctx.arc(cx + i * r * 0.14, cy + r * 0.62, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    // Seal center: X=965, Y=650, R=42
+    drawOfficialSeal(965, 650, 42);
 
     return cvs;
   }
