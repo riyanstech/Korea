@@ -256,6 +256,41 @@
                 }
               ],
               "correct": "B"
+            },
+            {
+              "id": "q-muc5f9oto8az",
+              "type": "reading",
+              "text": "가: 네가 왜 그래요, 이렇게 너무 뚱뚱했어요? \n나: 응. 제가 다이어트 해도 살이 _______________",
+              "image": "",
+              "audioText": "",
+              "audioTarget": "question",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "안 쪄요.",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "안 보여요",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "안 빠져요.",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "안 고파요",
+                  "audioText": "",
+                  "image": ""
+                }
+              ],
+              "correct": "A"
             }
           ]
         },
