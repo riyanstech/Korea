@@ -1580,15 +1580,15 @@ function escMultiline(s = '') {
   }
 
   async function renderCertificateToCanvas({ name, pkgName, score, dateStr, certId, gradeText, wrong, details }) {
-    // Load signature (opsional — fallback kalau gagal)
+    // Load signature (pakai multiply blend biar white bg jadi transparan)
     let signatureImg = null;
     try {
       signatureImg = await loadImage('assets/img/signature.png');
     } catch (e) {
-      console.warn('[Cert] Signature tidak ditemukan, pakai fallback:', e.message);
+      console.warn('[Cert] Signature tidak ditemukan:', e.message);
     }
 
-    // Hitung reading & listening dari details
+    // Hitung Reading & Listening dari details
     const reading = { correct: 0, total: 0 };
     const listening = { correct: 0, total: 0 };
     (details || []).forEach(d => {
@@ -1601,10 +1601,9 @@ function escMultiline(s = '') {
         if (d.isCorrect) reading.correct++;
       }
     });
-
-    const totalCorrect = reading.correct + listening.correct;
     const totalQuestions = reading.total + listening.total;
 
+    // ============ CANVAS SETUP ============
     const W = 1123, H = 794;
     const SCALE = 2;
     const cvs = document.createElement('canvas');
@@ -1614,7 +1613,7 @@ function escMultiline(s = '') {
     ctx.scale(SCALE, SCALE);
     ctx.textBaseline = 'middle';
 
-    // Palet warna
+    // ============ PALET WARNA ============
     const NAVY = '#1e3a5f';
     const NAVY_DARK = '#152a44';
     const NAVY_LIGHT = '#2d4a70';
@@ -1623,16 +1622,13 @@ function escMultiline(s = '') {
     const GOLD_LIGHT = '#e6d9b3';
     const CREAM = '#faf8f3';
     const CREAM_LIGHT = '#fdfcf8';
+    const CREAM_DARK = '#f4f1e8';
     const TEXT_DARK = '#1a2942';
     const TEXT_MUTED = '#5a6b82';
 
-    /* ====================================================
-       1. BACKGROUND — Navy outer
-       ==================================================== */
+    // ============ 1. NAVY BACKGROUND ============
     ctx.fillStyle = NAVY;
     ctx.fillRect(0, 0, W, H);
-
-    // Gradient halus di navy untuk kesan dimensi
     const navyGrad = ctx.createLinearGradient(0, 0, W, H);
     navyGrad.addColorStop(0, NAVY_LIGHT);
     navyGrad.addColorStop(0.5, NAVY);
@@ -1640,259 +1636,238 @@ function escMultiline(s = '') {
     ctx.fillStyle = navyGrad;
     ctx.fillRect(0, 0, W, H);
 
-    /* ====================================================
-       2. CREAM PAPER AREA
-       ==================================================== */
-    const PAPER_MARGIN = 28;
-    const paperX = PAPER_MARGIN;
-    const paperY = PAPER_MARGIN;
-    const paperW = W - PAPER_MARGIN * 2;
-    const paperH = H - PAPER_MARGIN * 2;
+    // ============ 2. CREAM PAPER ============
+    const PAPER = 28;
+    const paperX = PAPER;
+    const paperY = PAPER;
+    const paperW = W - PAPER * 2;
+    const paperH = H - PAPER * 2;
 
-    // Shadow di paper
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.3)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 8;
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 10;
     ctx.fillStyle = CREAM;
     ctx.fillRect(paperX, paperY, paperW, paperH);
     ctx.restore();
 
-    // Subtle paper gradient
     const paperGrad = ctx.createLinearGradient(paperX, paperY, paperX + paperW, paperY + paperH);
     paperGrad.addColorStop(0, CREAM_LIGHT);
     paperGrad.addColorStop(0.5, CREAM);
-    paperGrad.addColorStop(1, '#f4f1e8');
+    paperGrad.addColorStop(1, CREAM_DARK);
     ctx.fillStyle = paperGrad;
     ctx.fillRect(paperX, paperY, paperW, paperH);
 
-    /* ====================================================
-       3. BACKGROUND PATTERN — Ornamen samar
-       ==================================================== */
+    // ============ 3. BACKGROUND PATTERNS (clipped) ============
     ctx.save();
-    // Clip ke paper area
     ctx.beginPath();
     ctx.rect(paperX, paperY, paperW, paperH);
     ctx.clip();
 
-    // 3a. Taegeuk di kanan atas (samar)
-    ctx.globalAlpha = 0.05;
-    drawTaegeuk(ctx, W - 200, 200, 130, NAVY, '#c8423a');
-    ctx.globalAlpha = 1;
+    // 3a. Taegeuk kanan-atas (subtle, kecil)
+    ctx.save();
+    ctx.globalAlpha = 0.035;
+    drawTaegeuk(ctx, 940, 200, 85, NAVY, '#c8423a');
+    ctx.restore();
 
-    // 3b. Pagoda roof samar di kiri bawah
+    // 3b. Pagoda silhouette kiri-bawah (subtle)
     ctx.save();
     ctx.globalAlpha = 0.045;
     ctx.strokeStyle = NAVY;
-    ctx.lineWidth = 3;
     ctx.lineCap = 'round';
-
-    // Atap 1 (atas)
+    ctx.lineWidth = 3;
+    // Atap atas
     ctx.beginPath();
-    ctx.moveTo(60, 620);
-    ctx.quadraticCurveTo(180, 540, 300, 620);
+    ctx.moveTo(40, 580);
+    ctx.quadraticCurveTo(180, 510, 320, 580);
     ctx.stroke();
-    // Tiang atap 1
+    // Tiang atap atas
     ctx.beginPath();
-    ctx.moveTo(110, 620);
-    ctx.lineTo(110, 660);
-    ctx.moveTo(250, 620);
-    ctx.lineTo(250, 660);
-    ctx.moveTo(80, 660);
-    ctx.lineTo(280, 660);
+    ctx.moveTo(105, 580); ctx.lineTo(105, 615);
+    ctx.moveTo(255, 580); ctx.lineTo(255, 615);
+    ctx.moveTo(75, 615); ctx.lineTo(285, 615);
     ctx.stroke();
-
-    // Atap 2 (bawah)
+    // Atap bawah
     ctx.beginPath();
-    ctx.moveTo(40, 720);
-    ctx.quadraticCurveTo(180, 640, 320, 720);
+    ctx.moveTo(20, 670);
+    ctx.quadraticCurveTo(180, 600, 340, 670);
     ctx.stroke();
+    // Tiang atap bawah
     ctx.beginPath();
-    ctx.moveTo(100, 720);
-    ctx.lineTo(100, 770);
-    ctx.moveTo(260, 720);
-    ctx.lineTo(260, 770);
-    ctx.moveTo(70, 770);
-    ctx.lineTo(290, 770);
+    ctx.moveTo(95, 670); ctx.lineTo(95, 720);
+    ctx.moveTo(265, 670); ctx.lineTo(265, 720);
+    ctx.moveTo(65, 720); ctx.lineTo(295, 720);
     ctx.stroke();
-
     ctx.restore();
 
-    // 3c. Mountain silhouettes di bawah (samar)
+    // 3c. Mountain range dasar (subtle)
     ctx.save();
     ctx.globalAlpha = 0.05;
     ctx.fillStyle = NAVY;
-
-    // Mountain range
     ctx.beginPath();
     ctx.moveTo(0, H - 50);
-    ctx.lineTo(150, H - 130);
-    ctx.lineTo(280, H - 80);
-    ctx.lineTo(420, H - 160);
-    ctx.lineTo(580, H - 90);
-    ctx.lineTo(720, H - 140);
-    ctx.lineTo(880, H - 100);
-    ctx.lineTo(1050, H - 170);
-    ctx.lineTo(W, H - 100);
+    ctx.lineTo(140, H - 120);
+    ctx.lineTo(280, H - 70);
+    ctx.lineTo(420, H - 150);
+    ctx.lineTo(580, H - 85);
+    ctx.lineTo(720, H - 135);
+    ctx.lineTo(880, H - 95);
+    ctx.lineTo(1050, H - 160);
+    ctx.lineTo(W, H - 90);
     ctx.lineTo(W, H);
     ctx.lineTo(0, H);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 
-    ctx.restore(); // End clip
+    ctx.restore(); // end clip
 
-    /* ====================================================
-       4. GOLD INNER FRAME
-       ==================================================== */
-    const FRAME_OUTER = PAPER_MARGIN + 20;
-    const FRAME_INNER = FRAME_OUTER + 8;
+    // ============ 4. GOLD DOUBLE FRAME ============
+    const FRAME_OUT = 45;
+    const FRAME_IN = 53;
 
-    // Outer gold line
     ctx.strokeStyle = GOLD;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(FRAME_OUTER, FRAME_OUTER, W - FRAME_OUTER * 2, H - FRAME_OUTER * 2);
+    ctx.lineWidth = 1.8;
+    ctx.strokeRect(FRAME_OUT, FRAME_OUT, W - FRAME_OUT * 2, H - FRAME_OUT * 2);
 
-    // Inner gold thin line
     ctx.strokeStyle = GOLD_DARK;
-    ctx.lineWidth = 0.7;
-    ctx.strokeRect(FRAME_INNER, FRAME_INNER, W - FRAME_INNER * 2, H - FRAME_INNER * 2);
+    ctx.lineWidth = 0.6;
+    ctx.strokeRect(FRAME_IN, FRAME_IN, W - FRAME_IN * 2, H - FRAME_IN * 2);
 
-    // Ornamen di 4 corner
-    const cornSize = 32;
-    const cornPad = FRAME_OUTER + 8;
-    drawOrnateCorner(ctx, cornPad, cornPad, cornSize, GOLD, false, false);
-    drawOrnateCorner(ctx, W - cornPad, cornPad, cornSize, GOLD, true, false);
-    drawOrnateCorner(ctx, cornPad, H - cornPad, cornSize, GOLD, false, true);
-    drawOrnateCorner(ctx, W - cornPad, H - cornPad, cornSize, GOLD, true, true);
+    // Ornamen 4 corner
+    const cs = 28;
+    const cp = FRAME_OUT + 8;
+    drawOrnateCorner(ctx, cp, cp, cs, GOLD, false, false);
+    drawOrnateCorner(ctx, W - cp, cp, cs, GOLD, true, false);
+    drawOrnateCorner(ctx, cp, H - cp, cs, GOLD, false, true);
+    drawOrnateCorner(ctx, W - cp, H - cp, cs, GOLD, true, true);
 
-    /* ====================================================
-       5. TOP-LEFT: LOGO + BRAND
-       ==================================================== */
-    const logoX = FRAME_OUTER + 40;
-    const logoY = FRAME_OUTER + 35;
+    /* ============================================================
+       SECTION 1: HEADER (y=70–105)
+       ============================================================ */
+    // Logo book icon (kiri)
+    const logoX = 78;
+    const logoY = 78;
+    const bkSize = 26;
 
-    // Book icon (disederhanakan)
-    const bkSize = 32;
     ctx.save();
-    // Left page
     ctx.fillStyle = NAVY;
+    // Left page
     ctx.beginPath();
-    ctx.moveTo(logoX, logoY + 6);
+    ctx.moveTo(logoX, logoY + 4);
     ctx.lineTo(logoX, logoY + bkSize);
     ctx.lineTo(logoX + bkSize / 2 - 2, logoY + bkSize - 3);
-    ctx.lineTo(logoX + bkSize / 2 - 2, logoY + 3);
+    ctx.lineTo(logoX + bkSize / 2 - 2, logoY + 2);
     ctx.closePath();
     ctx.fill();
     // Right page
     ctx.beginPath();
-    ctx.moveTo(logoX + bkSize, logoY + 6);
+    ctx.moveTo(logoX + bkSize, logoY + 4);
     ctx.lineTo(logoX + bkSize, logoY + bkSize);
     ctx.lineTo(logoX + bkSize / 2 + 2, logoY + bkSize - 3);
-    ctx.lineTo(logoX + bkSize / 2 + 2, logoY + 3);
+    ctx.lineTo(logoX + bkSize / 2 + 2, logoY + 2);
     ctx.closePath();
     ctx.fill();
-    // Center small circle (taegeuk accent)
+    // Taegeuk accent dot
     ctx.fillStyle = '#c8423a';
     ctx.beginPath();
-    ctx.arc(logoX + bkSize / 2, logoY + bkSize / 2, 3.5, 0, Math.PI * 2);
+    ctx.arc(logoX + bkSize / 2, logoY + bkSize / 2, 3, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // Brand text
-    ctx.fillStyle = NAVY;
-    ctx.font = '900 22px "Playfair Display", Georgia, serif';
+    // Brand
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText('KR-DICT', logoX + bkSize + 12, logoY + 14);
-
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '600 10px "Plus Jakarta Sans", sans-serif';
+    ctx.fillStyle = NAVY;
+    ctx.font = '900 20px "Playfair Display", Georgia, serif';
     ctx.letterSpacing = '0.5px';
-    ctx.fillText('Learn Korean, Go Further', logoX + bkSize + 12, logoY + 32);
+    ctx.fillText('KR-DICT', logoX + bkSize + 10, logoY + 11);
     ctx.letterSpacing = '0px';
 
-    /* ====================================================
-       6. TOP-RIGHT: KOREAN TITLE
-       ==================================================== */
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
+    ctx.fillStyle = TEXT_MUTED;
+    ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
+    ctx.letterSpacing = '0.4px';
+    ctx.fillText('Learn Korean, Go Further', logoX + bkSize + 10, logoY + 24);
+    ctx.letterSpacing = '0px';
 
+    // Korean title (kanan)
+    ctx.textAlign = 'right';
     ctx.fillStyle = NAVY;
-    ctx.font = '800 26px "Noto Sans KR", sans-serif';
-    ctx.fillText('한국어 능력 인증서', W - FRAME_OUTER - 40, FRAME_OUTER + 40);
+    ctx.font = '800 22px "Noto Sans KR", sans-serif';
+    ctx.fillText('한국어 능력 인증서', W - 76, 84);
 
     ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '500 11px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Korean Language Competency Certificate', W - FRAME_OUTER - 40, FRAME_OUTER + 62);
+    ctx.font = '500 10px "Plus Jakarta Sans", sans-serif';
+    ctx.fillText('Korean Language Competency Certificate', W - 76, 103);
 
-    // Garis dekoratif tipis di bawah title
+    // Underline tipis di bawah Korean title
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 0.8;
     ctx.beginPath();
-    ctx.moveTo(W - FRAME_OUTER - 280, FRAME_OUTER + 75);
-    ctx.lineTo(W - FRAME_OUTER - 40, FRAME_OUTER + 75);
+    ctx.moveTo(W - 320, 115);
+    ctx.lineTo(W - 76, 115);
     ctx.stroke();
 
-    /* ====================================================
-       7. MAIN TITLE
-       ==================================================== */
+    /* ============================================================
+       SECTION 2: MAIN TITLE (y=130–230)
+       ============================================================ */
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    // CERTIFICATE (besar)
+    // "CERTIFICATE"
     ctx.fillStyle = NAVY;
-    ctx.font = '900 68px "Playfair Display", Georgia, serif';
-    ctx.letterSpacing = '4px';
-    ctx.fillText('CERTIFICATE', W / 2, 200);
+    ctx.font = '900 62px "Playfair Display", Georgia, serif';
+    ctx.letterSpacing = '5px';
+    ctx.fillText('CERTIFICATE', W / 2, 165);
     ctx.letterSpacing = '0px';
 
     // Subtitle
     ctx.fillStyle = GOLD_DARK;
-    ctx.font = '700 15px "Plus Jakarta Sans", sans-serif';
-    ctx.letterSpacing = '6px';
-    ctx.fillText('OF KOREAN LANGUAGE COMPETENCY', W / 2, 245);
+    ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
+    ctx.letterSpacing = '7px';
+    ctx.fillText('OF KOREAN LANGUAGE COMPETENCY', W / 2, 200);
     ctx.letterSpacing = '0px';
 
     // Ornamental divider
-    drawOrnamentalDivider(ctx, W / 2, 275, 400, GOLD);
+    drawOrnamentalDivider(ctx, W / 2, 222, 380, GOLD);
 
-    // Korean subtitle
+    /* ============================================================
+       SECTION 3: KOREAN SUB (y=245–270)
+       ============================================================ */
     ctx.fillStyle = NAVY;
-    ctx.font = '700 20px "Noto Sans KR", sans-serif';
-    ctx.fillText('한국어 능력 인증서', W / 2, 310);
+    ctx.font = '700 18px "Noto Sans KR", sans-serif';
+    ctx.fillText('한국어 능력 인증서', W / 2, 255);
 
-    /* ====================================================
-       8. "This is to certify that" + NAME
-       ==================================================== */
+    /* ============================================================
+       SECTION 4: CERTIFICATION BLOCK (y=285–455)
+       ============================================================ */
     ctx.fillStyle = TEXT_MUTED;
-    ctx.font = 'italic 15px Georgia, "Times New Roman", serif';
-    ctx.fillText('This is to certify that', W / 2, 360);
+    ctx.font = 'italic 14px Georgia, "Times New Roman", serif';
+    ctx.fillText('This is to certify that', W / 2, 292);
 
-    // User name
-    const displayName = name.length > 34 ? name.slice(0, 32) + '…' : name;
+    // Nama (clamp kalau panjang)
+    const displayName = name.length > 30 ? name.slice(0, 28) + '…' : name;
     ctx.fillStyle = NAVY;
-    ctx.font = '900 52px "Playfair Display", Georgia, serif';
+    ctx.font = '900 44px "Playfair Display", Georgia, serif';
     ctx.letterSpacing = '-0.5px';
-    ctx.fillText(displayName, W / 2, 415);
+    ctx.fillText(displayName, W / 2, 340);
     ctx.letterSpacing = '0px';
 
-    // Nama underline dengan ornamen
-    const nameWidth = ctx.measureText(displayName).width;
-    const underlineW = Math.min(Math.max(nameWidth + 80, 300), 600);
-    const ulLeft = W / 2 - underlineW / 2;
-    const ulRight = W / 2 + underlineW / 2;
-    const ulY = 452;
+    // Underline nama dengan diamond di ujung
+    const nw = ctx.measureText(displayName).width;
+    const ulW = Math.min(Math.max(nw + 80, 280), 560);
+    const ulL = W / 2 - ulW / 2;
+    const ulR = W / 2 + ulW / 2;
+    const ulY = 372;
 
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.moveTo(ulLeft, ulY);
-    ctx.lineTo(ulRight, ulY);
+    ctx.moveTo(ulL, ulY);
+    ctx.lineTo(ulR, ulY);
     ctx.stroke();
 
-    // Diamond ornament di ujung
-    [ulLeft, ulRight].forEach(x => {
+    [ulL, ulR].forEach(x => {
       ctx.save();
       ctx.translate(x, ulY);
       ctx.rotate(Math.PI / 4);
@@ -1901,30 +1876,30 @@ function escMultiline(s = '') {
       ctx.restore();
     });
 
-    /* ====================================================
-       9. DESCRIPTIVE TEXT
-       ==================================================== */
+    // Deskripsi 3 baris
     ctx.fillStyle = TEXT_DARK;
     ctx.font = '400 14px Georgia, "Times New Roman", serif';
-    ctx.fillText('has successfully completed the Korean Language Proficiency Test', W / 2, 490);
-    ctx.fillText('and demonstrated the required level of competence in', W / 2, 512);
-    ctx.font = '700 14px Georgia, "Times New Roman", serif';
+    ctx.fillText('has successfully completed the Korean Language Proficiency Test', W / 2, 400);
+    ctx.fillText('and demonstrated the required level of competence in', W / 2, 422);
+
     ctx.fillStyle = NAVY;
-    ctx.fillText('Reading and Listening.', W / 2, 534);
+    ctx.font = '700 14px Georgia, "Times New Roman", serif';
+    ctx.fillText('Reading and Listening.', W / 2, 444);
 
-    /* ====================================================
-       10. STATS BOX (3 kolom: Reading, Listening, Total)
-       ==================================================== */
-    const boxW = 780;
-    const boxH = 90;
-    const boxX = (W - boxW) / 2;
-    const boxY = 565;
+    /* ============================================================
+       SECTION 5: STATS BOX (y=465–555)
+       ============================================================ */
+    const boxX = 175;
+    const boxW = 773;
+    const boxY = 465;
+    const boxH = 88;
 
-    // Box background
+    // Background
     ctx.save();
     ctx.fillStyle = '#f6f2e8';
     roundRect(ctx, boxX, boxY, boxW, boxH, 12);
     ctx.fill();
+    ctx.restore();
 
     // Border gold
     ctx.strokeStyle = GOLD;
@@ -1932,14 +1907,13 @@ function escMultiline(s = '') {
     roundRect(ctx, boxX, boxY, boxW, boxH, 12);
     ctx.stroke();
 
-    // Double line inner
+    // Inner double line
     ctx.strokeStyle = GOLD_DARK;
     ctx.lineWidth = 0.5;
     roundRect(ctx, boxX + 4, boxY + 4, boxW - 8, boxH - 8, 10);
     ctx.stroke();
-    ctx.restore();
 
-    // 3 Kolom
+    // 3 kolom
     const colCount = 3;
     const colW = boxW / colCount;
 
@@ -1949,119 +1923,103 @@ function escMultiline(s = '') {
     for (let i = 1; i < colCount; i++) {
       const divX = boxX + colW * i;
       ctx.beginPath();
-      ctx.moveTo(divX, boxY + 18);
-      ctx.lineTo(divX, boxY + boxH - 18);
+      ctx.moveTo(divX, boxY + 16);
+      ctx.lineTo(divX, boxY + boxH - 16);
       ctx.stroke();
     }
 
-    // Kolom 1: Reading
-    const col1X = boxX + colW * 0.5;
-    // Icon bulat navy
-    ctx.fillStyle = NAVY;
-    ctx.beginPath();
-    ctx.arc(col1X - 50, boxY + boxH / 2, 22, 0, Math.PI * 2);
-    ctx.fill();
-    // Icon buku putih di dalam
-    ctx.fillStyle = '#fff';
-    ctx.font = '22px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('📖', col1X - 50, boxY + boxH / 2 + 1);
+    // Data tiap kolom
+    const statsData = [
+      { label: 'Reading', correct: reading.correct, total: reading.total, icon: '📖' },
+      { label: 'Listening', correct: listening.correct, total: listening.total, icon: '🎧' },
+      { label: 'Total Score', correct: totalQuestions, total: totalQuestions, isTotal: true, score },
+    ];
 
-    // Label Reading
-    ctx.fillStyle = NAVY;
-    ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Reading', col1X - 20, boxY + 28);
+    statsData.forEach((stat, i) => {
+      const cx = boxX + colW * (i + 0.5);
 
-    // Score
-    ctx.fillStyle = NAVY;
-    ctx.font = '900 22px "Playfair Display", Georgia, serif';
-    ctx.fillText(`${reading.correct} / ${reading.total}`, col1X - 20, boxY + 55);
+      if (stat.isTotal) {
+        // Kolom 3: Total Score (tanpa icon, center)
+        ctx.textAlign = 'center';
+        ctx.fillStyle = NAVY;
+        ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText('Total Score', cx, boxY + 26);
 
-    // Sub-text
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '500 10px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`(${(reading.correct * 100 / Math.max(1, reading.total) / 2).toFixed(1)} / 50.0)`, col1X - 20, boxY + 74);
+        ctx.fillStyle = NAVY;
+        ctx.font = '900 32px "Playfair Display", Georgia, serif';
+        ctx.fillText(`${score} / 100`, cx, boxY + 52);
 
-    // Kolom 2: Listening
-    const col2X = boxX + colW * 1.5;
-    ctx.fillStyle = NAVY;
-    ctx.beginPath();
-    ctx.arc(col2X - 50, boxY + boxH / 2, 22, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.font = '22px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('🎧', col2X - 50, boxY + boxH / 2 + 1);
+        ctx.fillStyle = TEXT_MUTED;
+        ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(`(${score.toFixed(1)} / 100.0)`, cx, boxY + 72);
+      } else {
+        // Kolom 1 & 2: Reading / Listening
+        const iconCx = cx - 78;
+        const iconCy = boxY + boxH / 2;
 
-    ctx.fillStyle = NAVY;
-    ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('Listening', col2X - 20, boxY + 28);
+        // Icon circle
+        ctx.beginPath();
+        ctx.arc(iconCx, iconCy, 19, 0, Math.PI * 2);
+        ctx.fillStyle = NAVY;
+        ctx.fill();
 
-    ctx.fillStyle = NAVY;
-    ctx.font = '900 22px "Playfair Display", Georgia, serif';
-    ctx.fillText(`${listening.correct} / ${listening.total}`, col2X - 20, boxY + 55);
+        // Emoji icon
+        ctx.font = '20px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.fillText(stat.icon, iconCx, iconCy + 1);
 
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '500 10px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`(${(listening.correct * 100 / Math.max(1, listening.total) / 2).toFixed(1)} / 50.0)`, col2X - 20, boxY + 74);
+        // Text
+        const textX = iconCx + 30;
+        ctx.textAlign = 'left';
 
-    // Kolom 3: Total Score
-    const col3X = boxX + colW * 2.5;
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Total Score', col3X, boxY + 28);
+        ctx.fillStyle = NAVY;
+        ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(stat.label, textX, boxY + 26);
 
-    ctx.fillStyle = NAVY;
-    ctx.font = '900 34px "Playfair Display", Georgia, serif';
-    ctx.fillText(`${score} / 100`, col3X, boxY + 55);
+        ctx.fillStyle = NAVY;
+        ctx.font = '900 22px "Playfair Display", Georgia, serif';
+        ctx.fillText(`${stat.correct} / ${stat.total}`, textX, boxY + 52);
 
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '500 10px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`(${score.toFixed(1)} / 100.0)`, col3X, boxY + 74);
+        ctx.fillStyle = TEXT_MUTED;
+        ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
+        const halfScore = (stat.correct * 50 / Math.max(1, stat.total));
+        ctx.fillText(`(${halfScore.toFixed(1)} / 50.0)`, textX, boxY + 72);
+      }
+    });
 
-    /* ====================================================
-       11. FOOTER INFO (4 kolom)
-       ==================================================== */
-    const footerY = 680;
+    /* ============================================================
+       SECTION 6: FOOTER INFO (y=575–630)
+       ============================================================ */
+    const footerY = 585;
     const footColW = boxW / 4;
     const footStartX = boxX;
 
-    // Divider lines atas & bawah footer
-    ctx.strokeStyle = GOLD_LIGHT;
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
-    ctx.moveTo(boxX + 40, footerY - 15);
-    ctx.lineTo(boxX + boxW - 40, footerY - 15);
-    ctx.stroke();
-
     const footerItems = [
       { label: 'Test Type', value: 'Korean Language Competency Test', sub: '(Reading & Listening)' },
-      { label: 'Total Questions', value: String(totalQuestions), sub: `(${reading.total} Reading + ${listening.total} Listening)` },
+      { label: 'Total Questions', value: `${totalQuestions} Soal`, sub: `(${reading.total} Reading + ${listening.total} Listening)` },
       { label: 'Test Date', value: dateStr, sub: '' },
       { label: 'Certificate Number', value: certId, sub: '' },
     ];
 
     footerItems.forEach((item, i) => {
       const cx = footStartX + footColW * (i + 0.5);
-
       ctx.textAlign = 'center';
+
       ctx.fillStyle = TEXT_MUTED;
-      ctx.font = '600 10px "Plus Jakarta Sans", sans-serif';
-      ctx.letterSpacing = '0.5px';
+      ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
+      ctx.letterSpacing = '0.4px';
       ctx.fillText(item.label, cx, footerY);
       ctx.letterSpacing = '0px';
 
       ctx.fillStyle = NAVY;
-      ctx.font = '800 12px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(item.value, cx, footerY + 20);
+      ctx.font = '800 11px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(item.value, cx, footerY + 18);
 
       if (item.sub) {
         ctx.fillStyle = TEXT_MUTED;
-        ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(item.sub, cx, footerY + 36);
+        ctx.font = '500 8px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(item.sub, cx, footerY + 33);
       }
 
       // Divider vertikal kecil
@@ -2070,96 +2028,100 @@ function escMultiline(s = '') {
         ctx.strokeStyle = GOLD;
         ctx.lineWidth = 0.8;
         ctx.beginPath();
-        ctx.moveTo(divX, footerY - 8);
-        ctx.lineTo(divX, footerY + 30);
+        ctx.moveTo(divX, footerY - 6);
+        ctx.lineTo(divX, footerY + 34);
         ctx.stroke();
       }
     });
 
-    /* ====================================================
-       12. SIGNATURE (bottom-left)
-       ==================================================== */
-    const sigX = FRAME_OUTER + 60;
-    const sigY = H - FRAME_OUTER - 90;
-    const sigW = 220;
-    const sigH = 70;
+    /* ============================================================
+       SECTION 7: SIGNATURE (kiri bawah, y=650–730)
+       ============================================================ */
+    const sigX = 90;
+    const sigY = 655;
+    const sigMaxW = 200;
+    const sigMaxH = 50;
 
     if (signatureImg) {
-      // Hitung aspect ratio
+      // Pakai multiply blend biar background putih transparan
+      ctx.save();
+      ctx.globalCompositeOperation = 'multiply';
+
       const imgRatio = signatureImg.width / signatureImg.height;
-      let drawW = sigW;
+      let drawW = sigMaxW;
       let drawH = drawW / imgRatio;
-      if (drawH > sigH) {
-        drawH = sigH;
+      if (drawH > sigMaxH) {
+        drawH = sigMaxH;
         drawW = drawH * imgRatio;
       }
-      ctx.drawImage(signatureImg, sigX, sigY - drawH / 2 + 10, drawW, drawH);
+      ctx.drawImage(signatureImg, sigX, sigY, drawW, drawH);
+      ctx.restore();
     } else {
-      // Fallback: garis tanda tangan sederhana
+      // Fallback: coretan garis
       ctx.strokeStyle = NAVY;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.8;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(sigX, sigY + 20);
-      ctx.bezierCurveTo(sigX + 40, sigY - 20, sigX + 80, sigY + 40, sigX + 130, sigY);
-      ctx.bezierCurveTo(sigX + 160, sigY - 20, sigX + 180, sigY + 30, sigX + 200, sigY + 10);
+      ctx.moveTo(sigX, sigY + 30);
+      ctx.bezierCurveTo(sigX + 40, sigY + 5, sigX + 80, sigY + 45, sigX + 120, sigY + 15);
+      ctx.bezierCurveTo(sigX + 150, sigY - 5, sigX + 170, sigY + 35, sigX + 190, sigY + 20);
       ctx.stroke();
     }
 
     // Garis bawah tanda tangan
-    const sigLineY = sigY + 45;
+    const sigLineY = 710;
     ctx.strokeStyle = NAVY;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(sigX, sigLineY);
-    ctx.lineTo(sigX + 220, sigLineY);
+    ctx.lineTo(sigX + 200, sigLineY);
     ctx.stroke();
 
-    // Label di bawah
+    // Label
     ctx.textAlign = 'left';
     ctx.fillStyle = NAVY;
-    ctx.font = '800 13px "Playfair Display", Georgia, serif';
-    ctx.fillText('Director', sigX + 60, sigLineY + 22);
+    ctx.font = '800 12px "Playfair Display", Georgia, serif';
+    ctx.fillText('Director', sigX + 62, sigLineY + 18);
 
     ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '600 10px "Plus Jakarta Sans", sans-serif';
-    ctx.letterSpacing = '1px';
-    ctx.fillText('KR-DICT', sigX + 70, sigLineY + 40);
+    ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
+    ctx.letterSpacing = '0.8px';
+    ctx.fillText('KR-DICT', sigX + 70, sigLineY + 33);
     ctx.letterSpacing = '0px';
 
-    /* ====================================================
-       13. SEAL MEDAL (bottom-right)
-       ==================================================== */
-    const sealCx = W - FRAME_OUTER - 110;
-    const sealCy = H - FRAME_OUTER - 75;
-    const sealR = 52;
+    /* ============================================================
+       SECTION 8: SEAL MEDAL (kanan bawah)
+       ============================================================ */
+    const sealCx = 985;
+    const sealCy = 665;
+    const sealR = 42;
 
-    // Ribbon bawah (2 pita)
+    // Ribbon (2 pita di bawah seal)
     ctx.save();
-    // Pita kiri
+    // Pita kiri (navy)
     ctx.fillStyle = NAVY_DARK;
     ctx.beginPath();
-    ctx.moveTo(sealCx - 30, sealCy + sealR - 5);
-    ctx.lineTo(sealCx - 45, sealCy + sealR + 55);
-    ctx.lineTo(sealCx - 15, sealCy + sealR + 45);
-    ctx.lineTo(sealCx, sealCy + sealR + 55);
-    ctx.lineTo(sealCx - 5, sealCy + sealR - 5);
+    ctx.moveTo(sealCx - 26, sealCy + sealR - 3);
+    ctx.lineTo(sealCx - 38, sealCy + sealR + 48);
+    ctx.lineTo(sealCx - 12, sealCy + sealR + 40);
+    ctx.lineTo(sealCx, sealCy + sealR + 48);
+    ctx.lineTo(sealCx - 4, sealCy + sealR - 3);
     ctx.closePath();
     ctx.fill();
 
-    // Pita kanan
+    // Pita kanan (gold)
     ctx.fillStyle = GOLD_DARK;
     ctx.beginPath();
-    ctx.moveTo(sealCx + 30, sealCy + sealR - 5);
-    ctx.lineTo(sealCx + 45, sealCy + sealR + 55);
-    ctx.lineTo(sealCx + 15, sealCy + sealR + 45);
-    ctx.lineTo(sealCx, sealCy + sealR + 55);
-    ctx.lineTo(sealCx + 5, sealCy + sealR - 5);
+    ctx.moveTo(sealCx + 26, sealCy + sealR - 3);
+    ctx.lineTo(sealCx + 38, sealCy + sealR + 48);
+    ctx.lineTo(sealCx + 12, sealCy + sealR + 40);
+    ctx.lineTo(sealCx, sealCy + sealR + 48);
+    ctx.lineTo(sealCx + 4, sealCy + sealR - 3);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
 
-    // Outer ring gold
+    // Outer gold ring
     ctx.beginPath();
     ctx.arc(sealCx, sealCy, sealR + 3, 0, Math.PI * 2);
     ctx.fillStyle = GOLD;
@@ -2170,69 +2132,55 @@ function escMultiline(s = '') {
     ctx.fillStyle = GOLD_LIGHT;
     ctx.fill();
 
-    // Inner circle navy
+    // Inner navy circle
     ctx.beginPath();
-    ctx.arc(sealCx, sealCy, sealR - 10, 0, Math.PI * 2);
+    ctx.arc(sealCx, sealCy, sealR - 9, 0, Math.PI * 2);
     ctx.fillStyle = NAVY;
     ctx.fill();
 
-    // Ring emas dalam
+    // Gold ring dalam
     ctx.beginPath();
-    ctx.arc(sealCx, sealCy, sealR - 12, 0, Math.PI * 2);
+    ctx.arc(sealCx, sealCy, sealR - 11, 0, Math.PI * 2);
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Book icon di tengah (kecil)
+    // Book icon di tengah
     ctx.fillStyle = GOLD;
     ctx.beginPath();
-    ctx.moveTo(sealCx - 10, sealCy - 10);
-    ctx.lineTo(sealCx - 10, sealCy + 10);
-    ctx.lineTo(sealCx - 2, sealCy + 8);
-    ctx.lineTo(sealCx - 2, sealCy - 12);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(sealCx + 10, sealCy - 10);
-    ctx.lineTo(sealCx + 10, sealCy + 10);
-    ctx.lineTo(sealCx + 2, sealCy + 8);
-    ctx.lineTo(sealCx + 2, sealCy - 12);
+    ctx.moveTo(sealCx - 8, sealCy - 9);
+    ctx.lineTo(sealCx - 8, sealCy + 8);
+    ctx.lineTo(sealCx - 1.5, sealCy + 6);
+    ctx.lineTo(sealCx - 1.5, sealCy - 11);
     ctx.closePath();
     ctx.fill();
 
-    // Text "KR-DICT" di bawah book
+    ctx.beginPath();
+    ctx.moveTo(sealCx + 8, sealCy - 9);
+    ctx.lineTo(sealCx + 8, sealCy + 8);
+    ctx.lineTo(sealCx + 1.5, sealCy + 6);
+    ctx.lineTo(sealCx + 1.5, sealCy - 11);
+    ctx.closePath();
+    ctx.fill();
+
+    // Text KR-DICT
     ctx.fillStyle = GOLD;
-    ctx.font = '900 9px "Playfair Display", Georgia, serif';
+    ctx.font = '900 8px "Playfair Display", Georgia, serif';
     ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '1.5px';
-    ctx.fillText('KR-DICT', sealCx, sealCy + 22);
+    ctx.letterSpacing = '1.2px';
+    ctx.fillText('KR-DICT', sealCx, sealCy + 18);
     ctx.letterSpacing = '0px';
 
-    // Bintang kecil di sekitar ring
+    // Bintang di ring
     ctx.fillStyle = GOLD_LIGHT;
     for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2 - Math.PI / 2;
-      const starX = sealCx + Math.cos(angle) * (sealR - 6);
-      const starY = sealCy + Math.sin(angle) * (sealR - 6);
+      const ang = (i / 8) * Math.PI * 2 - Math.PI / 2;
+      const sx = sealCx + Math.cos(ang) * (sealR - 5);
+      const sy = sealCy + Math.sin(ang) * (sealR - 5);
       ctx.beginPath();
-      ctx.arc(starX, starY, 1.5, 0, Math.PI * 2);
+      ctx.arc(sx, sy, 1.2, 0, Math.PI * 2);
       ctx.fill();
     }
-
-    /* ====================================================
-       14. BOTTOM MOTTO TEXT
-       ==================================================== */
-    ctx.textAlign = 'center';
-    ctx.fillStyle = GOLD_DARK;
-    ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
-    ctx.letterSpacing = '3px';
-    ctx.fillText('YOUR KOREAN JOURNEY', W / 2, H - FRAME_OUTER - 70);
-    ctx.fillText('BUILDS A BRIGHTER FUTURE', W / 2, H - FRAME_OUTER - 52);
-    ctx.letterSpacing = '0px';
-
-    // Ornamen divider di bawah motto
-    drawOrnamentalDivider(ctx, W / 2, H - FRAME_OUTER - 32, 320, GOLD);
 
     return cvs;
   }
