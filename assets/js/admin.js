@@ -1014,18 +1014,19 @@ KR.admin = (function () {
       return true;
     });
 
-    toolbar.innerHTML = `
-      <div class="input-group admin-search">
-        <i data-lucide="search"></i>
-        <input type="text" id="admVocabSearch" class="input" placeholder="Cari kosakata..." value="${esc(state.vocab.search)}">
-      </div>
-      <select id="admVocabBab" class="select" style="max-width:180px">
-        <option value="">Semua Bab (${total})</option>
-        ${babs.map(b => `<option value="${esc(b)}" ${state.vocab.bab === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}
-      </select>
-      <button id="admVocabAdd" class="btn btn-primary"><i data-lucide="plus"></i> Tambah</button>
-      <button id="admVocabReset" class="btn btn-secondary" title="Reset"><i data-lucide="rotate-ccw"></i></button>
-    `;
+     toolbar.innerHTML = `
+        <div class="input-group admin-search">
+          <i data-lucide="search"></i>
+          <input type="text" id="admVocabSearch" class="input" placeholder="Cari kosakata..." value="${esc(state.vocab.search)}">
+        </div>
+        <select id="admVocabBab" class="select" style="max-width:180px">
+          <option value="">Semua Bab (${total})</option>
+          ${babs.map(b => `<option value="${esc(b)}" ${state.vocab.bab === b ? 'selected' : ''}>${esc(b)}</option>`).join('')}
+        </select>
+        <button id="admVocabAdd" class="btn btn-primary"><i data-lucide="plus"></i> Tambah</button>
+        <button id="admVocabBulk" class="btn btn-primary" style="background:linear-gradient(135deg,#10b981,#14b8a6);"><i data-lucide="upload"></i> Upload Massal</button>
+        <button id="admVocabReset" class="btn btn-secondary" title="Reset"><i data-lucide="rotate-ccw"></i></button>
+      `;
 
     const start = state.vocab.page * state.vocab.perPage;
     const paged = filtered.slice(start, start + state.vocab.perPage);
@@ -1060,6 +1061,7 @@ KR.admin = (function () {
       state.vocab.bab = e.target.value; state.vocab.page = 0; renderVocab();
     });
     document.getElementById('admVocabAdd')?.addEventListener('click', addVocab);
+    document.getElementById('admVocabBulk')?.addEventListener('click', openVocabBulkUpload);  // ← TAMBAHKAN INI
     document.getElementById('admVocabReset')?.addEventListener('click', () => resetCategory('vocab'));
 
     container.querySelectorAll('.admin-row').forEach(row => {
@@ -1191,6 +1193,212 @@ KR.admin = (function () {
     });
   }
 
+/* ==========================================
+   BULK UPLOAD KOSAKATA (TXT, CSV, JSON, DOCX)
+   ========================================== */
+function loadMammoth() {
+  return new Promise((resolve, reject) => {
+    if (window.mammoth) return resolve();
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Gagal memuat parser docx'));
+    document.head.appendChild(s);
+  });
+}
+
+function parseBulkText(text) {
+  const lines = String(text || '').split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const out = [];
+  for (const rawLine of lines) {
+    // Skip header row
+    if (/^(hangeul|kata|korean|word)\b/i.test(rawLine)) continue;
+
+    let parts;
+    if (rawLine.includes('|')) parts = rawLine.split('|');
+    else if (rawLine.includes('\t')) parts = rawLine.split('\t');
+    else if (rawLine.includes(';')) parts = rawLine.split(';');
+    else if (rawLine.includes(',')) parts = rawLine.split(',');
+    else parts = rawLine.split(/\s{2,}/); // fallback: minimal 2 spasi
+
+    parts = parts.map(p => p.trim()).filter(Boolean);
+    if (parts.length < 2) continue;
+
+    let hangeul = '', rom = '', arti = '', bab = '';
+    if (parts.length === 2) {
+      hangeul = parts[0]; arti = parts[1];
+    } else if (parts.length === 3) {
+      hangeul = parts[0]; rom = parts[1]; arti = parts[2];
+    } else {
+      hangeul = parts[0]; rom = parts[1]; arti = parts[2]; bab = parts[3] || '';
+    }
+    if (!hangeul || !arti) continue;
+    out.push({ hangeul, rom, arti, bab });
+  }
+  return out;
+}
+
+async function readBulkFile(file) {
+  const name = (file.name || '').toLowerCase();
+
+  if (name.endsWith('.json')) {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!Array.isArray(data)) throw new Error('Format JSON harus berupa array');
+    return data.map(x => ({
+      hangeul: String(x.hangeul || '').trim(),
+      rom: String(x.rom || '').trim(),
+      arti: String(x.arti || '').trim(),
+      bab: String(x.bab || '').trim(),
+    })).filter(x => x.hangeul && x.arti);
+  }
+
+  if (name.endsWith('.docx')) {
+    await loadMammoth();
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await window.mammoth.extractRawText({ arrayBuffer });
+    return parseBulkText(result.value);
+  }
+
+  // .txt, .csv, atau extension lain
+  const text = await file.text();
+  return parseBulkText(text);
+}
+
+function renderBulkPreview(parsed) {
+  const el = document.getElementById('bulkPreview');
+  if (!el) return;
+  if (!parsed || !parsed.length) {
+    el.innerHTML = '<em style="color:var(--text-muted);">Tidak ada data valid ditemukan. Cek format pemisah (| atau , atau TAB).</em>';
+    return;
+  }
+  const rows = parsed.slice(0, 50).map(p => `
+    <tr>
+      <td style="padding:5px 6px;font-family:'Noto Sans KR',sans-serif;font-weight:700;">${esc(p.hangeul)}</td>
+      <td style="padding:5px 6px;color:var(--text-muted);">${esc(p.rom || '-')}</td>
+      <td style="padding:5px 6px;">${esc(p.arti)}</td>
+      <td style="padding:5px 6px;color:var(--text-muted);font-size:0.7rem;">${esc(p.bab || '-')}</td>
+    </tr>
+  `).join('');
+  el.innerHTML = `
+    <div style="margin-bottom:8px;font-weight:800;color:#059669;font-size:0.8rem;">
+      ✅ ${parsed.length} baris valid terdeteksi
+    </div>
+    <table style="width:100%;font-size:0.72rem;border-collapse:collapse;background:var(--bg-elev);border-radius:6px;overflow:hidden;">
+      <thead>
+        <tr style="background:var(--bg-muted);text-align:left;">
+          <th style="padding:6px;">Hangeul</th>
+          <th style="padding:6px;">Rom</th>
+          <th style="padding:6px;">Arti</th>
+          <th style="padding:6px;">Bab</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${parsed.length > 50 ? `<div style="margin-top:8px;font-style:italic;color:var(--text-muted);font-size:0.7rem;">... dan ${parsed.length - 50} baris lainnya</div>` : ''}
+  `;
+}
+
+function openVocabBulkUpload() {
+  window.__bulkParsed = null;
+
+  openModal({
+    icon: 'upload',
+    title: 'Upload Kosakata Massal',
+    subtitle: 'Impor dari file .txt / .csv / .json / .docx',
+    body: `
+      <div class="field">
+        <label class="field-label">Pilih File <span class="req">*</span></label>
+        <input type="file" id="bulkFileInput" accept=".txt,.csv,.json,.docx" class="input" style="padding:10px;cursor:pointer;">
+        <p style="font-size:0.7rem;color:var(--text-muted);margin-top:6px;">
+          Format didukung: <strong>.txt, .csv, .json, .docx</strong>
+        </p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">📖 Panduan Format</label>
+        <div style="background:var(--bg-subtle);padding:12px 14px;border-radius:10px;font-size:0.78rem;line-height:1.7;border-left:3px solid #8b5cf6;">
+          <strong>Setiap baris = 1 kosakata</strong>. Pemisah bisa <strong>|</strong> atau <strong>,</strong> atau <strong>TAB</strong>:<br>
+          <code style="background:#ede9fe;color:#6d28d9;padding:2px 6px;border-radius:4px;font-size:0.7rem;">hangeul | rom | arti | bab</code><br><br>
+          <strong>Contoh .txt / .csv:</strong><br>
+          <code style="font-size:0.7rem;color:var(--text-secondary);">안녕하세요 | annyeonghaseyo | Halo | BAB 1</code><br>
+          <code style="font-size:0.7rem;color:var(--text-secondary);">감사합니다 | gamsahamnida | Terima kasih | BAB 1</code><br>
+          <code style="font-size:0.7rem;color:var(--text-secondary);">학생 | haksaeng | Pelajar | BAB 1</code><br><br>
+          <strong>Contoh .json:</strong><br>
+          <code style="font-size:0.68rem;color:var(--text-secondary);word-break:break-all;">[{"hangeul":"안녕","rom":"annyeong","arti":"Halo","bab":"BAB 1"}]</code><br><br>
+          <strong>Contoh .docx:</strong><br>
+          Ketik tiap kata per baris seperti <em>.txt</em> di atas.
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">👁️ Preview</label>
+        <div id="bulkPreview" style="max-height:220px;overflow-y:auto;background:var(--bg-subtle);padding:10px;border-radius:10px;font-size:0.78rem;" class="custom-scroll">
+          <em style="color:var(--text-muted);">Belum ada file dipilih.</em>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">🏷️ Bab Default (jika kolom bab kosong)</label>
+        <input id="bulkDefaultBab" class="input" value="BAB 1" placeholder="BAB 1">
+      </div>
+    `,
+    submitText: 'Impor Sekarang',
+    onSubmit: async () => {
+      const parsed = window.__bulkParsed;
+      if (!parsed || !parsed.length) {
+        return KR.toast?.error('Pilih file terlebih dahulu atau format file salah');
+      }
+      const defaultBab = document.getElementById('bulkDefaultBab')?.value.trim() || 'BAB 1';
+      const vocab = getVocab();
+      let maxId = Math.max(0, ...vocab.map(v => Number(v.id) || 0));
+      let added = 0;
+      parsed.forEach(p => {
+        if (!p.hangeul || !p.arti) return;
+        maxId++;
+        vocab.push({
+          id: maxId,
+          bab: p.bab || defaultBab,
+          hangeul: p.hangeul,
+          rom: p.rom || '-',
+          arti: p.arti,
+        });
+        added++;
+      });
+      if (!added) return KR.toast?.error('Tidak ada data valid untuk diimpor');
+      saveVocab(vocab);
+      closeModal();
+      renderVocab();
+      KR.toast?.success(`✅ ${added} kosakata berhasil diimpor`);
+    },
+  });
+
+  // Setup file input listener
+  setTimeout(() => {
+    const fileInput = document.getElementById('bulkFileInput');
+    fileInput?.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      e.target.value = ''; // reset
+      if (!file) return;
+      try {
+        KR.toast?.info('Memproses file...', 1200);
+        const parsed = await readBulkFile(file);
+        window.__bulkParsed = parsed;
+        renderBulkPreview(parsed);
+        if (parsed.length) {
+          KR.toast?.success(`✅ ${parsed.length} baris terdeteksi`);
+        } else {
+          KR.toast?.warn('Tidak ada data valid. Cek format pemisah.');
+        }
+      } catch (err) {
+        console.error(err);
+        KR.toast?.error('Gagal membaca file: ' + (err.message || 'Unknown error'));
+        window.__bulkParsed = null;
+        renderBulkPreview([]);
+      }
+    });
+  }, 100);
+}
   /* ==========================================
      GRAMMAR CRUD
      ========================================== */
