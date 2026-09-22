@@ -1,0 +1,163 @@
+{
+  "babs": [
+    {
+      "id": 1,
+      "title": "한국의 인사 예절 (Etika Salam di Korea)",
+      "pages": [
+        {
+          "id": 1,
+          "korean": "한국에서는 상대에 따라 인사하는 방식이 다릅니다.",
+          "arti_full": "Di Korea, cara memberi salam berbeda-beda tergantung pada lawan bicara.",
+          "arti_per_kata": [
+            {
+              "bagian": "한국에서는",
+              "fungsi": "한국 (Korea) + 에서 (di) + 는 (topik)",
+              "arti": "Di Korea"
+            },
+            {
+              "bagian": "상대에 따라",
+              "fungsi": "상대 (lawan bicara) + 에 따라 (tergantung)",
+              "arti": "Tergantung pada lawan bicara"
+            },
+            {
+              "bagian": "인사하는 방식이",
+              "fungsi": "인사하다 (salam) + 는 방식 (cara) + 이 (subjek)",
+              "arti": "Cara memberi salam"
+            },
+            {
+              "bagian": "다릅니다",
+              "fungsi": "다르다 (berbeda) + ㅂ니다 (formal)",
+              "arti": "Berbeda"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "korean": "자신보다 나이가 많거나 지위가 높은 사람에게는 안녕하세요? 또는 안녕하십니까? 라고 말하며 고개를 숙이거나 허리를 굽혀 인사합니다.",
+          "arti_full": "Kepada orang yang lebih tua atau memiliki jabatan lebih tinggi, ucapkan 'Annyeonghaseyo?' atau 'Annyeonghasimnikka?' sambil menundukkan kepala atau membungkukkan badan saat memberi salam.",
+          "arti_per_kata": [
+            {
+              "bagian": "자신보다",
+              "fungsi": "자신 (diri sendiri) + 보다 (daripada)",
+              "arti": "Daripada diri sendiri"
+            },
+            {
+              "bagian": "나이가 많거나",
+              "fungsi": "나이 (umur) + 가 (subjek) + 많다 (banyak) + 거나 (atau)",
+              "arti": "Atau lebih tua"
+            },
+            {
+              "bagian": "지위가 높은 사람에게는",
+              "fungsi": "지위 (jabatan) + 높다 (tinggi) + 사람 (orang) + 에게 (kepada)",
+              "arti": "Kepada orang berjabatan tinggi"
+            },
+            {
+              "bagian": "인사합니다",
+              "fungsi": "인사하다 (memberi salam) + ㅂ니다 (formal)",
+              "arti": "Memberi salam"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "korean": "고개를 숙이거나 허리를 굽히는 것은 상대방에 대한 존경을 나타내는 제스처입니다.",
+          "arti_full": "Menundukkan kepala atau membungkukkan badan adalah gestur yang menunjukkan rasa hormat kepada lawan bicara.",
+          "arti_per_kata": [
+            {
+              "bagian": "고개를 숙이거나",
+              "fungsi": "고개 (kepala) + 를 (objek) + 숙이다 (menunduk)",
+              "arti": "Menundukkan kepala"
+            },
+            {
+              "bagian": "허리를 굽히는 것은",
+              "fungsi": "허리 (pinggang) + 굽히다 (membungkuk) + 것 (hal) + 은 (topik)",
+              "arti": "Membungkukkan badan"
+            },
+            {
+              "bagian": "존경을 나타내는",
+              "fungsi": "존경 (hormat) + 나타내다 (menunjukkan)",
+              "arti": "Yang menunjukkan rasa hormat"
+            },
+            {
+              "bagian": "제스처입니다",
+              "fungsi": "제스처 (gestur) + 입니다 (adalah)",
+              "arti": "Adalah gestur"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "한국에서 알뜰하게 생필품을 구입하는 팁 (Tips Membeli Barang Hemat di Korea)",
+      "pages": [
+        {
+          "id": 1,
+          "korean": "내용이 곧 업데이트될 예정입니다.",
+          "arti_full": "Konten akan segera diperbarui.",
+          "arti_per_kata": [
+            {
+              "bagian": "내용이",
+              "fungsi": "내용 (isi) + 이 (subjek)",
+              "arti": "Isi/Konten"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "한국의 도시 (Kota di Korea)",
+      "pages": [
+        {
+          "id": 1,
+          "korean": "내용이 곧 업데이트될 예정입니다.",
+          "arti_full": "Konten akan segera diperbarui.",
+          "arti_per_kata": [
+            {
+              "bagian": "내용이",
+              "fungsi": "내용 (isi) + 이 (subjek)",
+              "arti": "Isi/Konten"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "동작과 사물 (Aksi dan Benda)",
+      "pages": [
+        {
+          "id": 1,
+          "korean": "내용이 곧 업데이트될 예정입니다.",
+          "arti_full": "Konten akan segera diperbarui.",
+          "arti_per_kata": [
+            {
+              "bagian": "내용이",
+              "fungsi": "내용 (isi) + 이 (subjek)",
+              "arti": "Isi/Konten"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "한국의 좌식 문화 (Budaya Duduk di Lantai Korea)",
+      "pages": [
+        {
+          "id": 1,
+          "korean": "내용이 곧 업데이트될 예정입니다.",
+          "arti_full": "Konten akan segera diperbarui.",
+          "arti_per_kata": [
+            {
+              "bagian": "내용이",
+              "fungsi": "내용 (isi) + 이 (subjek)",
+              "arti": "Isi/Konten"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
