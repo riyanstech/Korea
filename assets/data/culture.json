@@ -170,12 +170,12 @@
           "arti_per_kata": [
             {
               "bagian": "저는",
-              "fungsi": "는 (penanda subjek)",
+              "fungsi": "저 (saya) + 는 (penanda subjek)",
               "arti": "Saya"
             },
             {
               "bagian": "아침에",
-              "fungsi": "",
+              "fungsi": "아쳄 (pagi) + 에 (",
               "arti": "Pada pagi hari"
             }
           ]
