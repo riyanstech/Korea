@@ -724,13 +724,13 @@ function escMultiline(s = '') {
     `;
 
     if (canGetCert) {
-      const tierStyle = `background: linear-gradient(135deg, ${tier.tierGradient[0]} 0%, ${tier.tierGradient[1]} 50%, ${tier.tierGradient[2]} 100%);`;
+      const tierStyle = `background: linear-gradient(135deg, #c9a961 0%, #9d7f45 50%, #6d5530 100%);`;
       actionsHTML += `
         <button class="quiz-action-btn gold" style="${tierStyle}" onclick="KR.quiz.generateCertificate()">
           <i data-lucide="award"></i>
           <div>
-            <div class="quiz-action-btn-title">${tier.icon} Get ${tier.name} Certificate</div>
-            <div class="quiz-action-btn-sub">${tier.title}</div>
+            <div class="quiz-action-btn-title">Get Certificate</div>
+            <div class="quiz-action-btn-sub">Certificate of Achievement</div>
           </div>
         </button>
       `;
@@ -2214,10 +2214,10 @@ function escMultiline(s = '') {
       const dateStr = new Date(r.at).toLocaleDateString('id-ID', {
         day: '2-digit', month: 'long', year: 'numeric'
       });
+
       const certId = 'KRD-' + r.at.toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
       const grade = getGrade(r.score);
       const gradeText = `${grade.letter} · ${grade.label.toUpperCase()}`;
-      const tier = getCertTier(r.wrong);
 
       _certCanvas = await renderCertificateToCanvas({
         name: user,
@@ -2231,19 +2231,13 @@ function escMultiline(s = '') {
       });
 
       const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-      _certFilenameBase = `Certificate_${tier.name}_${r.pkg.name.replace(/[^a-z0-9]/gi, '_')}_${user.replace(/[^a-z0-9]/gi, '_')}_${ts}`;
+      const safePkgName = r.pkg.name.replace(/[^a-z0-9]/gi, '_');
+      const safeUserName = user.replace(/[^a-z0-9]/gi, '_');
+      _certFilenameBase = `Certificate_${safePkgName}_${safeUserName}_${ts}`;
 
       const dataUrl = _certCanvas.toDataURL('image/png');
 
       els.certPreview.innerHTML = `
-        <div style="border-radius:14px; overflow:hidden; margin-bottom:14px; background:linear-gradient(135deg, ${tier.tierGradient[0]}, ${tier.tierGradient[1]}, ${tier.tierGradient[2]}); padding:16px 20px; display:flex; align-items:center; gap:14px; color:#fff; box-shadow:0 8px 24px -8px rgba(15,23,42,0.25);">
-          <div style="font-size:38px; line-height:1;">${tier.icon}</div>
-          <div style="flex:1;">
-            <div style="font-size:11px; font-weight:800; letter-spacing:0.15em; opacity:0.9;">CERTIFICATE TIER</div>
-            <div style="font-size:22px; font-weight:900; letter-spacing:0.02em; margin-top:2px;">${tier.name}</div>
-            <div style="font-size:12px; opacity:0.9; margin-top:2px;">${tier.title} · ${tier.wrongRange}</div>
-          </div>
-        </div>
         <div style="width:100%; background:#fdfcf7; border-radius:12px; overflow:hidden; text-align:center; box-shadow:0 4px 16px -4px rgba(15,23,42,0.1);">
           <img src="${dataUrl}" style="width:100%; height:auto; display:block;" alt="Certificate Preview">
         </div>`;
