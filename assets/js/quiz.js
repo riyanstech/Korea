@@ -51,70 +51,66 @@ KR.quiz = (function () {
   /* ==========================================
      INIT
      ========================================== */
-  async function init() {
-    // ✅ GUARD: kalau sudah pernah init, cuma refresh data
-    if (_inited) {
-      await loadQuizzes();
-      return;
-    }
-    _inited = true;
-    window.__KR_QUIZ_LISTENER_ADDED__ = window.__KR_QUIZ_LISTENER_ADDED__ || false;
+async function init() {
+  // ✅ GUARD: kalau sudah pernah init, cukup keluar (tidak reload berulang)
+  if (_inited) return;
+  _inited = true;
+  window.__KR_QUIZ_LISTENER_ADDED__ = window.__KR_QUIZ_LISTENER_ADDED__ || false;
 
-    els = {
-      list: document.getElementById('quizPackGrid'),
-      empty: document.getElementById('quizPackEmpty'),
-      loading: document.getElementById('quizPackLoading'),
-      listWrap: document.getElementById('quizListWrap'),
-      hubHeader: document.getElementById('quizHubHeader'),
-      setupModal: document.getElementById('quizSetupModal'),
-      setupTitle: document.getElementById('quizSetupTitle'),
-      setupDesc: document.getElementById('quizSetupDesc'),
-      setupInfo: document.getElementById('quizSetupInfo'),
-      setupFooter: document.getElementById('quizSetupFooter'),
-      setupBackdrop: document.getElementById('quizSetupBackdrop'),
-      setupClose: document.getElementById('quizSetupClose'),
-      setupCancel: document.getElementById('quizSetupCancel'),
-      testWrap: document.getElementById('quizTestWrap'),
-      testTitle: document.getElementById('quizTestTitle'),
-      testSection: document.getElementById('quizTestSection'),
-      testProgress: document.getElementById('quizTestProgress'),
-      testProgressBar: document.getElementById('quizTestProgressBar'),
-      testTimer: document.getElementById('quizTestTimer'),
-      testExit: document.getElementById('quizTestExit'),
-      testQ: document.getElementById('quizTestQuestion'),
-      testPrev: document.getElementById('quizTestPrev'),
-      testNext: document.getElementById('quizTestNext'),
-      testSubmit: document.getElementById('quizTestSubmit'),
-      testNav: document.getElementById('quizTestNav'),
-      resultWrap: document.getElementById('quizResultWrap'),
-      resultTitle: document.getElementById('quizResultTitle'),
-      resultScore: document.getElementById('quizResultScore'),
-      resultStats: document.getElementById('quizResultStats'),
-      resultActions: document.getElementById('quizResultActions'),
-      resultReview: document.getElementById('quizResultReview'),
-      resultClose: document.getElementById('quizResultClose'),
-      certModal: document.getElementById('certModal'),
-      certPreview: document.getElementById('certPreviewContainer'),
-      loadingOverlay: document.getElementById('loadingOverlay'),
-      loadingText: document.getElementById('loadingText'),
-      historyWrap: document.getElementById('quizHistoryWrap'),
-      historyContent: document.getElementById('quizHistoryContent'),
-      historyBtn: document.getElementById('quizHistoryBtn'),
-    };
+  els = {
+    list: document.getElementById('quizPackGrid'),
+    empty: document.getElementById('quizPackEmpty'),
+    loading: document.getElementById('quizPackLoading'),
+    listWrap: document.getElementById('quizListWrap'),
+    hubHeader: document.getElementById('quizHubHeader'),
+    setupModal: document.getElementById('quizSetupModal'),
+    setupTitle: document.getElementById('quizSetupTitle'),
+    setupDesc: document.getElementById('quizSetupDesc'),
+    setupInfo: document.getElementById('quizSetupInfo'),
+    setupFooter: document.getElementById('quizSetupFooter'),
+    setupBackdrop: document.getElementById('quizSetupBackdrop'),
+    setupClose: document.getElementById('quizSetupClose'),
+    setupCancel: document.getElementById('quizSetupCancel'),
+    testWrap: document.getElementById('quizTestWrap'),
+    testTitle: document.getElementById('quizTestTitle'),
+    testSection: document.getElementById('quizTestSection'),
+    testProgress: document.getElementById('quizTestProgress'),
+    testProgressBar: document.getElementById('quizTestProgressBar'),
+    testTimer: document.getElementById('quizTestTimer'),
+    testExit: document.getElementById('quizTestExit'),
+    testQ: document.getElementById('quizTestQuestion'),
+    testPrev: document.getElementById('quizTestPrev'),
+    testNext: document.getElementById('quizTestNext'),
+    testSubmit: document.getElementById('quizTestSubmit'),
+    testNav: document.getElementById('quizTestNav'),
+    resultWrap: document.getElementById('quizResultWrap'),
+    resultTitle: document.getElementById('quizResultTitle'),
+    resultScore: document.getElementById('quizResultScore'),
+    resultStats: document.getElementById('quizResultStats'),
+    resultActions: document.getElementById('quizResultActions'),
+    resultReview: document.getElementById('quizResultReview'),
+    resultClose: document.getElementById('quizResultClose'),
+    certModal: document.getElementById('certModal'),
+    certPreview: document.getElementById('certPreviewContainer'),
+    loadingOverlay: document.getElementById('loadingOverlay'),
+    loadingText: document.getElementById('loadingText'),
+    historyWrap: document.getElementById('quizHistoryWrap'),
+    historyContent: document.getElementById('quizHistoryContent'),
+    historyBtn: document.getElementById('quizHistoryBtn'),
+  };
 
-    if (!els.list) {
-      _inited = false; // reset kalau gagal init
-      return;
-    }
-
-    bindEvents();
-    await loadQuizzes();
-    // ✅ FIXED: cegah listener duplikat kalau init dipanggil lagi
-    if (!window.__KR_QUIZ_LISTENER_ADDED__) {
-      window.addEventListener('quizzes:updated', loadQuizzes);
-      window.__KR_QUIZ_LISTENER_ADDED__ = true;
-    }
+  if (!els.list) {
+    _inited = false; // reset kalau gagal init
+    return;
   }
+
+  bindEvents();
+  await loadQuizzes();
+  if (!window.__KR_QUIZ_LISTENER_ADDED__) {
+    window.addEventListener('quizzes:updated', loadQuizzes);
+    window.__KR_QUIZ_LISTENER_ADDED__ = true;
+  }
+}
 
   /* ==========================================
      DATA
