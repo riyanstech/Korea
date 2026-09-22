@@ -1579,531 +1579,14 @@ function escMultiline(s = '') {
     ctx.restore();
   }
 
-  async function renderCertificateToCanvas({ name, pkgName, score, dateStr, certId, gradeText, wrong, details }) {
-    // ========== LOAD IMAGES ==========
-    let signatureImg = null;
-    let flagImg = null;
-    try { signatureImg = await loadImage('assets/img/signature.png'); }
-    catch (e) { console.warn('[Cert] Signature tidak ditemukan:', e.message); }
-    try { flagImg = await loadImage('assets/img/korean-flag.png'); }
-    catch (e) { console.warn('[Cert] Korean flag tidak ditemukan:', e.message); }
-
-    // ========== COMPUTE STATS ==========
-    const reading = { correct: 0, total: 0 };
-    const listening = { correct: 0, total: 0 };
-    (details || []).forEach(d => {
-      const isL = d.sectionType === 'listening';
-      if (isL) {
-        listening.total++;
-        if (d.isCorrect) listening.correct++;
-      } else {
-        reading.total++;
-        if (d.isCorrect) reading.correct++;
-      }
-    });
-    const totalQuestions = reading.total + listening.total;
-
-    // ========== CANVAS SETUP ==========
-    const W = 1123, H = 794, SCALE = 2;
-    const cvs = document.createElement('canvas');
-    cvs.width = W * SCALE;
-    cvs.height = H * SCALE;
-    const ctx = cvs.getContext('2d');
-    ctx.scale(SCALE, SCALE);
-    ctx.textBaseline = 'middle';
-
-    // ========== PALETTE ==========
-    const NAVY = '#1e3a5f';
-    const NAVY_DARK = '#152a44';
-    const NAVY_LIGHT = '#2d4a70';
-    const GOLD = '#c9a961';
-    const GOLD_DARK = '#9d7f45';
-    const GOLD_LIGHT = '#e6d9b3';
-    const CREAM = '#faf8f3';
-    const CREAM_LIGHT = '#fdfcf8';
-    const CREAM_DARK = '#f4f1e8';
-    const TEXT_DARK = '#1a2942';
-    const TEXT_MUTED = '#5a6b82';
-
     /* ============================================================
-       ICON HELPERS — gambar icon sendiri (bukan emoji)
-       ============================================================ */
-    function drawBookIcon(cx, cy, size, color) {
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.fillStyle = color;
-      const h = size * 0.9;
-      const w = size * 0.42;
-      const gap = 1.4;
-      // Left page
-      ctx.beginPath();
-      ctx.moveTo(-w, -h / 2 + 1);
-      ctx.lineTo(-w, h / 2 - 1);
-      ctx.lineTo(-gap, h / 2 - 3);
-      ctx.lineTo(-gap, -h / 2 - 1);
-      ctx.closePath();
-      ctx.fill();
-      // Right page
-      ctx.beginPath();
-      ctx.moveTo(w, -h / 2 + 1);
-      ctx.lineTo(w, h / 2 - 1);
-      ctx.lineTo(gap, h / 2 - 3);
-      ctx.lineTo(gap, -h / 2 - 1);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawHeadphonesIcon(cx, cy, size, color) {
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.strokeStyle = color;
-      ctx.fillStyle = color;
-      ctx.lineCap = 'round';
-      const r = size * 0.42;
-      const earW = size * 0.24;
-      const earH = size * 0.5;
-      const earY = -size * 0.04;
-      // Headband arc
-      ctx.lineWidth = size * 0.15;
-      ctx.beginPath();
-      ctx.arc(0, 0, r, Math.PI * 1.02, Math.PI * 1.98);
-      ctx.stroke();
-      // Left ear cup
-      roundRect(ctx, -r - earW / 2, earY, earW, earH, earW * 0.45);
-      ctx.fill();
-      // Right ear cup
-      roundRect(ctx, r - earW / 2, earY, earW, earH, earW * 0.45);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    /* ============================================================
-       1. NAVY BACKGROUND
-       ============================================================ */
-    const navyGrad = ctx.createLinearGradient(0, 0, W, H);
-    navyGrad.addColorStop(0, NAVY_LIGHT);
-    navyGrad.addColorStop(0.5, NAVY);
-    navyGrad.addColorStop(1, NAVY_DARK);
-    ctx.fillStyle = navyGrad;
-    ctx.fillRect(0, 0, W, H);
-
-    /* ============================================================
-       2. CREAM PAPER
-       ============================================================ */
-    const PAPER = 28;
-    const paperX = PAPER, paperY = PAPER;
-    const paperW = W - PAPER * 2, paperH = H - PAPER * 2;
-
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.35)';
-    ctx.shadowBlur = 24;
-    ctx.shadowOffsetY = 10;
-    ctx.fillStyle = CREAM;
-    ctx.fillRect(paperX, paperY, paperW, paperH);
-    ctx.restore();
-
-    const paperGrad = ctx.createLinearGradient(paperX, paperY, paperX + paperW, paperY + paperH);
-    paperGrad.addColorStop(0, CREAM_LIGHT);
-    paperGrad.addColorStop(0.5, CREAM);
-    paperGrad.addColorStop(1, CREAM_DARK);
-    ctx.fillStyle = paperGrad;
-    ctx.fillRect(paperX, paperY, paperW, paperH);
-
-    /* ============================================================
-       3. BACKGROUND PATTERNS
-       ============================================================ */
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(paperX, paperY, paperW, paperH);
-    ctx.clip();
-
-    // 3a. Korean flag (subtle, pakai gambar PNG)
-    if (flagImg) {
-      ctx.save();
-      ctx.globalCompositeOperation = 'multiply';
-      ctx.globalAlpha = 0.15;
-      const flW = 300;
-      const flH = flW * (flagImg.height / flagImg.width);
-      ctx.drawImage(flagImg, 850 - flW / 2, 320 - flH / 2, flW, flH);
-      ctx.restore();
-    }
-
-    // 3b. Pagoda silhouette (kiri bawah)
-    ctx.save();
-    ctx.globalAlpha = 0.055;
-    ctx.strokeStyle = NAVY;
-    ctx.lineCap = 'round';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(40, 570);
-    ctx.quadraticCurveTo(180, 505, 320, 570);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(105, 570); ctx.lineTo(105, 605);
-    ctx.moveTo(255, 570); ctx.lineTo(255, 605);
-    ctx.moveTo(75, 605); ctx.lineTo(285, 605);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(20, 665);
-    ctx.quadraticCurveTo(180, 595, 340, 665);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(95, 665); ctx.lineTo(95, 715);
-    ctx.moveTo(265, 665); ctx.lineTo(265, 715);
-    ctx.moveTo(65, 715); ctx.lineTo(295, 715);
-    ctx.stroke();
-    ctx.restore();
-
-    // 3c. Mountains (dasar)
-    ctx.save();
-    ctx.globalAlpha = 0.055;
-    ctx.fillStyle = NAVY;
-    ctx.beginPath();
-    ctx.moveTo(0, H - 40);
-    ctx.lineTo(140, H - 115);
-    ctx.lineTo(280, H - 65);
-    ctx.lineTo(420, H - 145);
-    ctx.lineTo(580, H - 80);
-    ctx.lineTo(720, H - 130);
-    ctx.lineTo(880, H - 90);
-    ctx.lineTo(1050, H - 155);
-    ctx.lineTo(W, H - 85);
-    ctx.lineTo(W, H);
-    ctx.lineTo(0, H);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    ctx.restore(); // end clip
-
-    /* ============================================================
-       4. GOLD DOUBLE FRAME
-       ============================================================ */
-    const FRAME_OUT = 45, FRAME_IN = 53;
-    ctx.strokeStyle = GOLD;
-    ctx.lineWidth = 1.8;
-    ctx.strokeRect(FRAME_OUT, FRAME_OUT, W - FRAME_OUT * 2, H - FRAME_OUT * 2);
-    ctx.strokeStyle = GOLD_DARK;
-    ctx.lineWidth = 0.6;
-    ctx.strokeRect(FRAME_IN, FRAME_IN, W - FRAME_IN * 2, H - FRAME_IN * 2);
-
-    const cs = 26, cp = FRAME_OUT + 9;
-    drawOrnateCorner(ctx, cp, cp, cs, GOLD, false, false);
-    drawOrnateCorner(ctx, W - cp, cp, cs, GOLD, true, false);
-    drawOrnateCorner(ctx, cp, H - cp, cs, GOLD, false, true);
-    drawOrnateCorner(ctx, W - cp, H - cp, cs, GOLD, true, true);
-
-    /* ============================================================
-       5. HEADER
-       ============================================================ */
-    const logoX = 80, logoY = 78, bkSize = 26;
-    ctx.save();
-    ctx.fillStyle = NAVY;
-    ctx.beginPath();
-    ctx.moveTo(logoX, logoY + 4);
-    ctx.lineTo(logoX, logoY + bkSize);
-    ctx.lineTo(logoX + bkSize / 2 - 2, logoY + bkSize - 3);
-    ctx.lineTo(logoX + bkSize / 2 - 2, logoY + 2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(logoX + bkSize, logoY + 4);
-    ctx.lineTo(logoX + bkSize, logoY + bkSize);
-    ctx.lineTo(logoX + bkSize / 2 + 2, logoY + bkSize - 3);
-    ctx.lineTo(logoX + bkSize / 2 + 2, logoY + 2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#c8102e';
-    ctx.beginPath();
-    ctx.arc(logoX + bkSize / 2, logoY + bkSize / 2, 3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    ctx.textAlign = 'left';
-    ctx.fillStyle = NAVY;
-    ctx.font = '900 20px "Playfair Display", Georgia, serif';
-    ctx.letterSpacing = '0.5px';
-    ctx.fillText('KR-DICT', logoX + bkSize + 10, logoY + 11);
-    ctx.letterSpacing = '0px';
-
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Learn Korean, Go Further', logoX + bkSize + 10, logoY + 24);
-
-    ctx.textAlign = 'right';
-    ctx.fillStyle = NAVY;
-    ctx.font = '800 22px "Noto Sans KR", sans-serif';
-    ctx.fillText('한국어 능력 인증서', W - 80, 84);
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '500 10px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Korean Language Competency Certificate', W - 80, 104);
-
-    ctx.strokeStyle = GOLD;
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
-    ctx.moveTo(W - 340, 116);
-    ctx.lineTo(W - 80, 116);
-    ctx.stroke();
-
-    /* ============================================================
-       6. TITLE
-       ============================================================ */
-    ctx.textAlign = 'center';
-    ctx.fillStyle = NAVY;
-    ctx.font = '900 62px "Playfair Display", Georgia, serif';
-    ctx.letterSpacing = '5px';
-    ctx.fillText('CERTIFICATE', W / 2, 168);
-    ctx.letterSpacing = '0px';
-
-    ctx.fillStyle = GOLD_DARK;
-    ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
-    ctx.letterSpacing = '7px';
-    ctx.fillText('OF KOREAN LANGUAGE COMPETENCY', W / 2, 202);
-    ctx.letterSpacing = '0px';
-
-    drawOrnamentalDivider(ctx, W / 2, 224, 380, GOLD);
-
-    ctx.fillStyle = NAVY;
-    ctx.font = '700 18px "Noto Sans KR", sans-serif';
-    ctx.fillText('한국어 능력 인증서', W / 2, 254);
-
-    /* ============================================================
-       7. CERTIFICATION
-       ============================================================ */
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = 'italic 14px Georgia, "Times New Roman", serif';
-    ctx.fillText('This is to certify that', W / 2, 292);
-
-    const displayName = name.length > 30 ? name.slice(0, 28) + '…' : name;
-    ctx.fillStyle = NAVY;
-    ctx.font = '900 44px "Playfair Display", Georgia, serif';
-    ctx.letterSpacing = '-0.5px';
-    ctx.fillText(displayName, W / 2, 340);
-    ctx.letterSpacing = '0px';
-
-    const nw = ctx.measureText(displayName).width;
-    const ulW = Math.min(Math.max(nw + 80, 280), 560);
-    const ulL = W / 2 - ulW / 2, ulR = W / 2 + ulW / 2, ulY = 372;
-    ctx.strokeStyle = GOLD;
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(ulL, ulY);
-    ctx.lineTo(ulR, ulY);
-    ctx.stroke();
-    [ulL, ulR].forEach(x => {
-      ctx.save();
-      ctx.translate(x, ulY);
-      ctx.rotate(Math.PI / 4);
-      ctx.fillStyle = GOLD;
-      ctx.fillRect(-3, -3, 6, 6);
-      ctx.restore();
-    });
-
-    ctx.fillStyle = TEXT_DARK;
-    ctx.font = '400 14px Georgia, "Times New Roman", serif';
-    ctx.fillText('has successfully completed the Korean Language Proficiency Test', W / 2, 402);
-    ctx.fillText('and demonstrated the required level of competence in', W / 2, 424);
-    ctx.fillStyle = NAVY;
-    ctx.font = '700 14px Georgia, "Times New Roman", serif';
-    ctx.fillText('Reading and Listening.', W / 2, 446);
-
-    /* ============================================================
-       8. STATS BOX
-       ============================================================ */
-    const boxX = 175, boxW = 773, boxY = 465, boxH = 88;
-    ctx.fillStyle = '#f6f2e8';
-    roundRect(ctx, boxX, boxY, boxW, boxH, 12);
-    ctx.fill();
-    ctx.strokeStyle = GOLD;
-    ctx.lineWidth = 1.5;
-    roundRect(ctx, boxX, boxY, boxW, boxH, 12);
-    ctx.stroke();
-    ctx.strokeStyle = GOLD_DARK;
-    ctx.lineWidth = 0.5;
-    roundRect(ctx, boxX + 4, boxY + 4, boxW - 8, boxH - 8, 10);
-    ctx.stroke();
-
-    const colW = boxW / 3;
-    ctx.strokeStyle = GOLD_DARK;
-    ctx.lineWidth = 0.8;
-    for (let i = 1; i < 3; i++) {
-      const divX = boxX + colW * i;
-      ctx.beginPath();
-      ctx.moveTo(divX, boxY + 16);
-      ctx.lineTo(divX, boxY + boxH - 16);
-      ctx.stroke();
-    }
-
-    const iconR = 19;
-    const iconCy = boxY + boxH / 2;
-
-    // Col 1: Reading
-    const col1Cx = boxX + colW * 0.5;
-    ctx.beginPath();
-    ctx.arc(col1Cx - 78, iconCy, iconR, 0, Math.PI * 2);
-    ctx.fillStyle = NAVY;
-    ctx.fill();
-    drawBookIcon(col1Cx - 78, iconCy, 20, '#ffffff');
-
-    ctx.textAlign = 'left';
-    ctx.fillStyle = NAVY;
-    ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Reading', col1Cx - 48, boxY + 26);
-    ctx.font = '900 22px "Playfair Display", Georgia, serif';
-    ctx.fillText(`${reading.correct} / ${reading.total}`, col1Cx - 48, boxY + 52);
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
-    const rScore = reading.total > 0 ? (reading.correct * 50 / reading.total) : 0;
-    ctx.fillText(`(${rScore.toFixed(1)} / 50.0)`, col1Cx - 48, boxY + 72);
-
-    // Col 2: Listening
-    const col2Cx = boxX + colW * 1.5;
-    ctx.beginPath();
-    ctx.arc(col2Cx - 78, iconCy, iconR, 0, Math.PI * 2);
-    ctx.fillStyle = NAVY;
-    ctx.fill();
-    drawHeadphonesIcon(col2Cx - 78, iconCy, 22, '#ffffff');
-
-    ctx.textAlign = 'left';
-    ctx.fillStyle = NAVY;
-    ctx.font = '700 13px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Listening', col2Cx - 48, boxY + 26);
-    ctx.font = '900 22px "Playfair Display", Georgia, serif';
-    ctx.fillText(`${listening.correct} / ${listening.total}`, col2Cx - 48, boxY + 52);
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
-    const lScore = listening.total > 0 ? (listening.correct * 50 / listening.total) : 0;
-    ctx.fillText(`(${lScore.toFixed(1)} / 50.0)`, col2Cx - 48, boxY + 72);
-
-    // Col 3: Total Score
-    const col3Cx = boxX + colW * 2.5;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = NAVY;
-    ctx.font = '700 14px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText('Total Score', col3Cx, boxY + 26);
-    ctx.font = '900 32px "Playfair Display", Georgia, serif';
-    ctx.fillText(`${score} / 100`, col3Cx, boxY + 52);
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`(${score.toFixed(1)} / 100.0)`, col3Cx, boxY + 72);
-
-    /* ============================================================
-       9. FOOTER INFO
-       ============================================================ */
-    const footerY = 585;
-    const footColW = boxW / 4;
-    const footStartX = boxX;
-    const footerItems = [
-      { label: 'Test Type', value: 'Korean Language Competency Test', sub: '(Reading & Listening)' },
-      { label: 'Total Questions', value: `${totalQuestions} Soal`, sub: `(${reading.total} Reading + ${listening.total} Listening)` },
-      { label: 'Test Date', value: dateStr, sub: '' },
-      { label: 'Certificate Number', value: certId, sub: '' },
-    ];
-
-    footerItems.forEach((item, i) => {
-      const cx = footStartX + footColW * (i + 0.5);
-      ctx.textAlign = 'center';
-      ctx.fillStyle = TEXT_MUTED;
-      ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
-      ctx.letterSpacing = '0.4px';
-      ctx.fillText(item.label, cx, footerY);
-      ctx.letterSpacing = '0px';
-
-      ctx.fillStyle = NAVY;
-      ctx.font = '800 11px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(item.value, cx, footerY + 18);
-
-      if (item.sub) {
-        ctx.fillStyle = TEXT_MUTED;
-        ctx.font = '500 8px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(item.sub, cx, footerY + 32);
-      }
-
-      if (i < footerItems.length - 1) {
-        const divX = footStartX + footColW * (i + 1);
-        ctx.strokeStyle = GOLD;
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(divX, footerY - 6);
-        ctx.lineTo(divX, footerY + 34);
-        ctx.stroke();
-      }
-    });
-
-    /* ============================================================
-       10. SIGNATURE — lebih ke kanan, lebih besar, teks lebih naik
-       ============================================================ */
-    const sigX = 118;
-    const sigY = 585;
-    const sigMaxW = 320;
-    const sigMaxH = 90;
-
-    if (signatureImg) {
-      ctx.save();
-      ctx.globalCompositeOperation = 'multiply';
-      const imgRatio = signatureImg.width / signatureImg.height;
-      let drawW = sigMaxW;
-      let drawH = drawW / imgRatio;
-      if (drawH > sigMaxH) {
-        drawH = sigMaxH;
-        drawW = drawH * imgRatio;
-      }
-      ctx.drawImage(signatureImg, sigX, sigY, drawW, drawH);
-      ctx.restore();
-    } else {
-      ctx.strokeStyle = NAVY;
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(sigX, sigY + 50);
-      ctx.bezierCurveTo(sigX + 60, sigY + 10, sigX + 120, sigY + 70, sigX + 190, sigY + 25);
-      ctx.bezierCurveTo(sigX + 240, sigY - 5, sigX + 280, sigY + 55, sigX + 310, sigY + 35);
-      ctx.stroke();
-    }
-
-    // Signature line
-    const sigLineY = 686;
-    ctx.strokeStyle = NAVY;
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(sigX, sigLineY);
-    ctx.lineTo(sigX + 260, sigLineY);
-    ctx.stroke();
-
-    // Labels (lebih naik)
-    ctx.textAlign = 'left';
-    ctx.fillStyle = NAVY;
-    ctx.font = '800 13px "Playfair Display", Georgia, serif';
-    ctx.fillText('Director', sigX + 88, sigLineY + 18);
-
-    ctx.fillStyle = TEXT_MUTED;
-    ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
-    ctx.letterSpacing = '0.8px';
-    ctx.fillText('KR-DICT', sigX + 96, sigLineY + 33);
-    ctx.letterSpacing = '0px';
-
-    /* ============================================================
-       11. MOTTO
-       ============================================================ */
-    ctx.textAlign = 'center';
-    ctx.fillStyle = GOLD_DARK;
-    ctx.font = '700 11px "Plus Jakarta Sans", sans-serif';
-    ctx.letterSpacing = '4px';
-    ctx.fillText('YOUR KOREAN JOURNEY', W / 2, 655);
-    ctx.fillText('BUILDS A BRIGHTER FUTURE', W / 2, 675);
-    ctx.letterSpacing = '0px';
-
-    drawOrnamentalDivider(ctx, W / 2, 700, 300, GOLD);
-
-    /* ============================================================
-       12. OFFICIAL SEAL — clean, no curved line through text
+       12. OFFICIAL SEAL — dengan laurel wreath yang tidak menutupi text
        ============================================================ */
     const sealCx = 970;
     const sealCy = 655;
     const sealR = 44;
 
-    // Ribbons behind seal
+    // ---------- Ribbons (behind seal) ----------
     ctx.save();
     // Left ribbon
     ctx.fillStyle = NAVY_DARK;
@@ -2127,7 +1610,7 @@ function escMultiline(s = '') {
     ctx.fill();
     ctx.restore();
 
-    // Scalloped edge (24 petals)
+    // ---------- Scalloped edge (24 petals) ----------
     const petals = 24;
     const petalR = 5;
     ctx.fillStyle = GOLD;
@@ -2140,41 +1623,85 @@ function escMultiline(s = '') {
       ctx.fill();
     }
 
-    // Main gold ring
+    // ---------- Main gold ring ----------
     ctx.beginPath();
     ctx.arc(sealCx, sealCy, sealR - 3, 0, Math.PI * 2);
     ctx.fillStyle = GOLD;
     ctx.fill();
 
-    // Thin inner gold ring
+    // ---------- Thin inner gold ring ----------
     ctx.beginPath();
     ctx.arc(sealCx, sealCy, sealR - 7, 0, Math.PI * 2);
     ctx.strokeStyle = GOLD_LIGHT;
     ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Navy disc
+    // ---------- Navy disc ----------
     ctx.beginPath();
     ctx.arc(sealCx, sealCy, sealR - 10, 0, Math.PI * 2);
     ctx.fillStyle = NAVY;
     ctx.fill();
 
-    // Small decorative dots around inner edge
-    ctx.fillStyle = GOLD_LIGHT;
-    for (let i = 0; i < 12; i++) {
-      const ang = (i / 12) * Math.PI * 2;
-      const px = sealCx + Math.cos(ang) * (sealR - 8);
-      const py = sealCy + Math.sin(ang) * (sealR - 8);
+    /* ---------- LAUREL WREATH (kiri & kanan saja, tidak menutupi text) ---------- */
+    const laurelR = 26;
+    ctx.strokeStyle = GOLD;
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+
+    // Left branch: arc dari sudut 140° ke 220° (sisi kiri)
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, laurelR, Math.PI * 0.78, Math.PI * 1.22);
+    ctx.stroke();
+
+    // Right branch: arc dari sudut -40° ke 40° (sisi kanan)
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, laurelR, -Math.PI * 0.22, Math.PI * 0.22);
+    ctx.stroke();
+
+    // Leaves on left branch
+    const leafCount = 6;
+    ctx.fillStyle = GOLD;
+    for (let i = 0; i < leafCount; i++) {
+      const ang = Math.PI * 0.80 + i * (Math.PI * 0.40 / (leafCount - 1));
+      const lx = sealCx + Math.cos(ang) * laurelR;
+      const ly = sealCy + Math.sin(ang) * laurelR;
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.rotate(ang + Math.PI / 2);
       ctx.beginPath();
-      ctx.arc(px, py, 0.8, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, 3.5, 1.5, 0, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
     }
 
-    // Book icon (top-center)
+    // Leaves on right branch
+    for (let i = 0; i < leafCount; i++) {
+      const ang = -Math.PI * 0.20 + i * (Math.PI * 0.40 / (leafCount - 1));
+      const lx = sealCx + Math.cos(ang) * laurelR;
+      const ly = sealCy + Math.sin(ang) * laurelR;
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.rotate(ang + Math.PI / 2);
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 3.5, 1.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Small star ornaments at top-center and bottom-center (di luar laurel)
     ctx.fillStyle = GOLD;
-    const bkW = 22;
-    const bkH = 15;
-    const bkY = sealCy - 12;
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy - laurelR - 2, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy + laurelR + 2, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    /* ---------- BOOK ICON (top-center, di dalam laurel) ---------- */
+    ctx.fillStyle = GOLD;
+    const bkW = 20;
+    const bkH = 13;
+    const bkY = sealCy - 8;
     // Left page
     ctx.beginPath();
     ctx.moveTo(sealCx - bkW / 2, bkY - bkH / 2);
@@ -2192,12 +1719,12 @@ function escMultiline(s = '') {
     ctx.closePath();
     ctx.fill();
 
-    // "KR-DICT" text (clean area, below book)
+    /* ---------- KR-DICT TEXT (di bawah book, jelas tanpa halangan) ---------- */
     ctx.fillStyle = GOLD;
-    ctx.font = '900 9px "Playfair Display", Georgia, serif';
+    ctx.font = '900 8px "Playfair Display", Georgia, serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.letterSpacing = '1.2px';
+    ctx.letterSpacing = '1px';
     ctx.fillText('KR-DICT', sealCx, sealCy + 12);
     ctx.letterSpacing = '0px';
 
@@ -2205,7 +1732,7 @@ function escMultiline(s = '') {
     ctx.fillStyle = GOLD;
     for (let i = -1; i <= 1; i++) {
       ctx.beginPath();
-      ctx.arc(sealCx + i * 8, sealCy + 26, 1.2, 0, Math.PI * 2);
+      ctx.arc(sealCx + i * 6, sealCy + 22, 1.1, 0, Math.PI * 2);
       ctx.fill();
     }
 
