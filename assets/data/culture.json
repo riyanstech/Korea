@@ -158,29 +158,6 @@
           ]
         }
       ]
-    },
-    {
-      "id": 6,
-      "title": "저는 밥을 먹어요",
-      "pages": [
-        {
-          "id": 1,
-          "korean": "저는 아침에 일어나서 화장실에 가서 얼굴을 씻고 이를 닦아요. 그리고 부엌에 가서 밥을 먹어요.",
-          "arti_full": "Saya bangun pagi, pergi ke kamar mandi, mencuci muka dan menggosok gigi. Kemudian saya pergi ke dapur dan makan",
-          "arti_per_kata": [
-            {
-              "bagian": "저는",
-              "fungsi": "저 (saya) + 는 (penanda subjek)",
-              "arti": "Saya"
-            },
-            {
-              "bagian": "아침에",
-              "fungsi": "아쳄 (pagi) + 에 (di)",
-              "arti": "Pada pagi hari"
-            }
-          ]
-        }
-      ]
     }
   ]
 }
