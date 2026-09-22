@@ -516,6 +516,24 @@ function escMultiline(s = '') {
             </div>
             <span class="audio-label">Tap untuk memutar</span>
           </div>`;
+
+        // ✅ Kalau ada marker dialog, tampilkan sebagai bubble percakapan
+        if (hasDialogMarkers(question.audioText || '')) {
+          const parts = parseDialog(question.audioText);
+          qHtml += `
+            <div class="quiz-dialog-preview">
+              <div class="quiz-dialog-title">
+                <i data-lucide="messages-square" style="width:14px;height:14px;"></i>
+                Percakapan
+              </div>
+              ${parts.map(p => `
+                <div class="quiz-dialog-bubble ${p.speaker === 'M' ? 'from-man' : 'from-woman'}">
+                  <div class="quiz-dialog-avatar">${p.speaker === 'M' ? '👨' : '👩'}</div>
+                  <div class="quiz-dialog-text">${esc(p.text)}</div>
+                </div>
+              `).join('')}
+            </div>`;
+        }
       }
     }
 
@@ -612,6 +630,76 @@ function escMultiline(s = '') {
     if (window.lucide) lucide.createIcons();
   }
 
+  /* ==========================================
+     ✅ DIALOG PARSER — untuk soal percakapan
+     Format: [W] kata / [M] kata
+     ========================================== */
+  function parseDialog(text) {
+    const lines = String(text || '').split(/\r?\n/).filter(l => l.trim());
+    const parts = [];
+    lines.forEach(line => {
+      const m = line.match(/^\s*\[([WMF])\]\s*(.+)$/i);
+      if (m) {
+        parts.push({ speaker: m[1].toUpperCase(), text: m[2].trim() });
+      } else {
+        parts.push({ speaker: 'W', text: line.trim() });
+      }
+    });
+    return parts;
+  }
+
+  function hasDialogMarkers(text) {
+    return /\[[WMF]\]/i.test(text);
+  }
+
+  /* ==========================================
+     ✅ PLAY DIALOG SEQUENCE — suara berbeda per speaker
+     Pria: pitch rendah (0.55)
+     Wanita: pitch tinggi (1.35)
+     ========================================== */
+  async function playDialogSequence(parts) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+
+    const voices = window.speechSynthesis.getVoices();
+    const koVoices = voices.filter(v => v.lang.startsWith('ko') || v.lang.startsWith('ko-'));
+
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      await new Promise(resolve => {
+        const u = new SpeechSynthesisUtterance(part.text);
+        u.lang = 'ko-KR';
+        u.rate = 0.9;
+
+        // Beda pitch: pria rendah, wanita tinggi
+        if (part.speaker === 'M') {
+          u.pitch = 0.55;  // pria
+        } else {
+          u.pitch = 1.35;  // wanita
+        }
+
+        // Kalau ada ≥2 voice Korea, pakai berbeda
+        if (koVoices.length >= 2) {
+          u.voice = part.speaker === 'M' ? koVoices[0] : koVoices[koVoices.length - 1];
+        } else if (koVoices.length === 1) {
+          u.voice = koVoices[0];
+        }
+
+        u.onend = () => resolve();
+        u.onerror = () => resolve();
+        window.speechSynthesis.speak(u);
+      });
+
+      // Jeda 350ms antar dialog
+      if (i < parts.length - 1) {
+        await new Promise(r => setTimeout(r, 350));
+      }
+    }
+  }
+
+  /* ==========================================
+     ✅ PLAY AUDIO — support dialog & single
+     ========================================== */
   function playAudio(qIdx, source) {
     if (!activeSession) return;
     const item = activeSession.flatQuestions[qIdx];
@@ -626,8 +714,16 @@ function escMultiline(s = '') {
       text = opt?.audioText || opt?.text || '';
     }
     if (!text) return;
-    speak(text);
-    KR.toast?.info('🔊 Memutar audio...', 1000);
+
+    // ✅ Cek dialog atau single
+    if (hasDialogMarkers(text)) {
+      const parts = parseDialog(text);
+      KR.toast?.info(`🎙️ Memutar percakapan (${parts.length} baris)...`, 1500);
+      playDialogSequence(parts);
+    } else {
+      speak(text);
+      KR.toast?.info('🔊 Memutar audio...', 1000);
+    }
   }
 
   function handleAnswer(optId) {
@@ -2499,6 +2595,8 @@ function submitTest() {
     saveQuizzes,
     setQuizzes: (arr) => { quizzes = arr; saveQuizzes(); renderList(); },
     formatQuizMarkup,
+    parseDialog,
+    hasDialogMarkers,
     showHistory,
     closeHistory,
     renderHistory,
