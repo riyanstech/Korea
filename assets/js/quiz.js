@@ -517,14 +517,15 @@ function escMultiline(s = '') {
             <span class="audio-label">Tap untuk memutar</span>
           </div>`;
 
-        // ✅ Kalau ada marker dialog, tampilkan sebagai bubble percakapan
-        if (hasDialogMarkers(question.audioText || '')) {
+        // ✅ Tampilkan dialog HANYA di mode Latihan + setelah dijawab
+        // Di mode Ujian: tidak pernah tampil
+        if (isPractice && isRevealed && hasDialogMarkers(question.audioText || '')) {
           const parts = parseDialog(question.audioText);
           qHtml += `
             <div class="quiz-dialog-preview">
               <div class="quiz-dialog-title">
                 <i data-lucide="messages-square" style="width:14px;height:14px;"></i>
-                Percakapan
+                Transkrip Percakapan
               </div>
               ${parts.map(p => `
                 <div class="quiz-dialog-bubble ${p.speaker === 'M' ? 'from-man' : 'from-woman'}">
