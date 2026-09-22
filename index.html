@@ -12,7 +12,7 @@
         tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], korean: ['Noto Sans KR', 'sans-serif'], serif: ['Playfair Display', 'serif'] } } } }
     </script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link rel="stylesheet" href="assets/css/style.css?v=9.3">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body class="antialiased">
     <div class="ambient-bg"></div>
@@ -568,7 +568,6 @@
                     <div class="admin-stat-card"><div class="admin-stat-icon stat-blue"><i data-lucide="package"></i></div><div><div class="admin-stat-num" id="statQuizCount">0</div><div class="admin-stat-label">Paket Quiz</div></div></div>
                     <div class="admin-stat-card"><div class="admin-stat-icon stat-purple"><i data-lucide="help-circle"></i></div><div><div class="admin-stat-num" id="statQuestionCount">0</div><div class="admin-stat-label">Total Soal</div></div></div>
                     <div class="admin-stat-card"><div class="admin-stat-icon stat-green"><i data-lucide="book"></i></div><div><div class="admin-stat-num" id="statVocabCount">0</div><div class="admin-stat-label">Kosakata</div></div></div>
-                    <!-- ✅ FIXED: data-lucide="github" → data-lucide="git-branch" -->
                     <div class="admin-stat-card"><div class="admin-stat-icon stat-amber"><i data-lucide="git-branch"></i></div><div><div class="admin-stat-num text-base" id="statGhStatus">—</div><div class="admin-stat-label">GitHub</div></div></div>
                 </div>
                 <div class="admin-info-box"><h3><i data-lucide="sparkles"></i> Selamat datang, Admin!</h3><p>Kelola semua data aplikasi.</p></div>
@@ -604,7 +603,6 @@
             </div>
             <div data-admin-panel="settings" class="admin-panel hidden">
                 <div class="admin-section">
-                    <!-- ✅ FIXED: data-lucide="github" → data-lucide="git-branch" -->
                     <h3 class="admin-section-title"><i data-lucide="git-branch"></i> Konfigurasi GitHub</h3>
                     <p class="admin-section-desc">Sync data antar device.</p>
                     <div id="ghStatus" class="gh-status warn"><i data-lucide="alert-triangle" class="w-4 h-4"></i><span>Belum dikonfigurasi</span></div>
@@ -665,12 +663,12 @@
 
     <div id="toastContainer" class="fixed top-20 right-4 z-[2000] flex flex-col gap-2 pointer-events-none max-w-sm"></div>
 
-    <script src="assets/js/data.js?v=9.5"></script>
-    <script src="assets/js/auth.js?v=9.5"></script>
-    <script src="assets/js/github.js?v=9.5"></script>
-    <script src="assets/js/quiz.js?v=9.5"></script>
-    <script src="assets/js/admin.js?v=9.5"></script>
-    <script src="assets/js/app.js?v=9.5"></script>
+    <script src="assets/js/data.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/github.js"></script>
+    <script src="assets/js/quiz.js"></script>
+    <script src="assets/js/admin.js"></script>
+    <script src="assets/js/app.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
