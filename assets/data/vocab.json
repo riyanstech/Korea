@@ -1,0 +1,1411 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "bab": "BAB 1",
+      "hangeul": "한국",
+      "rom": "hanguk",
+      "arti": "Korea Selatan"
+    },
+    {
+      "id": 2,
+      "bab": "BAB 1",
+      "hangeul": "인도네시아",
+      "rom": "indonesia",
+      "arti": "Indonesia"
+    },
+    {
+      "id": 3,
+      "bab": "BAB 1",
+      "hangeul": "학생",
+      "rom": "haksaeng",
+      "arti": "pelajar/murid"
+    },
+    {
+      "id": 4,
+      "bab": "BAB 1",
+      "hangeul": "선생님",
+      "rom": "seonsaengnim",
+      "arti": "guru"
+    },
+    {
+      "id": 5,
+      "bab": "BAB 1",
+      "hangeul": "회사원",
+      "rom": "hoesawon",
+      "arti": "karyawan perusahaan"
+    },
+    {
+      "id": 6,
+      "bab": "BAB 1",
+      "hangeul": "이름",
+      "rom": "ireum",
+      "arti": "nama"
+    },
+    {
+      "id": 7,
+      "bab": "BAB 1",
+      "hangeul": "국적",
+      "rom": "gukjeok",
+      "arti": "kebangsaan"
+    },
+    {
+      "id": 8,
+      "bab": "BAB 1",
+      "hangeul": "직업",
+      "rom": "jigeop",
+      "arti": "pekerjaan"
+    },
+    {
+      "id": 9,
+      "bab": "BAB 1",
+      "hangeul": "사람",
+      "rom": "saram",
+      "arti": "orang"
+    },
+    {
+      "id": 10,
+      "bab": "BAB 1",
+      "hangeul": "나라",
+      "rom": "nara",
+      "arti": "negara"
+    },
+    {
+      "id": 11,
+      "bab": "BAB 2",
+      "hangeul": "이것",
+      "rom": "igeot",
+      "arti": "ini (barang)"
+    },
+    {
+      "id": 12,
+      "bab": "BAB 2",
+      "hangeul": "저것",
+      "rom": "jeogeot",
+      "arti": "itu (di sana)"
+    },
+    {
+      "id": 13,
+      "bab": "BAB 2",
+      "hangeul": "무엇",
+      "rom": "mueot",
+      "arti": "apa"
+    },
+    {
+      "id": 14,
+      "bab": "BAB 2",
+      "hangeul": "연필",
+      "rom": "yeonpil",
+      "arti": "pensil"
+    },
+    {
+      "id": 15,
+      "bab": "BAB 2",
+      "hangeul": "볼펜",
+      "rom": "bolpen",
+      "arti": "pulpen"
+    },
+    {
+      "id": 16,
+      "bab": "BAB 2",
+      "hangeul": "가위",
+      "rom": "gawi",
+      "arti": "gunting"
+    },
+    {
+      "id": 17,
+      "bab": "BAB 2",
+      "hangeul": "시계",
+      "rom": "sigye",
+      "arti": "jam"
+    },
+    {
+      "id": 18,
+      "bab": "BAB 2",
+      "hangeul": "컴퓨터",
+      "rom": "keompyuteo",
+      "arti": "komputer"
+    },
+    {
+      "id": 19,
+      "bab": "BAB 2",
+      "hangeul": "가방",
+      "rom": "gabang",
+      "arti": "tas"
+    },
+    {
+      "id": 20,
+      "bab": "BAB 2",
+      "hangeul": "우산",
+      "rom": "usan",
+      "arti": "payung"
+    },
+    {
+      "id": 21,
+      "bab": "BAB 3",
+      "hangeul": "집",
+      "rom": "jip",
+      "arti": "rumah"
+    },
+    {
+      "id": 22,
+      "bab": "BAB 3",
+      "hangeul": "방",
+      "rom": "bang",
+      "arti": "kamar"
+    },
+    {
+      "id": 23,
+      "bab": "BAB 3",
+      "hangeul": "화장실",
+      "rom": "hwajangsil",
+      "arti": "toilet"
+    },
+    {
+      "id": 24,
+      "bab": "BAB 3",
+      "hangeul": "부엌",
+      "rom": "bueok",
+      "arti": "dapur"
+    },
+    {
+      "id": 25,
+      "bab": "BAB 3",
+      "hangeul": "거실",
+      "rom": "geosil",
+      "arti": "ruang tamu"
+    },
+    {
+      "id": 26,
+      "bab": "BAB 3",
+      "hangeul": "병원",
+      "rom": "byeongwon",
+      "arti": "rumah sakit"
+    },
+    {
+      "id": 27,
+      "bab": "BAB 3",
+      "hangeul": "약국",
+      "rom": "yakkuk",
+      "arti": "apotek"
+    },
+    {
+      "id": 28,
+      "bab": "BAB 3",
+      "hangeul": "은행",
+      "rom": "eunhaeng",
+      "arti": "bank"
+    },
+    {
+      "id": 29,
+      "bab": "BAB 3",
+      "hangeul": "여기",
+      "rom": "yeogi",
+      "arti": "di sini"
+    },
+    {
+      "id": 30,
+      "bab": "BAB 3",
+      "hangeul": "어디",
+      "rom": "eodi",
+      "arti": "di mana"
+    },
+    {
+      "id": 31,
+      "bab": "BAB 4",
+      "hangeul": "일하다",
+      "rom": "ilhada",
+      "arti": "bekerja"
+    },
+    {
+      "id": 32,
+      "bab": "BAB 4",
+      "hangeul": "공부하다",
+      "rom": "gongbuhada",
+      "arti": "belajar"
+    },
+    {
+      "id": 33,
+      "bab": "BAB 4",
+      "hangeul": "운동하다",
+      "rom": "undonghada",
+      "arti": "berolahraga"
+    },
+    {
+      "id": 34,
+      "bab": "BAB 4",
+      "hangeul": "쉬다",
+      "rom": "swida",
+      "arti": "istirahat"
+    },
+    {
+      "id": 35,
+      "bab": "BAB 4",
+      "hangeul": "자다",
+      "rom": "jada",
+      "arti": "tidur"
+    },
+    {
+      "id": 36,
+      "bab": "BAB 4",
+      "hangeul": "가다",
+      "rom": "gada",
+      "arti": "pergi"
+    },
+    {
+      "id": 37,
+      "bab": "BAB 4",
+      "hangeul": "오다",
+      "rom": "oda",
+      "arti": "datang"
+    },
+    {
+      "id": 38,
+      "bab": "BAB 4",
+      "hangeul": "먹다",
+      "rom": "meokda",
+      "arti": "makan"
+    },
+    {
+      "id": 39,
+      "bab": "BAB 4",
+      "hangeul": "마시다",
+      "rom": "masida",
+      "arti": "minum"
+    },
+    {
+      "id": 40,
+      "bab": "BAB 4",
+      "hangeul": "보다",
+      "rom": "boda",
+      "arti": "melihat/menonton"
+    },
+    {
+      "id": 41,
+      "bab": "BAB 5",
+      "hangeul": "월요일",
+      "rom": "woryoil",
+      "arti": "Senin"
+    },
+    {
+      "id": 42,
+      "bab": "BAB 5",
+      "hangeul": "화요일",
+      "rom": "hwayoil",
+      "arti": "Selasa"
+    },
+    {
+      "id": 43,
+      "bab": "BAB 5",
+      "hangeul": "수요일",
+      "rom": "suyoil",
+      "arti": "Rabu"
+    },
+    {
+      "id": 44,
+      "bab": "BAB 5",
+      "hangeul": "목요일",
+      "rom": "mogyoil",
+      "arti": "Kamis"
+    },
+    {
+      "id": 45,
+      "bab": "BAB 5",
+      "hangeul": "금요일",
+      "rom": "geumyoil",
+      "arti": "Jumat"
+    },
+    {
+      "id": 46,
+      "bab": "BAB 5",
+      "hangeul": "토요일",
+      "rom": "toyoil",
+      "arti": "Sabtu"
+    },
+    {
+      "id": 47,
+      "bab": "BAB 5",
+      "hangeul": "일요일",
+      "rom": "iryoil",
+      "arti": "Minggu"
+    },
+    {
+      "id": 48,
+      "bab": "BAB 5",
+      "hangeul": "오늘",
+      "rom": "oneul",
+      "arti": "hari ini"
+    },
+    {
+      "id": 49,
+      "bab": "BAB 5",
+      "hangeul": "내일",
+      "rom": "naeil",
+      "arti": "besok"
+    },
+    {
+      "id": 50,
+      "bab": "BAB 5",
+      "hangeul": "어제",
+      "rom": "eoje",
+      "arti": "kemarin"
+    },
+    {
+      "id": 51,
+      "bab": "BAB 6",
+      "hangeul": "아침",
+      "rom": "achim",
+      "arti": "pagi"
+    },
+    {
+      "id": 52,
+      "bab": "BAB 6",
+      "hangeul": "점심",
+      "rom": "jeomsim",
+      "arti": "siang"
+    },
+    {
+      "id": 53,
+      "bab": "BAB 6",
+      "hangeul": "저녁",
+      "rom": "jeonyeok",
+      "arti": "malam"
+    },
+    {
+      "id": 54,
+      "bab": "BAB 6",
+      "hangeul": "일어나다",
+      "rom": "ireonada",
+      "arti": "bangun"
+    },
+    {
+      "id": 55,
+      "bab": "BAB 6",
+      "hangeul": "씻다",
+      "rom": "ssitda",
+      "arti": "mencuci"
+    },
+    {
+      "id": 56,
+      "bab": "BAB 6",
+      "hangeul": "출근하다",
+      "rom": "chulgeunhada",
+      "arti": "berangkat kerja"
+    },
+    {
+      "id": 57,
+      "bab": "BAB 6",
+      "hangeul": "퇴근하다",
+      "rom": "toegeunhada",
+      "arti": "pulang kerja"
+    },
+    {
+      "id": 58,
+      "bab": "BAB 6",
+      "hangeul": "샤워하다",
+      "rom": "syawohada",
+      "arti": "mandi"
+    },
+    {
+      "id": 59,
+      "bab": "BAB 6",
+      "hangeul": "청소하다",
+      "rom": "cheongsohada",
+      "arti": "bersih-bersih"
+    },
+    {
+      "id": 60,
+      "bab": "BAB 6",
+      "hangeul": "산책하다",
+      "rom": "sanchaekhada",
+      "arti": "jalan-jalan"
+    },
+    {
+      "id": 61,
+      "bab": "BAB 7",
+      "hangeul": "봄",
+      "rom": "bom",
+      "arti": "musim semi"
+    },
+    {
+      "id": 62,
+      "bab": "BAB 7",
+      "hangeul": "여름",
+      "rom": "yeoreum",
+      "arti": "musim panas"
+    },
+    {
+      "id": 63,
+      "bab": "BAB 7",
+      "hangeul": "가을",
+      "rom": "gaeul",
+      "arti": "musim gugur"
+    },
+    {
+      "id": 64,
+      "bab": "BAB 7",
+      "hangeul": "겨울",
+      "rom": "gyeoul",
+      "arti": "musim dingin"
+    },
+    {
+      "id": 65,
+      "bab": "BAB 7",
+      "hangeul": "덥다",
+      "rom": "deopda",
+      "arti": "panas"
+    },
+    {
+      "id": 66,
+      "bab": "BAB 7",
+      "hangeul": "춥다",
+      "rom": "chupda",
+      "arti": "dingin"
+    },
+    {
+      "id": 67,
+      "bab": "BAB 7",
+      "hangeul": "따뜻하다",
+      "rom": "ttatteuthada",
+      "arti": "hangat"
+    },
+    {
+      "id": 68,
+      "bab": "BAB 7",
+      "hangeul": "시원하다",
+      "rom": "siwonhada",
+      "arti": "sejuk"
+    },
+    {
+      "id": 69,
+      "bab": "BAB 7",
+      "hangeul": "비",
+      "rom": "bi",
+      "arti": "hujan"
+    },
+    {
+      "id": 70,
+      "bab": "BAB 7",
+      "hangeul": "눈",
+      "rom": "nun",
+      "arti": "salju"
+    },
+    {
+      "id": 71,
+      "bab": "BAB 8",
+      "hangeul": "가족",
+      "rom": "gajok",
+      "arti": "keluarga"
+    },
+    {
+      "id": 72,
+      "bab": "BAB 8",
+      "hangeul": "아버지",
+      "rom": "abeoji",
+      "arti": "ayah"
+    },
+    {
+      "id": 73,
+      "bab": "BAB 8",
+      "hangeul": "어머니",
+      "rom": "eomeoni",
+      "arti": "ibu"
+    },
+    {
+      "id": 74,
+      "bab": "BAB 8",
+      "hangeul": "형",
+      "rom": "hyeong",
+      "arti": "kakak (laki-laki)"
+    },
+    {
+      "id": 75,
+      "bab": "BAB 8",
+      "hangeul": "누나",
+      "rom": "nuna",
+      "arti": "kakak (perempuan)"
+    },
+    {
+      "id": 76,
+      "bab": "BAB 8",
+      "hangeul": "동생",
+      "rom": "dongsaeng",
+      "arti": "adik"
+    },
+    {
+      "id": 77,
+      "bab": "BAB 8",
+      "hangeul": "친구",
+      "rom": "chingu",
+      "arti": "teman"
+    },
+    {
+      "id": 78,
+      "bab": "BAB 8",
+      "hangeul": "아들",
+      "rom": "adeul",
+      "arti": "anak laki-laki"
+    },
+    {
+      "id": 79,
+      "bab": "BAB 8",
+      "hangeul": "딸",
+      "rom": "ttal",
+      "arti": "anak perempuan"
+    },
+    {
+      "id": 80,
+      "bab": "BAB 8",
+      "hangeul": "부모님",
+      "rom": "bumonim",
+      "arti": "orang tua"
+    },
+    {
+      "id": 81,
+      "bab": "BAB 9",
+      "hangeul": "밥",
+      "rom": "bap",
+      "arti": "nasi"
+    },
+    {
+      "id": 82,
+      "bab": "BAB 9",
+      "hangeul": "김치",
+      "rom": "gimchi",
+      "arti": "kimchi"
+    },
+    {
+      "id": 83,
+      "bab": "BAB 9",
+      "hangeul": "불고기",
+      "rom": "bulgogi",
+      "arti": "bulgogi"
+    },
+    {
+      "id": 84,
+      "bab": "BAB 9",
+      "hangeul": "비빔밥",
+      "rom": "bibimbap",
+      "arti": "nasi campur"
+    },
+    {
+      "id": 85,
+      "bab": "BAB 9",
+      "hangeul": "라면",
+      "rom": "ramyeon",
+      "arti": "mie instan"
+    },
+    {
+      "id": 86,
+      "bab": "BAB 9",
+      "hangeul": "물",
+      "rom": "mul",
+      "arti": "air"
+    },
+    {
+      "id": 87,
+      "bab": "BAB 9",
+      "hangeul": "커피",
+      "rom": "keopi",
+      "arti": "kopi"
+    },
+    {
+      "id": 88,
+      "bab": "BAB 9",
+      "hangeul": "맛있다",
+      "rom": "masitda",
+      "arti": "enak"
+    },
+    {
+      "id": 89,
+      "bab": "BAB 9",
+      "hangeul": "주문하다",
+      "rom": "jumunhada",
+      "arti": "memesan"
+    },
+    {
+      "id": 90,
+      "bab": "BAB 9",
+      "hangeul": "식당",
+      "rom": "sikdang",
+      "arti": "restoran"
+    },
+    {
+      "id": 91,
+      "bab": "BAB 10",
+      "hangeul": "얼마",
+      "rom": "eolma",
+      "arti": "berapa (harga)"
+    },
+    {
+      "id": 92,
+      "bab": "BAB 10",
+      "hangeul": "비싸다",
+      "rom": "bissada",
+      "arti": "mahal"
+    },
+    {
+      "id": 93,
+      "bab": "BAB 10",
+      "hangeul": "싸다",
+      "rom": "ssada",
+      "arti": "murah"
+    },
+    {
+      "id": 94,
+      "bab": "BAB 10",
+      "hangeul": "현금",
+      "rom": "hyeongeum",
+      "arti": "uang tunai"
+    },
+    {
+      "id": 95,
+      "bab": "BAB 10",
+      "hangeul": "카드",
+      "rom": "kadeu",
+      "arti": "kartu"
+    },
+    {
+      "id": 96,
+      "bab": "BAB 10",
+      "hangeul": "계산하다",
+      "rom": "gyesanhada",
+      "arti": "membayar"
+    },
+    {
+      "id": 97,
+      "bab": "BAB 10",
+      "hangeul": "옷",
+      "rom": "ot",
+      "arti": "baju"
+    },
+    {
+      "id": 98,
+      "bab": "BAB 10",
+      "hangeul": "신발",
+      "rom": "sinbal",
+      "arti": "sepatu"
+    },
+    {
+      "id": 99,
+      "bab": "BAB 10",
+      "hangeul": "가게",
+      "rom": "gage",
+      "arti": "toko"
+    },
+    {
+      "id": 100,
+      "bab": "BAB 10",
+      "hangeul": "사다",
+      "rom": "sada",
+      "arti": "membeli"
+    },
+    {
+      "id": 101,
+      "bab": "BAB 11",
+      "hangeul": "집안일",
+      "rom": "jibanil",
+      "arti": "pekerjaan rumah"
+    },
+    {
+      "id": 102,
+      "bab": "BAB 11",
+      "hangeul": "빨래",
+      "rom": "ppallae",
+      "arti": "mencuci baju"
+    },
+    {
+      "id": 103,
+      "bab": "BAB 11",
+      "hangeul": "설거지",
+      "rom": "seolgeoji",
+      "arti": "mencuci piring"
+    },
+    {
+      "id": 104,
+      "bab": "BAB 11",
+      "hangeul": "쓰레기",
+      "rom": "sseuregi",
+      "arti": "sampah"
+    },
+    {
+      "id": 105,
+      "bab": "BAB 11",
+      "hangeul": "청소기",
+      "rom": "cheongsogi",
+      "arti": "vacuum cleaner"
+    },
+    {
+      "id": 106,
+      "bab": "BAB 12",
+      "hangeul": "버스",
+      "rom": "beoseu",
+      "arti": "bus"
+    },
+    {
+      "id": 107,
+      "bab": "BAB 12",
+      "hangeul": "지하철",
+      "rom": "jihacheol",
+      "arti": "kereta bawah tanah"
+    },
+    {
+      "id": 108,
+      "bab": "BAB 12",
+      "hangeul": "택시",
+      "rom": "taeksi",
+      "arti": "taksi"
+    },
+    {
+      "id": 109,
+      "bab": "BAB 12",
+      "hangeul": "기차",
+      "rom": "gicha",
+      "arti": "kereta"
+    },
+    {
+      "id": 110,
+      "bab": "BAB 12",
+      "hangeul": "비행기",
+      "rom": "bihaenggi",
+      "arti": "pesawat"
+    },
+    {
+      "id": 111,
+      "bab": "BAB 13",
+      "hangeul": "주말",
+      "rom": "jumal",
+      "arti": "akhir pekan"
+    },
+    {
+      "id": 112,
+      "bab": "BAB 13",
+      "hangeul": "영화",
+      "rom": "yeonghwa",
+      "arti": "film"
+    },
+    {
+      "id": 113,
+      "bab": "BAB 13",
+      "hangeul": "놀다",
+      "rom": "nolda",
+      "arti": "bermain"
+    },
+    {
+      "id": 114,
+      "bab": "BAB 13",
+      "hangeul": "쇼핑",
+      "rom": "syoping",
+      "arti": "belanja"
+    },
+    {
+      "id": 115,
+      "bab": "BAB 13",
+      "hangeul": "여행",
+      "rom": "yeohaeng",
+      "arti": "perjalanan"
+    },
+    {
+      "id": 116,
+      "bab": "BAB 14",
+      "hangeul": "왼쪽",
+      "rom": "oenjjok",
+      "arti": "kiri"
+    },
+    {
+      "id": 117,
+      "bab": "BAB 14",
+      "hangeul": "오른쪽",
+      "rom": "oreunjjok",
+      "arti": "kanan"
+    },
+    {
+      "id": 118,
+      "bab": "BAB 14",
+      "hangeul": "앞",
+      "rom": "ap",
+      "arti": "depan"
+    },
+    {
+      "id": 119,
+      "bab": "BAB 14",
+      "hangeul": "뒤",
+      "rom": "dwi",
+      "arti": "belakang"
+    },
+    {
+      "id": 120,
+      "bab": "BAB 14",
+      "hangeul": "옆",
+      "rom": "yeop",
+      "arti": "samping"
+    },
+    {
+      "id": 121,
+      "bab": "BAB 15",
+      "hangeul": "청바지",
+      "rom": "cheongbaji",
+      "arti": "celana jeans"
+    },
+    {
+      "id": 122,
+      "bab": "BAB 15",
+      "hangeul": "티셔츠",
+      "rom": "tisyeocheu",
+      "arti": "kaos"
+    },
+    {
+      "id": 123,
+      "bab": "BAB 15",
+      "hangeul": "원피스",
+      "rom": "wonpiseu",
+      "arti": "dress"
+    },
+    {
+      "id": 124,
+      "bab": "BAB 15",
+      "hangeul": "모자",
+      "rom": "moja",
+      "arti": "topi"
+    },
+    {
+      "id": 125,
+      "bab": "BAB 15",
+      "hangeul": "안경",
+      "rom": "angyeong",
+      "arti": "kacamata"
+    },
+    {
+      "id": 126,
+      "bab": "BAB 16",
+      "hangeul": "아파트",
+      "rom": "apateu",
+      "arti": "apartemen"
+    },
+    {
+      "id": 127,
+      "bab": "BAB 16",
+      "hangeul": "월세",
+      "rom": "wolse",
+      "arti": "sewa bulanan"
+    },
+    {
+      "id": 128,
+      "bab": "BAB 16",
+      "hangeul": "보증금",
+      "rom": "bojeunggeum",
+      "arti": "uang jaminan"
+    },
+    {
+      "id": 129,
+      "bab": "BAB 16",
+      "hangeul": "이사",
+      "rom": "isa",
+      "arti": "pindahan"
+    },
+    {
+      "id": 130,
+      "bab": "BAB 16",
+      "hangeul": "계약",
+      "rom": "gyeyak",
+      "arti": "kontrak"
+    },
+    {
+      "id": 131,
+      "bab": "BAB 17",
+      "hangeul": "휴가",
+      "rom": "hyuga",
+      "arti": "cuti"
+    },
+    {
+      "id": 132,
+      "bab": "BAB 17",
+      "hangeul": "호텔",
+      "rom": "hotel",
+      "arti": "hotel"
+    },
+    {
+      "id": 133,
+      "bab": "BAB 17",
+      "hangeul": "예약",
+      "rom": "yeyak",
+      "arti": "reservasi"
+    },
+    {
+      "id": 134,
+      "bab": "BAB 17",
+      "hangeul": "짐",
+      "rom": "jim",
+      "arti": "barang bawaan"
+    },
+    {
+      "id": 135,
+      "bab": "BAB 17",
+      "hangeul": "관광",
+      "rom": "gwangwang",
+      "arti": "wisata"
+    },
+    {
+      "id": 136,
+      "bab": "BAB 18",
+      "hangeul": "취미",
+      "rom": "chwimi",
+      "arti": "hobi"
+    },
+    {
+      "id": 137,
+      "bab": "BAB 18",
+      "hangeul": "독서",
+      "rom": "dokseo",
+      "arti": "membaca buku"
+    },
+    {
+      "id": 138,
+      "bab": "BAB 18",
+      "hangeul": "음악",
+      "rom": "eumak",
+      "arti": "musik"
+    },
+    {
+      "id": 139,
+      "bab": "BAB 18",
+      "hangeul": "그림",
+      "rom": "geurim",
+      "arti": "gambar/lukisan"
+    },
+    {
+      "id": 140,
+      "bab": "BAB 18",
+      "hangeul": "사진",
+      "rom": "sajin",
+      "arti": "foto"
+    },
+    {
+      "id": 141,
+      "bab": "BAB 19",
+      "hangeul": "요리",
+      "rom": "yori",
+      "arti": "memasak"
+    },
+    {
+      "id": 142,
+      "bab": "BAB 19",
+      "hangeul": "소금",
+      "rom": "sogeum",
+      "arti": "garam"
+    },
+    {
+      "id": 143,
+      "bab": "BAB 19",
+      "hangeul": "설탕",
+      "rom": "seoltang",
+      "arti": "gula"
+    },
+    {
+      "id": 144,
+      "bab": "BAB 19",
+      "hangeul": "기름",
+      "rom": "gireum",
+      "arti": "minyak"
+    },
+    {
+      "id": 145,
+      "bab": "BAB 19",
+      "hangeul": "끓이다",
+      "rom": "kkeurida",
+      "arti": "merebus"
+    },
+    {
+      "id": 146,
+      "bab": "BAB 20",
+      "hangeul": "인터넷",
+      "rom": "inteonet",
+      "arti": "internet"
+    },
+    {
+      "id": 147,
+      "bab": "BAB 20",
+      "hangeul": "스마트폰",
+      "rom": "seumateupon",
+      "arti": "smartphone"
+    },
+    {
+      "id": 148,
+      "bab": "BAB 20",
+      "hangeul": "이메일",
+      "rom": "imeil",
+      "arti": "email"
+    },
+    {
+      "id": 149,
+      "bab": "BAB 20",
+      "hangeul": "검색",
+      "rom": "geomsaek",
+      "arti": "pencarian"
+    },
+    {
+      "id": 150,
+      "bab": "BAB 20",
+      "hangeul": "다운로드",
+      "rom": "daunrodeu",
+      "arti": "unduh"
+    },
+    {
+      "id": 151,
+      "bab": "BAB 21",
+      "hangeul": "병원",
+      "rom": "byeongwon",
+      "arti": "rumah sakit"
+    },
+    {
+      "id": 152,
+      "bab": "BAB 21",
+      "hangeul": "의사",
+      "rom": "uisa",
+      "arti": "dokter"
+    },
+    {
+      "id": 153,
+      "bab": "BAB 21",
+      "hangeul": "간호사",
+      "rom": "ganhosa",
+      "arti": "perawat"
+    },
+    {
+      "id": 154,
+      "bab": "BAB 21",
+      "hangeul": "아프다",
+      "rom": "apeuda",
+      "arti": "sakit"
+    },
+    {
+      "id": 155,
+      "bab": "BAB 21",
+      "hangeul": "약",
+      "rom": "yak",
+      "arti": "obat"
+    },
+    {
+      "id": 156,
+      "bab": "BAB 22",
+      "hangeul": "감기",
+      "rom": "gamgi",
+      "arti": "flu"
+    },
+    {
+      "id": 157,
+      "bab": "BAB 22",
+      "hangeul": "열",
+      "rom": "yeol",
+      "arti": "demam"
+    },
+    {
+      "id": 158,
+      "bab": "BAB 22",
+      "hangeul": "기침",
+      "rom": "gichim",
+      "arti": "batuk"
+    },
+    {
+      "id": 159,
+      "bab": "BAB 22",
+      "hangeul": "콧물",
+      "rom": "konmul",
+      "arti": "pilek"
+    },
+    {
+      "id": 160,
+      "bab": "BAB 22",
+      "hangeul": "머리",
+      "rom": "meori",
+      "arti": "kepala"
+    },
+    {
+      "id": 161,
+      "bab": "BAB 23",
+      "hangeul": "우체국",
+      "rom": "ucheguk",
+      "arti": "kantor pos"
+    },
+    {
+      "id": 162,
+      "bab": "BAB 23",
+      "hangeul": "편지",
+      "rom": "pyeonji",
+      "arti": "surat"
+    },
+    {
+      "id": 163,
+      "bab": "BAB 23",
+      "hangeul": "소포",
+      "rom": "sopo",
+      "arti": "paket"
+    },
+    {
+      "id": 164,
+      "bab": "BAB 23",
+      "hangeul": "우표",
+      "rom": "upyo",
+      "arti": "perangko"
+    },
+    {
+      "id": 165,
+      "bab": "BAB 23",
+      "hangeul": "보내다",
+      "rom": "bonaeda",
+      "arti": "mengirim"
+    },
+    {
+      "id": 166,
+      "bab": "BAB 24",
+      "hangeul": "은행",
+      "rom": "eunhaeng",
+      "arti": "bank"
+    },
+    {
+      "id": 167,
+      "bab": "BAB 24",
+      "hangeul": "계좌",
+      "rom": "gyejwa",
+      "arti": "rekening"
+    },
+    {
+      "id": 168,
+      "bab": "BAB 24",
+      "hangeul": "입금",
+      "rom": "ipgeum",
+      "arti": "setor"
+    },
+    {
+      "id": 169,
+      "bab": "BAB 24",
+      "hangeul": "출금",
+      "rom": "chulgeum",
+      "arti": "tarik uang"
+    },
+    {
+      "id": 170,
+      "bab": "BAB 24",
+      "hangeul": "환전",
+      "rom": "hwanjeon",
+      "arti": "tukar uang"
+    },
+    {
+      "id": 171,
+      "bab": "BAB 25",
+      "hangeul": "상담",
+      "rom": "sangdam",
+      "arti": "konsultasi"
+    },
+    {
+      "id": 172,
+      "bab": "BAB 25",
+      "hangeul": "교육",
+      "rom": "gyoyuk",
+      "arti": "pendidikan"
+    },
+    {
+      "id": 173,
+      "bab": "BAB 25",
+      "hangeul": "지원",
+      "rom": "jiwon",
+      "arti": "dukungan"
+    },
+    {
+      "id": 174,
+      "bab": "BAB 25",
+      "hangeul": "근로자",
+      "rom": "geulloja",
+      "arti": "pekerja"
+    },
+    {
+      "id": 175,
+      "bab": "BAB 25",
+      "hangeul": "외국인",
+      "rom": "oegugin",
+      "arti": "orang asing"
+    },
+    {
+      "id": 176,
+      "bab": "BAB 26",
+      "hangeul": "한옥",
+      "rom": "hanok",
+      "arti": "rumah tradisional"
+    },
+    {
+      "id": 177,
+      "bab": "BAB 26",
+      "hangeul": "음식",
+      "rom": "eumsik",
+      "arti": "makanan"
+    },
+    {
+      "id": 178,
+      "bab": "BAB 26",
+      "hangeul": "예절",
+      "rom": "yejeol",
+      "arti": "etika"
+    },
+    {
+      "id": 179,
+      "bab": "BAB 26",
+      "hangeul": "숟가락",
+      "rom": "sutgarak",
+      "arti": "sendok"
+    },
+    {
+      "id": 180,
+      "bab": "BAB 26",
+      "hangeul": "젓가락",
+      "rom": "jeotgarak",
+      "arti": "sumpit"
+    },
+    {
+      "id": 181,
+      "bab": "BAB 27",
+      "hangeul": "생일",
+      "rom": "saengil",
+      "arti": "ulang tahun"
+    },
+    {
+      "id": 182,
+      "bab": "BAB 27",
+      "hangeul": "결혼식",
+      "rom": "gyeolhonsik",
+      "arti": "pernikahan"
+    },
+    {
+      "id": 183,
+      "bab": "BAB 27",
+      "hangeul": "축하",
+      "rom": "chukha",
+      "arti": "selamat"
+    },
+    {
+      "id": 184,
+      "bab": "BAB 27",
+      "hangeul": "선물",
+      "rom": "seonmul",
+      "arti": "hadiah"
+    },
+    {
+      "id": 185,
+      "bab": "BAB 27",
+      "hangeul": "초대",
+      "rom": "chodae",
+      "arti": "undangan"
+    },
+    {
+      "id": 186,
+      "bab": "BAB 28",
+      "hangeul": "설날",
+      "rom": "seollal",
+      "arti": "tahun baru Imlek"
+    },
+    {
+      "id": 187,
+      "bab": "BAB 28",
+      "hangeul": "추석",
+      "rom": "chuseok",
+      "arti": "hari panen"
+    },
+    {
+      "id": 188,
+      "bab": "BAB 28",
+      "hangeul": "송편",
+      "rom": "songpyeon",
+      "arti": "kue beras"
+    },
+    {
+      "id": 189,
+      "bab": "BAB 28",
+      "hangeul": "세배",
+      "rom": "sebae",
+      "arti": "sungkem"
+    },
+    {
+      "id": 190,
+      "bab": "BAB 28",
+      "hangeul": "한복",
+      "rom": "hanbok",
+      "arti": "pakaian tradisional"
+    },
+    {
+      "id": 191,
+      "bab": "BAB 29",
+      "hangeul": "인사",
+      "rom": "insa",
+      "arti": "salam"
+    },
+    {
+      "id": 192,
+      "bab": "BAB 29",
+      "hangeul": "존댓말",
+      "rom": "jondaenmal",
+      "arti": "bahasa hormat"
+    },
+    {
+      "id": 193,
+      "bab": "BAB 29",
+      "hangeul": "반말",
+      "rom": "banmal",
+      "arti": "bahasa informal"
+    },
+    {
+      "id": 194,
+      "bab": "BAB 29",
+      "hangeul": "예의",
+      "rom": "yeui",
+      "arti": "sopan santun"
+    },
+    {
+      "id": 195,
+      "bab": "BAB 29",
+      "hangeul": "공공장소",
+      "rom": "gonggongjangso",
+      "arti": "tempat umum"
+    },
+    {
+      "id": 196,
+      "bab": "BAB 30",
+      "hangeul": "한류",
+      "rom": "hallyu",
+      "arti": "gelombang Korea"
+    },
+    {
+      "id": 197,
+      "bab": "BAB 30",
+      "hangeul": "가수",
+      "rom": "gasu",
+      "arti": "penyanyi"
+    },
+    {
+      "id": 198,
+      "bab": "BAB 30",
+      "hangeul": "배우",
+      "rom": "baeu",
+      "arti": "aktor"
+    },
+    {
+      "id": 199,
+      "bab": "BAB 30",
+      "hangeul": "드라마",
+      "rom": "deurama",
+      "arti": "drama"
+    },
+    {
+      "id": 200,
+      "bab": "BAB 30",
+      "hangeul": "음악",
+      "rom": "eumak",
+      "arti": "musik"
+    },
+    {
+      "id": 201,
+      "bab": "BAB 1",
+      "hangeul": "씨발",
+      "rom": "Ssibal",
+      "arti": "Bangsat"
+    }
+  ]
+}
