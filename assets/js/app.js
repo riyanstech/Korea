@@ -1296,17 +1296,23 @@ function toggleDarkMode() {
   if (window.lucide) lucide.createIcons();
 }
 
-/* ---------- MENU ---------- */
+/* ---------- MENU DRAWER (dari kiri) ---------- */
 function toggleMenu() {
   const menu = document.getElementById('mobile-menu');
+  const backdrop = document.getElementById('mobile-menu-backdrop');
   const btn = document.getElementById('burger-btn');
-  if (!menu || !btn) return;
-  if (menu.classList.contains('open')) {
+  if (!menu) return;
+  const isOpen = menu.classList.contains('open');
+  if (isOpen) {
     menu.classList.remove('open');
-    btn.innerHTML = '<i data-lucide="menu" class="w-6 h-6"></i>';
+    backdrop?.classList.remove('open');
+    document.body.classList.remove('drawer-open');
+    if (btn) btn.innerHTML = '<i data-lucide="menu" class="w-6 h-6"></i>';
   } else {
     menu.classList.add('open');
-    btn.innerHTML = '<i data-lucide="x" class="w-6 h-6"></i>';
+    backdrop?.classList.add('open');
+    document.body.classList.add('drawer-open');
+    if (btn) btn.innerHTML = '<i data-lucide="x" class="w-6 h-6"></i>';
   }
   if (window.lucide) lucide.createIcons();
 }
