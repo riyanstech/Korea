@@ -1413,6 +1413,13 @@
       "hangeul": "우딘",
       "rom": "Udin",
       "arti": "Udin"
+    },
+    {
+      "id": 203,
+      "bab": "BAB 1",
+      "hangeul": "컨베이어",
+      "rom": "컨베이어",
+      "arti": "Konveyor"
     }
   ]
 }
