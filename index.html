@@ -229,12 +229,16 @@
                     </div>
                     <div id="downloads-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12"></div>
                 </div>
-
                 <div id="quiz-hub" class="tab-content hidden animate-slide-up">
                     <div id="quizHubHeader" class="text-center mb-8">
                         <h2 class="text-3xl font-bold dark:text-white mb-2">Latihan Soal</h2>
                         <p class="text-gray-500 dark:text-gray-400">Practice Reading & Listening — siap untuk EPS-TOPIK</p>
+                        <button id="quizHistoryBtn" class="btn-ghost mt-4 inline-flex items-center gap-2" onclick="KR.quiz.showHistory()">
+                            <i data-lucide="history"></i>
+                            <span>Riwayat Hasil</span>
+                        </button>
                     </div>
+
                     <div id="quizListWrap">
                         <div id="quizPackLoading" class="text-center py-12">
                             <div class="loader-kr mx-auto"></div>
@@ -303,8 +307,12 @@
                             </button>
                         </div>
                     </div>
-                </div>
 
+                    <div id="quizHistoryWrap" class="hidden">
+                        <div id="quizHistoryContent" class="max-w-3xl mx-auto pb-8"></div>
+                    </div>
+                </div>
+                   
                 <!-- ===================== AI TUTOR TAB ===================== -->
                 <div id="chat-ai" class="tab-content hidden chat-shell">
 
