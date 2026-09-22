@@ -581,11 +581,7 @@ function escMultiline(s = '') {
     renderNav();
     document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (isListening && !isRevealed && (question.audioTarget === 'question' || question.audioTarget === 'both') && question.audioText) {
-      setTimeout(() => {
-        if (activeSession && activeSession.currentIdx === currentIdx) playAudio(currentIdx, 'question');
-      }, 400);
-    }
+    // ✅ REMOVED: auto-play audio. Sekarang audio HANYA diputar saat user klik tombol play.
 
     if (window.lucide) lucide.createIcons();
   }
