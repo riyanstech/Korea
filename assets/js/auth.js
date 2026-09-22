@@ -1,6 +1,6 @@
 /* ==========================================
-   KR-Dict — Authentication Module v3.2 (FINAL)
-   + User & Admin login dengan SHA-256 hash
+   KR-Dict — Authentication Module v3.3 (FINAL)
+   + FIXED: Storage error logging (kuota/private mode)
    + FIXED: XSS prevention di updateBadge
    + FIXED: Null safety pada event binding
    + FIXED: Enter key submit di login user
@@ -18,7 +18,14 @@ KR.auth = (function () {
       } catch { return d; }
     },
     set(k, v) {
-      try { localStorage.setItem('krdict:' + k, JSON.stringify(v)); } catch {}
+      try {
+        localStorage.setItem('krdict:' + k, JSON.stringify(v));
+      } catch (e) {
+        console.error('[Storage] ❌ Gagal simpan:', k, e);
+        if (e.name === 'QuotaExceededError' || e.code === 22) {
+          console.error('[Storage] Quota localStorage penuh! Hapus data lama (misal gambar quiz).');
+        }
+      }
     },
     remove(k) {
       try { localStorage.removeItem('krdict:' + k); } catch {}
@@ -128,7 +135,7 @@ KR.auth = (function () {
     })[c]);
   }
 
-  /* ---------- Update Badge (FIXED XSS) ---------- */
+  /* ---------- Update Badge ---------- */
   function updateBadge() {
     const badge = document.getElementById('roleBadge');
     if (!badge) return;
@@ -210,7 +217,6 @@ KR.auth = (function () {
       if (e.key === 'Enter') submitAdmin();
     });
 
-    // Enter di login user
     document.getElementById('loginUserName')?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         const nameInput = document.getElementById('loginUserName');
