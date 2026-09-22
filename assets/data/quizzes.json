@@ -445,7 +445,7 @@
               "type": "listening",
               "text": "Jawab",
               "image": "",
-              "audioText": "안녕하세요?\n네 안녕하세요\n일음이 뭐예요?\n저는 리얀이예요",
+              "audioText": "[W] = 안녕하세요?\n[M] = 네 안녕하세요\n[W] = 일음이 뭐예요?\n[M] = 저는 리얀이예요",
               "audioTarget": "both",
               "options": [
                 {
