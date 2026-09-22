@@ -1580,15 +1580,15 @@ function escMultiline(s = '') {
   }
 
   async function renderCertificateToCanvas({ name, pkgName, score, dateStr, certId, gradeText, wrong, details }) {
-    // Load signature
+    // ========== LOAD IMAGES ==========
     let signatureImg = null;
-    try {
-      signatureImg = await loadImage('assets/img/signature.png');
-    } catch (e) {
-      console.warn('[Cert] Signature tidak ditemukan:', e.message);
-    }
+    let flagImg = null;
+    try { signatureImg = await loadImage('assets/img/signature.png'); }
+    catch (e) { console.warn('[Cert] Signature tidak ditemukan:', e.message); }
+    try { flagImg = await loadImage('assets/img/korean-flag.png'); }
+    catch (e) { console.warn('[Cert] Korean flag tidak ditemukan:', e.message); }
 
-    // Compute stats
+    // ========== COMPUTE STATS ==========
     const reading = { correct: 0, total: 0 };
     const listening = { correct: 0, total: 0 };
     (details || []).forEach(d => {
@@ -1603,7 +1603,7 @@ function escMultiline(s = '') {
     });
     const totalQuestions = reading.total + listening.total;
 
-    // Canvas setup
+    // ========== CANVAS SETUP ==========
     const W = 1123, H = 794, SCALE = 2;
     const cvs = document.createElement('canvas');
     cvs.width = W * SCALE;
@@ -1612,7 +1612,7 @@ function escMultiline(s = '') {
     ctx.scale(SCALE, SCALE);
     ctx.textBaseline = 'middle';
 
-    // Palette
+    // ========== PALETTE ==========
     const NAVY = '#1e3a5f';
     const NAVY_DARK = '#152a44';
     const NAVY_LIGHT = '#2d4a70';
@@ -1624,15 +1624,63 @@ function escMultiline(s = '') {
     const CREAM_DARK = '#f4f1e8';
     const TEXT_DARK = '#1a2942';
     const TEXT_MUTED = '#5a6b82';
-    const KFLAG_RED = '#c8102e';
-    const KFLAG_BLUE = '#003478';
-    const KFLAG_BLACK = '#1a1a1a';
 
     /* ============================================================
-       1. NAVY OUTER BACKGROUND
+       ICON HELPERS — gambar icon sendiri (bukan emoji)
        ============================================================ */
-    ctx.fillStyle = NAVY;
-    ctx.fillRect(0, 0, W, H);
+    function drawBookIcon(cx, cy, size, color) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.fillStyle = color;
+      const h = size * 0.9;
+      const w = size * 0.42;
+      const gap = 1.4;
+      // Left page
+      ctx.beginPath();
+      ctx.moveTo(-w, -h / 2 + 1);
+      ctx.lineTo(-w, h / 2 - 1);
+      ctx.lineTo(-gap, h / 2 - 3);
+      ctx.lineTo(-gap, -h / 2 - 1);
+      ctx.closePath();
+      ctx.fill();
+      // Right page
+      ctx.beginPath();
+      ctx.moveTo(w, -h / 2 + 1);
+      ctx.lineTo(w, h / 2 - 1);
+      ctx.lineTo(gap, h / 2 - 3);
+      ctx.lineTo(gap, -h / 2 - 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawHeadphonesIcon(cx, cy, size, color) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineCap = 'round';
+      const r = size * 0.42;
+      const earW = size * 0.24;
+      const earH = size * 0.5;
+      const earY = -size * 0.04;
+      // Headband arc
+      ctx.lineWidth = size * 0.15;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, Math.PI * 1.02, Math.PI * 1.98);
+      ctx.stroke();
+      // Left ear cup
+      roundRect(ctx, -r - earW / 2, earY, earW, earH, earW * 0.45);
+      ctx.fill();
+      // Right ear cup
+      roundRect(ctx, r - earW / 2, earY, earW, earH, earW * 0.45);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    /* ============================================================
+       1. NAVY BACKGROUND
+       ============================================================ */
     const navyGrad = ctx.createLinearGradient(0, 0, W, H);
     navyGrad.addColorStop(0, NAVY_LIGHT);
     navyGrad.addColorStop(0.5, NAVY);
@@ -1663,102 +1711,30 @@ function escMultiline(s = '') {
     ctx.fillRect(paperX, paperY, paperW, paperH);
 
     /* ============================================================
-       3. BACKGROUND PATTERNS (clipped to paper)
+       3. BACKGROUND PATTERNS
        ============================================================ */
     ctx.save();
     ctx.beginPath();
     ctx.rect(paperX, paperY, paperW, paperH);
     ctx.clip();
 
-    // ============ KOREAN FLAG (TAEGEUKGI) — proper drawing ============
-    const drawKoreanFlag = (cx, cy, size, alpha) => {
+    // 3a. Korean flag (subtle, pakai gambar PNG)
+    if (flagImg) {
       ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.translate(cx, cy);
-
-      const taeR = size * 0.40;
-
-      // Taegeuk: blue full circle
-      ctx.beginPath();
-      ctx.arc(0, 0, taeR, 0, Math.PI * 2);
-      ctx.fillStyle = KFLAG_BLUE;
-      ctx.fill();
-
-      // Red top half (through top)
-      ctx.beginPath();
-      ctx.arc(0, 0, taeR, Math.PI, 0, false);
-      ctx.closePath();
-      ctx.fillStyle = KFLAG_RED;
-      ctx.fill();
-
-      // Red lobe extends down (bottom-center)
-      ctx.beginPath();
-      ctx.arc(0, taeR / 2, taeR / 2, 0, Math.PI * 2);
-      ctx.fillStyle = KFLAG_RED;
-      ctx.fill();
-
-      // Blue lobe extends up (top-center)
-      ctx.beginPath();
-      ctx.arc(0, -taeR / 2, taeR / 2, 0, Math.PI * 2);
-      ctx.fillStyle = KFLAG_BLUE;
-      ctx.fill();
-
-      // ---- 4 TRIGRAMS ----
-      // Config: [angleDeg, pattern (top→bottom, 1=solid, 0=broken)]
-      const trigrams = [
-        { angleDeg: -135, pattern: [1, 1, 1] },  // Geon ☰  upper-left
-        { angleDeg: -45,  pattern: [0, 1, 0] },  // Gam  ☵  upper-right
-        { angleDeg: 45,   pattern: [0, 0, 0] },  // Gon  ☷  lower-right
-        { angleDeg: 135,  pattern: [1, 0, 1] },  // Ri   ☲  lower-left
-      ];
-
-      const trgDist = size * 0.72;
-      const barLen = size * 0.24;
-      const barH = size * 0.038;
-      const barGap = size * 0.055;
-
-      trigrams.forEach(cfg => {
-        const ang = cfg.angleDeg * Math.PI / 180;
-        const tx = Math.cos(ang) * trgDist;
-        const ty = Math.sin(ang) * trgDist;
-
-        ctx.save();
-        ctx.translate(tx, ty);
-        ctx.rotate(ang + Math.PI / 2);
-
-        const totalH = barH * 3 + barGap * 2;
-        const startY = -totalH / 2 + barH / 2;
-
-        for (let i = 0; i < 3; i++) {
-          const y = startY + i * (barH + barGap);
-          const solid = cfg.pattern[i] === 1;
-          ctx.fillStyle = KFLAG_BLACK;
-          if (solid) {
-            ctx.fillRect(-barLen / 2, y - barH / 2, barLen, barH);
-          } else {
-            const gapHalf = barLen * 0.16;
-            const halfLen = (barLen - gapHalf) / 2;
-            ctx.fillRect(-barLen / 2, y - barH / 2, halfLen, barH);
-            ctx.fillRect(gapHalf / 2, y - barH / 2, halfLen, barH);
-          }
-        }
-        ctx.restore();
-      });
-
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.globalAlpha = 0.15;
+      const flW = 300;
+      const flH = flW * (flagImg.height / flagImg.width);
+      ctx.drawImage(flagImg, 850 - flW / 2, 320 - flH / 2, flW, flH);
       ctx.restore();
-    };
+    }
 
-    // Draw Korean flag subtle in the background (right side, behind taegeuk area)
-    drawKoreanFlag(870, 330, 240, 0.075);
-
-    // ============ PAGODA silhouette (lower-left) ============
+    // 3b. Pagoda silhouette (kiri bawah)
     ctx.save();
-    ctx.globalAlpha = 0.06;
+    ctx.globalAlpha = 0.055;
     ctx.strokeStyle = NAVY;
     ctx.lineCap = 'round';
     ctx.lineWidth = 3;
-
-    // Atap atas
     ctx.beginPath();
     ctx.moveTo(40, 570);
     ctx.quadraticCurveTo(180, 505, 320, 570);
@@ -1766,10 +1742,8 @@ function escMultiline(s = '') {
     ctx.beginPath();
     ctx.moveTo(105, 570); ctx.lineTo(105, 605);
     ctx.moveTo(255, 570); ctx.lineTo(255, 605);
-    ctx.moveTo(75, 605);  ctx.lineTo(285, 605);
+    ctx.moveTo(75, 605); ctx.lineTo(285, 605);
     ctx.stroke();
-
-    // Atap bawah
     ctx.beginPath();
     ctx.moveTo(20, 665);
     ctx.quadraticCurveTo(180, 595, 340, 665);
@@ -1777,12 +1751,11 @@ function escMultiline(s = '') {
     ctx.beginPath();
     ctx.moveTo(95, 665); ctx.lineTo(95, 715);
     ctx.moveTo(265, 665); ctx.lineTo(265, 715);
-    ctx.moveTo(65, 715);  ctx.lineTo(295, 715);
+    ctx.moveTo(65, 715); ctx.lineTo(295, 715);
     ctx.stroke();
-
     ctx.restore();
 
-    // ============ MOUNTAINS (bottom) ============
+    // 3c. Mountains (dasar)
     ctx.save();
     ctx.globalAlpha = 0.055;
     ctx.fillStyle = NAVY;
@@ -1802,10 +1775,10 @@ function escMultiline(s = '') {
     ctx.fill();
     ctx.restore();
 
-    ctx.restore(); // end paper clip
+    ctx.restore(); // end clip
 
     /* ============================================================
-       4. GOLD DOUBLE FRAME + CORNER ORNAMENTS
+       4. GOLD DOUBLE FRAME
        ============================================================ */
     const FRAME_OUT = 45, FRAME_IN = 53;
     ctx.strokeStyle = GOLD;
@@ -1822,9 +1795,8 @@ function escMultiline(s = '') {
     drawOrnateCorner(ctx, W - cp, H - cp, cs, GOLD, true, true);
 
     /* ============================================================
-       SECTION 1: HEADER (y=70–115)
+       5. HEADER
        ============================================================ */
-    // Logo book icon
     const logoX = 80, logoY = 78, bkSize = 26;
     ctx.save();
     ctx.fillStyle = NAVY;
@@ -1842,13 +1814,12 @@ function escMultiline(s = '') {
     ctx.lineTo(logoX + bkSize / 2 + 2, logoY + 2);
     ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = KFLAG_RED;
+    ctx.fillStyle = '#c8102e';
     ctx.beginPath();
     ctx.arc(logoX + bkSize / 2, logoY + bkSize / 2, 3, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // Brand
     ctx.textAlign = 'left';
     ctx.fillStyle = NAVY;
     ctx.font = '900 20px "Playfair Display", Georgia, serif';
@@ -1858,21 +1829,16 @@ function escMultiline(s = '') {
 
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
-    ctx.letterSpacing = '0.3px';
     ctx.fillText('Learn Korean, Go Further', logoX + bkSize + 10, logoY + 24);
-    ctx.letterSpacing = '0px';
 
-    // Korean title
     ctx.textAlign = 'right';
     ctx.fillStyle = NAVY;
     ctx.font = '800 22px "Noto Sans KR", sans-serif';
     ctx.fillText('한국어 능력 인증서', W - 80, 84);
-
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = '500 10px "Plus Jakarta Sans", sans-serif';
     ctx.fillText('Korean Language Competency Certificate', W - 80, 104);
 
-    // Underline
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 0.8;
     ctx.beginPath();
@@ -1881,7 +1847,7 @@ function escMultiline(s = '') {
     ctx.stroke();
 
     /* ============================================================
-       SECTION 2: TITLE (y=140–230)
+       6. TITLE
        ============================================================ */
     ctx.textAlign = 'center';
     ctx.fillStyle = NAVY;
@@ -1898,21 +1864,17 @@ function escMultiline(s = '') {
 
     drawOrnamentalDivider(ctx, W / 2, 224, 380, GOLD);
 
-    /* ============================================================
-       SECTION 3: KOREAN SUBTITLE (y=250–270)
-       ============================================================ */
     ctx.fillStyle = NAVY;
     ctx.font = '700 18px "Noto Sans KR", sans-serif';
     ctx.fillText('한국어 능력 인증서', W / 2, 254);
 
     /* ============================================================
-       SECTION 4: CERTIFICATION (y=285–455)
+       7. CERTIFICATION
        ============================================================ */
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = 'italic 14px Georgia, "Times New Roman", serif';
     ctx.fillText('This is to certify that', W / 2, 292);
 
-    // Name
     const displayName = name.length > 30 ? name.slice(0, 28) + '…' : name;
     ctx.fillStyle = NAVY;
     ctx.font = '900 44px "Playfair Display", Georgia, serif';
@@ -1920,7 +1882,6 @@ function escMultiline(s = '') {
     ctx.fillText(displayName, W / 2, 340);
     ctx.letterSpacing = '0px';
 
-    // Underline with diamonds
     const nw = ctx.measureText(displayName).width;
     const ulW = Math.min(Math.max(nw + 80, 280), 560);
     const ulL = W / 2 - ulW / 2, ulR = W / 2 + ulW / 2, ulY = 372;
@@ -1930,7 +1891,6 @@ function escMultiline(s = '') {
     ctx.moveTo(ulL, ulY);
     ctx.lineTo(ulR, ulY);
     ctx.stroke();
-
     [ulL, ulR].forEach(x => {
       ctx.save();
       ctx.translate(x, ulY);
@@ -1940,30 +1900,25 @@ function escMultiline(s = '') {
       ctx.restore();
     });
 
-    // Description
     ctx.fillStyle = TEXT_DARK;
     ctx.font = '400 14px Georgia, "Times New Roman", serif';
     ctx.fillText('has successfully completed the Korean Language Proficiency Test', W / 2, 402);
     ctx.fillText('and demonstrated the required level of competence in', W / 2, 424);
-
     ctx.fillStyle = NAVY;
     ctx.font = '700 14px Georgia, "Times New Roman", serif';
     ctx.fillText('Reading and Listening.', W / 2, 446);
 
     /* ============================================================
-       SECTION 5: STATS BOX (y=465–555)
+       8. STATS BOX
        ============================================================ */
     const boxX = 175, boxW = 773, boxY = 465, boxH = 88;
-
     ctx.fillStyle = '#f6f2e8';
     roundRect(ctx, boxX, boxY, boxW, boxH, 12);
     ctx.fill();
-
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 1.5;
     roundRect(ctx, boxX, boxY, boxW, boxH, 12);
     ctx.stroke();
-
     ctx.strokeStyle = GOLD_DARK;
     ctx.lineWidth = 0.5;
     roundRect(ctx, boxX + 4, boxY + 4, boxW - 8, boxH - 8, 10);
@@ -1980,17 +1935,16 @@ function escMultiline(s = '') {
       ctx.stroke();
     }
 
-    // Kolom 1: Reading
-    const col1Cx = boxX + colW * 0.5;
     const iconR = 19;
+    const iconCy = boxY + boxH / 2;
+
+    // Col 1: Reading
+    const col1Cx = boxX + colW * 0.5;
     ctx.beginPath();
-    ctx.arc(col1Cx - 78, boxY + boxH / 2, iconR, 0, Math.PI * 2);
+    ctx.arc(col1Cx - 78, iconCy, iconR, 0, Math.PI * 2);
     ctx.fillStyle = NAVY;
     ctx.fill();
-    ctx.font = '20px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff';
-    ctx.fillText('📖', col1Cx - 78, boxY + boxH / 2 + 1);
+    drawBookIcon(col1Cx - 78, iconCy, 20, '#ffffff');
 
     ctx.textAlign = 'left';
     ctx.fillStyle = NAVY;
@@ -2000,19 +1954,16 @@ function escMultiline(s = '') {
     ctx.fillText(`${reading.correct} / ${reading.total}`, col1Cx - 48, boxY + 52);
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
-    const rScore = (reading.correct * 50 / Math.max(1, reading.total));
+    const rScore = reading.total > 0 ? (reading.correct * 50 / reading.total) : 0;
     ctx.fillText(`(${rScore.toFixed(1)} / 50.0)`, col1Cx - 48, boxY + 72);
 
-    // Kolom 2: Listening
+    // Col 2: Listening
     const col2Cx = boxX + colW * 1.5;
     ctx.beginPath();
-    ctx.arc(col2Cx - 78, boxY + boxH / 2, iconR, 0, Math.PI * 2);
+    ctx.arc(col2Cx - 78, iconCy, iconR, 0, Math.PI * 2);
     ctx.fillStyle = NAVY;
     ctx.fill();
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff';
-    ctx.font = '20px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
-    ctx.fillText('🎧', col2Cx - 78, boxY + boxH / 2 + 1);
+    drawHeadphonesIcon(col2Cx - 78, iconCy, 22, '#ffffff');
 
     ctx.textAlign = 'left';
     ctx.fillStyle = NAVY;
@@ -2022,10 +1973,10 @@ function escMultiline(s = '') {
     ctx.fillText(`${listening.correct} / ${listening.total}`, col2Cx - 48, boxY + 52);
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = '500 9px "Plus Jakarta Sans", sans-serif';
-    const lScore = (listening.correct * 50 / Math.max(1, listening.total));
+    const lScore = listening.total > 0 ? (listening.correct * 50 / listening.total) : 0;
     ctx.fillText(`(${lScore.toFixed(1)} / 50.0)`, col2Cx - 48, boxY + 72);
 
-    // Kolom 3: Total
+    // Col 3: Total Score
     const col3Cx = boxX + colW * 2.5;
     ctx.textAlign = 'center';
     ctx.fillStyle = NAVY;
@@ -2038,12 +1989,11 @@ function escMultiline(s = '') {
     ctx.fillText(`(${score.toFixed(1)} / 100.0)`, col3Cx, boxY + 72);
 
     /* ============================================================
-       SECTION 6: FOOTER INFO (y=575–618)
+       9. FOOTER INFO
        ============================================================ */
     const footerY = 585;
     const footColW = boxW / 4;
     const footStartX = boxX;
-
     const footerItems = [
       { label: 'Test Type', value: 'Korean Language Competency Test', sub: '(Reading & Listening)' },
       { label: 'Total Questions', value: `${totalQuestions} Soal`, sub: `(${reading.total} Reading + ${listening.total} Listening)` },
@@ -2054,7 +2004,6 @@ function escMultiline(s = '') {
     footerItems.forEach((item, i) => {
       const cx = footStartX + footColW * (i + 0.5);
       ctx.textAlign = 'center';
-
       ctx.fillStyle = TEXT_MUTED;
       ctx.font = '600 9px "Plus Jakarta Sans", sans-serif';
       ctx.letterSpacing = '0.4px';
@@ -2083,12 +2032,12 @@ function escMultiline(s = '') {
     });
 
     /* ============================================================
-       SECTION 7: SIGNATURE (bottom-left) — BIGGER + proper
+       10. SIGNATURE — lebih ke kanan, lebih besar, teks lebih naik
        ============================================================ */
-    const sigX = 90;
-    const sigY = 615;
-    const sigMaxW = 270;
-    const sigMaxH = 70;
+    const sigX = 118;
+    const sigY = 585;
+    const sigMaxW = 320;
+    const sigMaxH = 90;
 
     if (signatureImg) {
       ctx.save();
@@ -2107,14 +2056,14 @@ function escMultiline(s = '') {
       ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(sigX, sigY + 40);
-      ctx.bezierCurveTo(sigX + 50, sigY + 5, sigX + 100, sigY + 60, sigX + 160, sigY + 20);
-      ctx.bezierCurveTo(sigX + 200, sigY - 5, sigX + 230, sigY + 45, sigX + 260, sigY + 28);
+      ctx.moveTo(sigX, sigY + 50);
+      ctx.bezierCurveTo(sigX + 60, sigY + 10, sigX + 120, sigY + 70, sigX + 190, sigY + 25);
+      ctx.bezierCurveTo(sigX + 240, sigY - 5, sigX + 280, sigY + 55, sigX + 310, sigY + 35);
       ctx.stroke();
     }
 
     // Signature line
-    const sigLineY = 700;
+    const sigLineY = 686;
     ctx.strokeStyle = NAVY;
     ctx.lineWidth = 1.2;
     ctx.beginPath();
@@ -2122,20 +2071,20 @@ function escMultiline(s = '') {
     ctx.lineTo(sigX + 260, sigLineY);
     ctx.stroke();
 
-    // Labels
+    // Labels (lebih naik)
     ctx.textAlign = 'left';
     ctx.fillStyle = NAVY;
     ctx.font = '800 13px "Playfair Display", Georgia, serif';
-    ctx.fillText('Director', sigX + 88, sigLineY + 20);
+    ctx.fillText('Director', sigX + 88, sigLineY + 18);
 
     ctx.fillStyle = TEXT_MUTED;
     ctx.font = '700 10px "Plus Jakarta Sans", sans-serif';
     ctx.letterSpacing = '0.8px';
-    ctx.fillText('KR-DICT', sigX + 96, sigLineY + 38);
+    ctx.fillText('KR-DICT', sigX + 96, sigLineY + 33);
     ctx.letterSpacing = '0px';
 
     /* ============================================================
-       SECTION 8: MOTTO (center bottom)
+       11. MOTTO
        ============================================================ */
     ctx.textAlign = 'center';
     ctx.fillStyle = GOLD_DARK;
@@ -2148,151 +2097,117 @@ function escMultiline(s = '') {
     drawOrnamentalDivider(ctx, W / 2, 700, 300, GOLD);
 
     /* ============================================================
-       SECTION 9: OFFICIAL SEAL (bottom-right) — premium medal
+       12. OFFICIAL SEAL — clean, no curved line through text
        ============================================================ */
-    const drawOfficialSeal = (cx, cy, r) => {
-      // ---- Ribbons (behind seal) ----
-      ctx.save();
-      // Left ribbon
-      ctx.fillStyle = NAVY_DARK;
+    const sealCx = 970;
+    const sealCy = 655;
+    const sealR = 44;
+
+    // Ribbons behind seal
+    ctx.save();
+    // Left ribbon
+    ctx.fillStyle = NAVY_DARK;
+    ctx.beginPath();
+    ctx.moveTo(sealCx - 22, sealCy + sealR - 2);
+    ctx.lineTo(sealCx - 34, sealCy + sealR + 52);
+    ctx.lineTo(sealCx - 12, sealCy + sealR + 44);
+    ctx.lineTo(sealCx, sealCy + sealR + 52);
+    ctx.lineTo(sealCx - 4, sealCy + sealR - 2);
+    ctx.closePath();
+    ctx.fill();
+    // Right ribbon
+    ctx.fillStyle = GOLD_DARK;
+    ctx.beginPath();
+    ctx.moveTo(sealCx + 22, sealCy + sealR - 2);
+    ctx.lineTo(sealCx + 34, sealCy + sealR + 52);
+    ctx.lineTo(sealCx + 12, sealCy + sealR + 44);
+    ctx.lineTo(sealCx, sealCy + sealR + 52);
+    ctx.lineTo(sealCx + 4, sealCy + sealR - 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Scalloped edge (24 petals)
+    const petals = 24;
+    const petalR = 5;
+    ctx.fillStyle = GOLD;
+    for (let i = 0; i < petals; i++) {
+      const ang = (i / petals) * Math.PI * 2 - Math.PI / 2;
+      const px = sealCx + Math.cos(ang) * (sealR - 3);
+      const py = sealCy + Math.sin(ang) * (sealR - 3);
       ctx.beginPath();
-      ctx.moveTo(cx - r * 0.55, cy + r * 0.55);
-      ctx.lineTo(cx - r * 0.85, cy + r * 1.85);
-      ctx.lineTo(cx - r * 0.35, cy + r * 1.65);
-      ctx.lineTo(cx - r * 0.10, cy + r * 1.85);
-      ctx.lineTo(cx - r * 0.05, cy + r * 0.55);
-      ctx.closePath();
+      ctx.arc(px, py, petalR, 0, Math.PI * 2);
       ctx.fill();
+    }
 
-      // Right ribbon
+    // Main gold ring
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, sealR - 3, 0, Math.PI * 2);
+    ctx.fillStyle = GOLD;
+    ctx.fill();
+
+    // Thin inner gold ring
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, sealR - 7, 0, Math.PI * 2);
+    ctx.strokeStyle = GOLD_LIGHT;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Navy disc
+    ctx.beginPath();
+    ctx.arc(sealCx, sealCy, sealR - 10, 0, Math.PI * 2);
+    ctx.fillStyle = NAVY;
+    ctx.fill();
+
+    // Small decorative dots around inner edge
+    ctx.fillStyle = GOLD_LIGHT;
+    for (let i = 0; i < 12; i++) {
+      const ang = (i / 12) * Math.PI * 2;
+      const px = sealCx + Math.cos(ang) * (sealR - 8);
+      const py = sealCy + Math.sin(ang) * (sealR - 8);
       ctx.beginPath();
-      ctx.moveTo(cx + r * 0.55, cy + r * 0.55);
-      ctx.lineTo(cx + r * 0.85, cy + r * 1.85);
-      ctx.lineTo(cx + r * 0.35, cy + r * 1.65);
-      ctx.lineTo(cx + r * 0.10, cy + r * 1.85);
-      ctx.lineTo(cx + r * 0.05, cy + r * 0.55);
-      ctx.closePath();
+      ctx.arc(px, py, 0.8, 0, Math.PI * 2);
       ctx.fill();
-      ctx.restore();
+    }
 
-      // ---- Scalloped gold edge (petals) ----
-      const petals = 24;
-      const petalR = r * 0.13;
-      const petalDist = r * 0.94;
-      ctx.fillStyle = GOLD;
-      for (let i = 0; i < petals; i++) {
-        const ang = (i / petals) * Math.PI * 2 - Math.PI / 2;
-        const px = cx + Math.cos(ang) * petalDist;
-        const py = cy + Math.sin(ang) * petalDist;
-        ctx.beginPath();
-        ctx.arc(px, py, petalR, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    // Book icon (top-center)
+    ctx.fillStyle = GOLD;
+    const bkW = 22;
+    const bkH = 15;
+    const bkY = sealCy - 12;
+    // Left page
+    ctx.beginPath();
+    ctx.moveTo(sealCx - bkW / 2, bkY - bkH / 2);
+    ctx.lineTo(sealCx - bkW / 2, bkY + bkH / 2);
+    ctx.lineTo(sealCx - 1, bkY + bkH / 2 - 2);
+    ctx.lineTo(sealCx - 1, bkY - bkH / 2 - 2);
+    ctx.closePath();
+    ctx.fill();
+    // Right page
+    ctx.beginPath();
+    ctx.moveTo(sealCx + bkW / 2, bkY - bkH / 2);
+    ctx.lineTo(sealCx + bkW / 2, bkY + bkH / 2);
+    ctx.lineTo(sealCx + 1, bkY + bkH / 2 - 2);
+    ctx.lineTo(sealCx + 1, bkY - bkH / 2 - 2);
+    ctx.closePath();
+    ctx.fill();
 
-      // ---- Main gold ring ----
+    // "KR-DICT" text (clean area, below book)
+    ctx.fillStyle = GOLD;
+    ctx.font = '900 9px "Playfair Display", Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.letterSpacing = '1.2px';
+    ctx.fillText('KR-DICT', sealCx, sealCy + 12);
+    ctx.letterSpacing = '0px';
+
+    // 3 small dots below text
+    ctx.fillStyle = GOLD;
+    for (let i = -1; i <= 1; i++) {
       ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.96, 0, Math.PI * 2);
-      ctx.fillStyle = GOLD;
+      ctx.arc(sealCx + i * 8, sealCy + 26, 1.2, 0, Math.PI * 2);
       ctx.fill();
-
-      // ---- Inner shadow ring ----
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.86, 0, Math.PI * 2);
-      ctx.fillStyle = GOLD_DARK;
-      ctx.fill();
-
-      // ---- Navy inner disc ----
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.82, 0, Math.PI * 2);
-      ctx.fillStyle = NAVY;
-      ctx.fill();
-
-      // ---- Thin gold inner ring ----
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.76, 0, Math.PI * 2);
-      ctx.strokeStyle = GOLD;
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
-
-      // ---- Laurel wreath (2 arcs) ----
-      ctx.strokeStyle = GOLD;
-      ctx.lineWidth = 2.2;
-      ctx.lineCap = 'round';
-
-      // Left branch (arc on left side)
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.62, Math.PI * 0.65, Math.PI * 1.15);
-      ctx.stroke();
-
-      // Right branch
-      ctx.beginPath();
-      ctx.arc(cx, cy, r * 0.62, -Math.PI * 0.15, Math.PI * 0.35);
-      ctx.stroke();
-
-      // Leaves (dots along arcs)
-      const leaves = 9;
-      ctx.fillStyle = GOLD;
-      for (let i = 0; i < leaves; i++) {
-        // Left side leaves
-        const la = Math.PI * 0.67 + (i / (leaves - 1)) * Math.PI * 0.46;
-        const lx = cx + Math.cos(la) * r * 0.62;
-        const ly = cy + Math.sin(la) * r * 0.62;
-        ctx.beginPath();
-        ctx.arc(lx, ly, 1.6, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Right side leaves
-        const ra = -Math.PI * 0.13 + (i / (leaves - 1)) * Math.PI * 0.46;
-        const rx = cx + Math.cos(ra) * r * 0.62;
-        const ry = cy + Math.sin(ra) * r * 0.62;
-        ctx.beginPath();
-        ctx.arc(rx, ry, 1.6, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // ---- Book icon in upper-center ----
-      const bkW = r * 0.42;
-      const bkH = r * 0.32;
-      const bkY = cy - r * 0.18;
-
-      ctx.fillStyle = GOLD;
-      // Left page
-      ctx.beginPath();
-      ctx.moveTo(cx - bkW / 2, bkY - bkH / 2);
-      ctx.lineTo(cx - bkW / 2, bkY + bkH / 2);
-      ctx.lineTo(cx - 1.2, bkY + bkH / 2 - 2);
-      ctx.lineTo(cx - 1.2, bkY - bkH / 2 - 2);
-      ctx.closePath();
-      ctx.fill();
-
-      // Right page
-      ctx.beginPath();
-      ctx.moveTo(cx + bkW / 2, bkY - bkH / 2);
-      ctx.lineTo(cx + bkW / 2, bkY + bkH / 2);
-      ctx.lineTo(cx + 1.2, bkY + bkH / 2 - 2);
-      ctx.lineTo(cx + 1.2, bkY - bkH / 2 - 2);
-      ctx.closePath();
-      ctx.fill();
-
-      // ---- "KR-DICT" text below book ----
-      ctx.fillStyle = GOLD;
-      ctx.font = '900 9px "Playfair Display", Georgia, serif';
-      ctx.textAlign = 'center';
-      ctx.letterSpacing = '1.5px';
-      ctx.fillText('KR-DICT', cx, cy + r * 0.42);
-      ctx.letterSpacing = '0px';
-
-      // ---- 3 small dots below text ----
-      ctx.fillStyle = GOLD;
-      for (let i = -1; i <= 1; i++) {
-        ctx.beginPath();
-        ctx.arc(cx + i * r * 0.14, cy + r * 0.62, 1.2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    };
-
-    // Seal center: X=965, Y=650, R=42
-    drawOfficialSeal(965, 650, 42);
+    }
 
     return cvs;
   }
