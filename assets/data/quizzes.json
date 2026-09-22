@@ -439,6 +439,41 @@
                 }
               ],
               "correct": "A"
+            },
+            {
+              "id": "q-mucjly718q97",
+              "type": "listening",
+              "text": "Jawab",
+              "image": "",
+              "audioText": "안녕하세요?\n네 안녕하세요\n일음이 뭐예요?\n저는 리얀이예요",
+              "audioTarget": "both",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "",
+                  "audioText": "일음",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "",
+                  "audioText": "나라",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "",
+                  "audioText": "물건",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "",
+                  "audioText": "직업",
+                  "image": ""
+                }
+              ],
+              "correct": "A"
             }
           ]
         }
