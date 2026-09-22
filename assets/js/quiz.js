@@ -662,8 +662,28 @@ function escMultiline(s = '') {
   /* ==========================================
      SUBMIT
      ========================================== */
-  function submitTest() {
+
+function submitTest() {
     if (!activeSession) return;
+
+    // ✅ VALIDASI: cek semua soal sudah dijawab
+    const totalQ = activeSession.flatQuestions.length;
+    const answeredKeys = Object.keys(activeSession.answers).filter(k => activeSession.answers[k] != null);
+    const answered = answeredKeys.length;
+
+    console.log('[Quiz] Submit clicked. Answered:', answered, '/', totalQ);
+
+    if (answered < totalQ) {
+      const unanswered = [];
+      for (let i = 0; i < totalQ; i++) {
+        if (activeSession.answers[i] == null) unanswered.push(i + 1);
+      }
+      console.log('[Quiz] Belum lengkap. Unanswered:', unanswered);
+      showIncompleteModal(unanswered, answered, totalQ);
+      return; // ✅ WAJIB — hentikan eksekusi di sini
+    }
+
+    console.log('[Quiz] Semua lengkap, submit sekarang');
     clearInterval(timerInterval);
 
     const { pkg, flatQuestions, answers, startedAt, mode } = activeSession;
