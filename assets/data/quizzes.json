@@ -221,6 +221,41 @@
                 }
               ],
               "correct": "B"
+            },
+            {
+              "id": "q-muc5bqttedml",
+              "type": "reading",
+              "text": "개신교 신자들은 교회에서 예배를 드립니다. _________다양한 모임과 활동을 통해 신앙생활을 합니다.",
+              "image": "",
+              "audioText": "",
+              "audioTarget": "question",
+              "options": [
+                {
+                  "id": "A",
+                  "text": "그래서",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "B",
+                  "text": "그리고",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "C",
+                  "text": "그런데",
+                  "audioText": "",
+                  "image": ""
+                },
+                {
+                  "id": "D",
+                  "text": "그러면",
+                  "audioText": "",
+                  "image": ""
+                }
+              ],
+              "correct": "B"
             }
           ]
         },
