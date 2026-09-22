@@ -1,16 +1,19 @@
 // ==========================================
-// KR-Dict — Main App v9.5 (FINAL)
-// + FIXED: override kosong tidak lagi dihapus (data admin aman)
-// + FIXED: __KR_ORIGINAL__ untuk reset yang benar
-// + FIXED: XSS prevention di toast (whitelist tag)
-// + FIXED: safeOnclickString untuk prevent injection di onclick
-// + FIXED: handleImageSelect selalu clear input
-// + FIXED: scroll target pakai main.app-main
+// KR-Dict — Main App v9.6 (FINAL)
+// + FIXED: override kosong tidak lagi dihapus
+// + FIXED: __KR_ORIGINAL__ untuk reset
+// + FIXED: XSS prevention di toast (whitelist)
+// + FIXED: safeOnclickString untuk onclick
+// + FIXED: handleImageSelect clear input
+// + FIXED: scroll target main.app-main
+// + FIXED: formatHTTPError untuk pesan error jelas
+// + FIXED: Network error handling di semua provider
+// + FIXED: testConnection dengan detail log
+// + FIXED: Groq models (hapus mixtral deprecated)
 // ==========================================
 
 /* ---------- LOAD OVERRIDE DARI ADMIN ---------- */
 (function loadOverrides() {
-  // ✅ Simpan data ORIGINAL sebelum di-override (untuk fitur Reset)
   window.__KR_ORIGINAL__ = {
     vocab: (window.vocabTextbookData || []).slice(),
     grammar: (window.grammarData || []).slice(),
@@ -26,26 +29,17 @@
     } catch { return null; }
   };
 
-  // ✅ FIX: Jangan hapus override kosong — admin mungkin sengaja menghapus semua
   const vocabOvr = get('vocabOverride');
-  if (vocabOvr && Array.isArray(vocabOvr)) {
-    window.vocabTextbookData = vocabOvr;
-  }
+  if (vocabOvr && Array.isArray(vocabOvr)) window.vocabTextbookData = vocabOvr;
 
   const grammarOvr = get('grammarOverride');
-  if (grammarOvr && Array.isArray(grammarOvr)) {
-    window.grammarData = grammarOvr;
-  }
+  if (grammarOvr && Array.isArray(grammarOvr)) window.grammarData = grammarOvr;
 
   const cultureOvr = get('cultureOverride');
-  if (cultureOvr && cultureOvr.babs && Array.isArray(cultureOvr.babs)) {
-    window.CULTURE_DATA = cultureOvr;
-  }
+  if (cultureOvr && cultureOvr.babs && Array.isArray(cultureOvr.babs)) window.CULTURE_DATA = cultureOvr;
 
   const downloadsOvr = get('downloadsOverride');
-  if (downloadsOvr && Array.isArray(downloadsOvr)) {
-    window.downloadsData = downloadsOvr;
-  }
+  if (downloadsOvr && Array.isArray(downloadsOvr)) window.downloadsData = downloadsOvr;
 })();
 
 /* ---------- TOAST (whitelist tag aman) ---------- */
@@ -57,11 +51,7 @@ KR.toast = (function () {
     if (!container) { console.warn('[Toast]', msg); return; }
     const div = document.createElement('div');
     div.className = 'toast ' + type;
-    // ✅ FIX: whitelist tag aman (strong, em, br, code), sisanya dihapus
-    const cleaned = String(msg).replace(
-      /<(?!\/?(strong|em|br|code)\b)[^>]*>/gi,
-      ''
-    );
+    const cleaned = String(msg).replace(/<(?!\/?(strong|em|br|code)\b)[^>]*>/gi, '');
     div.innerHTML = `<div style="flex:1">${cleaned}</div>`;
     container.appendChild(div);
     setTimeout(() => {
@@ -78,7 +68,6 @@ KR.toast = (function () {
 })();
 
 /* ---------- SAFE HELPERS ---------- */
-// ✅ FIX: Escape string untuk dipakai di dalam onclick attribute JS
 function safeOnclickString(str) {
   return String(str || '')
     .replace(/\\/g, '\\\\')
@@ -88,7 +77,6 @@ function safeOnclickString(str) {
     .replace(/</g, '\\x3c');
 }
 
-// ✅ FIX: Escape HTML untuk dirender ke dalam tag text
 function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -133,7 +121,7 @@ const AI_PROVIDERS = {
     name: 'Groq (Gratis & Cepat)',
     icon: '⚡',
     endpoint: 'https://api.groq.com/openai/v1/chat/completions',
-    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768', 'gemma2-9b-it'],
+    models: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'gemma2-9b-it'],
     defaultModel: 'llama-3.3-70b-versatile',
     keyUrl: 'https://console.groq.com/keys',
     desc: 'Gratis, sangat cepat, limit tinggi',
@@ -206,6 +194,23 @@ const AI_PROVIDERS = {
     format: 'openai',
   },
 };
+
+/* ---------- FORMAT HTTP ERROR ---------- */
+function formatHTTPError(status, data) {
+  const serverMsg = data?.error?.message || data?.message || (typeof data?.error === 'string' ? data.error : '');
+  const hints = {
+    400: 'Permintaan tidak valid (mungkin model deprecated atau format salah)',
+    401: 'API Key tidak valid atau expired → cek di dashboard provider',
+    403: 'Akses ditolak (API Key tidak punya izin, atau model tidak tersedia)',
+    404: 'Model atau endpoint tidak ditemukan (mungkin model sudah deprecated atau API Key salah)',
+    429: 'Rate limit tercapai → tunggu 1 menit atau ganti provider',
+    500: 'Server provider error → coba lagi nanti',
+    502: 'Bad gateway provider → coba lagi nanti',
+    503: 'Provider sedang maintenance → coba lagi nanti',
+  };
+  const hint = hints[status] || 'Kesalahan tidak terduga';
+  return `HTTP ${status}: ${hint}${serverMsg ? ' — ' + serverMsg : ''}`;
+}
 
 /* ---------- AI CONFIG STORAGE ---------- */
 function getAIConfig() {
@@ -362,6 +367,9 @@ KR.ai = (function () {
     }
   }
 
+  /* ==========================================
+     TEST CONNECTION — dengan log detail
+     ========================================== */
   async function testConnection() {
     const cfg = getAIConfig();
     if (!cfg.apiKey) {
@@ -372,21 +380,35 @@ KR.ai = (function () {
       KR.toast?.error('Isi Custom Endpoint URL dulu');
       return;
     }
-    KR.toast?.info('Testing koneksi...');
+
+    console.log('%c[AI Test] Memulai test koneksi...', 'color:#6366f1;font-weight:800;');
+    console.log('[AI Test] Provider:', cfg.provider);
+    console.log('[AI Test] Model:', cfg.model);
+    console.log('[AI Test] Key length:', cfg.apiKey.length);
+    console.log('[AI Test] Key prefix:', cfg.apiKey.slice(0, 6) + '...' + cfg.apiKey.slice(-4));
+    console.log('[AI Test] Endpoint:', cfg.provider === 'custom' ? cfg.customEndpoint : AI_PROVIDERS[cfg.provider]?.endpoint);
+
+    KR.toast?.info(`Testing ${cfg.provider}...`, 5000);
+    const t0 = Date.now();
+
     try {
-      await callAIProvider({
+      const result = await callAIProvider({
         provider: cfg.provider,
-        apiKey: cfg.apiKey,
+        apiKey: cfg.apiKey.trim(),
         model: cfg.model,
         customEndpoint: cfg.customEndpoint,
         systemPrompt: 'Balas dengan satu kata: OK',
         messages: [{ role: 'user', content: 'Test' }],
       });
-      KR.toast?.success('✅ Koneksi berhasil!');
+      const dt = Date.now() - t0;
+      console.log('%c[AI Test] ✅ BERHASIL', 'color:#10b981;font-weight:800;', `(${dt}ms)`, 'Respons:', result);
+      KR.toast?.success(`✅ Koneksi berhasil! (${dt}ms)`, 4000);
       updateStatusFromConfig();
     } catch (err) {
-      console.error('[Test]', err);
-      KR.toast?.error('❌ Gagal: ' + escapeHtml(err.message));
+      console.error('%c[AI Test] ❌ GAGAL', 'color:#ef4444;font-weight:800;', err);
+      console.error('[AI Test] Error message:', err.message);
+      console.error('[AI Test] Error stack:', err.stack);
+      KR.toast?.error('❌ ' + escapeHtml(err.message), 10000);
     }
   }
 
@@ -626,17 +648,25 @@ KR.ai = (function () {
       }
       return { role, parts: [{ text: String(m.content) }] };
     });
-    const res = await fetch(endpoint + '?key=' + apiKey, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents,
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Gemini error');
+
+    let res;
+    try {
+      res = await fetch(endpoint + '?key=' + apiKey, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents,
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          generationConfig: { temperature: 0.7, maxOutputTokens: 2048 },
+        }),
+      });
+    } catch (networkErr) {
+      console.error('[Network Error - Gemini]', networkErr);
+      throw new Error('Tidak bisa menghubungi Gemini. Cek: (1) koneksi internet, (2) API Key, (3) provider diblokir ISP/region.');
+    }
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(formatHTTPError(res.status, data));
     return data.candidates?.[0]?.content?.parts?.[0]?.text || '(Tidak ada respons)';
   }
 
@@ -661,18 +691,26 @@ KR.ai = (function () {
       headers['HTTP-Referer'] = location.origin || 'https://localhost';
       headers['X-Title'] = 'KR-Dict Learning Hub';
     }
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'system', content: systemPrompt }, ...converted],
-        temperature: 0.7,
-        max_tokens: 2048,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+
+    let res;
+    try {
+      res = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'system', content: systemPrompt }, ...converted],
+          temperature: 0.7,
+          max_tokens: 2048,
+        }),
+      });
+    } catch (networkErr) {
+      console.error('[Network Error - OpenAI-compat]', networkErr);
+      throw new Error('Tidak bisa menghubungi server. Cek: (1) koneksi internet, (2) API Key, (3) provider diblokir ISP/region.');
+    }
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(formatHTTPError(res.status, data));
     return data.choices?.[0]?.message?.content || '(Tidak ada respons)';
   }
 
@@ -690,18 +728,26 @@ KR.ai = (function () {
       }
       return { role: m.role, content: [{ type: 'text', text: String(m.content) }] };
     });
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({ model, max_tokens: 2048, system: systemPrompt, messages: converted }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+
+    let res;
+    try {
+      res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({ model, max_tokens: 2048, system: systemPrompt, messages: converted }),
+      });
+    } catch (networkErr) {
+      console.error('[Network Error - Anthropic]', networkErr);
+      throw new Error('Tidak bisa menghubungi Anthropic. Cek: (1) koneksi internet, (2) API Key, (3) provider diblokir ISP/region.');
+    }
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(formatHTTPError(res.status, data));
     return data.content?.[0]?.text || '(Tidak ada respons)';
   }
 
@@ -746,7 +792,6 @@ KR.ai = (function () {
 
   function handleImageSelect(e) {
     const file = e.target.files[0];
-    // ✅ FIX: Selalu clear input value — supaya bisa pilih file yang sama 2x
     e.target.value = '';
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
@@ -781,7 +826,7 @@ KR.ai = (function () {
 })();
 
 /* ==========================================
-   BULLETPROOF SETTINGS TOGGLE
+   SETTINGS TOGGLE
    ========================================== */
 function toggleChatSettings() {
   const sheet = document.getElementById('chat-settings');
@@ -976,37 +1021,47 @@ async function callAIDirect(cfg, systemPrompt, messages) {
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: String(m.content) }],
     }));
-    const res = await fetch(endpoint + '?key=' + cfg.apiKey, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents,
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Error');
+    let res;
+    try {
+      res = await fetch(endpoint + '?key=' + cfg.apiKey, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents,
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+        }),
+      });
+    } catch (e) {
+      throw new Error('Network error');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(formatHTTPError(res.status, data));
     return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
   }
 
   if (provider.format === 'anthropic') {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': cfg.apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: cfg.model,
-        max_tokens: 300,
-        system: systemPrompt,
-        messages: messages.map(m => ({ role: m.role, content: [{ type: 'text', text: String(m.content) }] })),
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Error');
+    let res;
+    try {
+      res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': cfg.apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+        },
+        body: JSON.stringify({
+          model: cfg.model,
+          max_tokens: 300,
+          system: systemPrompt,
+          messages: messages.map(m => ({ role: m.role, content: [{ type: 'text', text: String(m.content) }] })),
+        }),
+      });
+    } catch (e) {
+      throw new Error('Network error');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(formatHTTPError(res.status, data));
     return data.content?.[0]?.text || '';
   }
 
@@ -1018,17 +1073,22 @@ async function callAIDirect(cfg, systemPrompt, messages) {
     headers['HTTP-Referer'] = location.origin || 'https://localhost';
     headers['X-Title'] = 'KR-Dict Learning Hub';
   }
-  const res = await fetch(endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model: cfg.model,
-      messages: [{ role: 'system', content: systemPrompt }, ...messages],
-      max_tokens: 300,
-    }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || 'Error');
+  let res;
+  try {
+    res = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: cfg.model,
+        messages: [{ role: 'system', content: systemPrompt }, ...messages],
+        max_tokens: 300,
+      }),
+    });
+  } catch (e) {
+    throw new Error('Network error');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(formatHTTPError(res.status, data));
   return data.choices?.[0]?.message?.content || '';
 }
 
@@ -1128,7 +1188,7 @@ function toggleMenu() {
 }
 
 /* ==========================================
-   NAVIGATION v9.5
+   NAVIGATION v9.6
    ========================================== */
 function showTab(tabId, element) {
   document.body.classList.remove('chat-open');
@@ -1242,7 +1302,6 @@ function renderHangeul() {
               <span><span style="color:var(--text-muted);">Akhir:</span> <strong style="color:var(--accent);">${item.akhir}</strong></span>
              </div>`
           : `<div class="hangeul-sub">${item.rom}</div>`;
-        // ✅ FIX: pakai safeOnclickString
         html += `
           <div class="hangeul-card" onclick="speak('${safeOnclickString(item.hangeul)}')">
             <div style="flex:1; display:flex; align-items:center; justify-content:center;">
@@ -1484,7 +1543,6 @@ function renderCultureDetail(babId) {
     } else {
       vocabHtml = `<p class="v-def" style="text-align:center; color:var(--text-muted); font-style:italic; padding:16px;">Tidak ada detail kosakata.</p>`;
     }
-    // ✅ FIX: pakai safeOnclickString untuk page.korean
     html += `
       <div class="culture-page">
         <div class="culture-korean">${page.korean}</div>
@@ -1510,7 +1568,6 @@ function renderCultureDetail(babId) {
   html += `</div>`;
   container.innerHTML = html;
   if (window.lucide) lucide.createIcons();
-  // ✅ FIX: scroll ke main container, bukan window
   document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -1719,7 +1776,6 @@ function renderQuestion(index) {
   footerContainer.classList.add('translate-y-20', 'opacity-0');
   document.getElementById('next-question-btn').disabled = true;
   const optionsContainer = document.getElementById('quiz-options');
-  // ✅ FIX: pakai safeOnclickString + escape attribute value
   const safeAnswer = safeOnclickString(question.correctAnswer);
   optionsContainer.innerHTML = question.options.map((option, i) => `
     <button class="quiz-option" data-answer="${escapeHtml(option)}" onclick="checkAnswer(this, '${safeAnswer}')">
