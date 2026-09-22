@@ -642,12 +642,10 @@ KR.admin = (function () {
     if (!text.trim()) {
       previewContent.innerHTML = '<span style="font-style:italic;color:#94a3b8;">Ketik pertanyaan untuk melihat preview...</span>';
     } else {
-      const escaped = text
-        .replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
-        .replace(/\r\n/g, '\n')
-        .replace(/\r/g, '\n')
-        .replace(/\n/g, '<br>');
-      previewContent.innerHTML = escaped;
+      const html = (KR.quiz && KR.quiz.formatQuizMarkup)
+        ? KR.quiz.formatQuizMarkup(text)
+        : text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]).replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n/g, '<br>');
+      previewContent.innerHTML = html;
     }
   }
 
@@ -673,10 +671,16 @@ KR.admin = (function () {
 
       <div class="field">
         <label class="field-label">Teks Pertanyaan</label>
-        <textarea id="qText" class="textarea" rows="5" placeholder="Pertanyaan yang ditampilkan&#10;Tekan Enter untuk baris baru" oninput="KR.admin.updateQTextPreview()">${esc(q.text || '')}</textarea>
-        <p style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;display:flex;align-items:center;gap:8px;">
+        <textarea id="qText" class="textarea" rows="5" placeholder="Pertanyaan yang ditampilkan&#10;Tekan Enter untuk baris baru&#10;&#10;Markup:&#10;[[kata]] = underline&#10;**kata** = bold&#10;*kata* = italic" oninput="KR.admin.updateQTextPreview()">${esc(q.text || '')}</textarea>
+        <p style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <i data-lucide="corner-down-left" style="width:11px;height:11px;"></i>
-          <span>Tekan <strong>Enter</strong> untuk baris baru</span>
+          <span>Enter = baris baru</span>
+          <span style="color:#8b5cf6;">·</span>
+          <span><code style="background:#ede9fe;color:#6d28d9;padding:1px 5px;border-radius:3px;font-size:0.68rem;">[[kata]]</code> = <u>underline</u></span>
+          <span style="color:#8b5cf6;">·</span>
+          <span><code style="background:#fef3c7;color:#b45309;padding:1px 5px;border-radius:3px;font-size:0.68rem;">**kata**</code> = <strong>bold</strong></span>
+          <span style="color:#8b5cf6;">·</span>
+          <span><code style="background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;font-size:0.68rem;">*kata*</code> = <em>italic</em></span>
           <span id="qTextLineCount" style="margin-left:auto;font-weight:800;color:#6366f1;">1 baris</span>
         </p>
         <div id="qTextPreview" style="margin-top:8px;padding:10px 12px;background:var(--bg-subtle);border-radius:8px;border-left:3px solid #8b5cf6;font-size:0.85rem;line-height:1.55;color:var(--text-secondary);font-family:'Noto Sans KR',sans-serif;">
@@ -783,7 +787,8 @@ KR.admin = (function () {
             <span class="opt-badge">${String.fromCharCode(65 + i)}</span>
             <button type="button" class="btn-icon-xs danger" data-del="${i}"><i data-lucide="x"></i></button>
           </div>
-          <input type="text" class="input" data-i="${i}" value="${esc(o.text || '')}" placeholder="Teks pilihan" style="margin-bottom:6px">
+          <input type="text" class="input" data-i="${i}" value="${esc(o.text || '')}" placeholder="Teks pilihan — pakai [[kata]] untuk underline" style="margin-bottom:6px">
+          <div class="opt-preview" data-preview="${i}" style="font-family:'Noto Sans KR',sans-serif;font-size:0.85rem;color:var(--text-secondary);padding:6px 10px;background:rgba(99,102,241,0.06);border-radius:6px;margin-bottom:6px;display:none;"></div>
           ${showAudio ? `<input type="text" class="input" data-audio="${i}" value="${esc(o.audioText || '')}" placeholder="🎧 Teks audio (opsional)" style="margin-bottom:6px">` : ''}
           <div class="opt-img-area" data-img="${i}"></div>
           <input type="file" class="hidden opt-img-input" data-img-input="${i}" accept="image/*">
@@ -862,6 +867,19 @@ KR.admin = (function () {
             if (KR.toast) KR.toast.error('Gagal memproses gambar');
           }
         });
+      });
+
+      options.forEach((o, i) => {
+        if (o.text && o.text.trim()) {
+          const previewEl = list.querySelector(`[data-preview="${i}"]`);
+          if (previewEl) {
+            const html = (KR.quiz && KR.quiz.formatQuizMarkup)
+              ? KR.quiz.formatQuizMarkup(o.text)
+              : o.text;
+            previewEl.innerHTML = '<span style="color:#94a3b8;font-size:0.68rem;font-weight:800;margin-right:6px;">PREVIEW:</span>' + html;
+            previewEl.style.display = 'block';
+          }
+        }
       });
 
       if (window.lucide) lucide.createIcons();
