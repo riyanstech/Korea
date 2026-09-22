@@ -2837,5 +2837,103 @@ select.chat-settings-input {
 }
 
 /* ============================================================
+   30. QUIZ DIALOG PREVIEW — Bubble percakapan 2 orang
+   ============================================================ */
+.quiz-dialog-preview {
+  margin: 16px 0 24px;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dark .quiz-dialog-preview {
+  background: linear-gradient(135deg, rgba(30,41,59,0.5) 0%, rgba(51,65,85,0.5) 100%);
+  border-color: rgba(99,102,241,0.25);
+}
+
+.quiz-dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6366f1;
+  margin-bottom: 4px;
+}
+
+.quiz-dialog-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  max-width: 85%;
+  animation: dialogIn 300ms cubic-bezier(0.34, 1.2, 0.64, 1);
+  position: relative;
+}
+@keyframes dialogIn {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.quiz-dialog-bubble.from-woman {
+  align-self: flex-start;
+  background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+  border: 1px solid rgba(236,72,153,0.25);
+}
+.dark .quiz-dialog-bubble.from-woman {
+  background: linear-gradient(135deg, rgba(236,72,153,0.15) 0%, rgba(219,39,119,0.15) 100%);
+  border-color: rgba(236,72,153,0.35);
+}
+
+.quiz-dialog-bubble.from-man {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 1px solid rgba(59,130,246,0.25);
+}
+.dark .quiz-dialog-bubble.from-man {
+  background: linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.15) 100%);
+  border-color: rgba(59,130,246,0.35);
+}
+
+.quiz-dialog-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  line-height: 1;
+  background: rgba(255,255,255,0.7);
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+.dark .quiz-dialog-avatar {
+  background: rgba(255,255,255,0.1);
+}
+
+.quiz-dialog-text {
+  font-family: 'Noto Sans KR', 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #1e293b;
+  word-break: break-word;
+  padding-top: 6px;
+}
+.dark .quiz-dialog-text {
+  color: #f1f5f9;
+}
+
+/* ============================================================
+   END OF FILE
+   ============================================================ */
+
+/* ============================================================
    END OF FILE
    ============================================================ */
