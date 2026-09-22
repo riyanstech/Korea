@@ -218,7 +218,10 @@ KR.admin = (function () {
     if (KR.github && KR.github.isConfigured()) {
       KR.github.uploadFile(path, JSON.stringify(data, null, 2), msg)
         .then(() => KR.toast?.success('✅ Sync ke GitHub'))
-        .catch(e => console.warn('[GitHub]', e));
+        .catch(e => {
+          console.warn('[GitHub]', e);
+          KR.toast?.error(`⚠️ Gagal sync ke GitHub: ${e.message || 'Unknown error'}`);
+        });
     }
   }
 
