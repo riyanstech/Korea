@@ -576,7 +576,33 @@ function escMultiline(s = '') {
     els.testPrev.disabled = currentIdx === 0;
     const isLast = currentIdx === flatQuestions.length - 1;
     els.testNext.classList.toggle('hidden', isLast);
-    els.testSubmit.classList.toggle('hidden', !isLast);
+
+    // ✅ Tombol Submit selalu kelihatan di soal terakhir
+    if (isLast) {
+      els.testSubmit.classList.remove('hidden');
+      const answeredCount = Object.keys(answers).filter(k => answers[k] != null).length;
+      const totalCount = flatQuestions.length;
+      const allAnswered = answeredCount === totalCount;
+
+      // Update tombol submit state
+      els.testSubmit.disabled = !allAnswered;
+      els.testSubmit.classList.toggle('opacity-50', !allAnswered);
+      els.testSubmit.classList.toggle('cursor-not-allowed', !allAnswered);
+
+      // Update label tombol
+      if (allAnswered) {
+        els.testSubmit.innerHTML = `
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Kirim</span>`;
+      } else {
+        const remaining = totalCount - answeredCount;
+        els.testSubmit.innerHTML = `
+          <i data-lucide="alert-circle" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Sisa ${remaining} soal</span>`;
+      }
+    } else {
+      els.testSubmit.classList.add('hidden');
+    }
 
     renderNav();
     document.querySelector('main.app-main')?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -611,6 +637,11 @@ function escMultiline(s = '') {
       activeSession.revealed[idx] = true;
     }
     renderQuestion();
+
+    // ✅ Update tombol submit langsung kalau user sedang di soal terakhir
+    if (activeSession && activeSession.currentIdx === activeSession.flatQuestions.length - 1) {
+      // renderQuestion sudah update, tapi kalau perlu tambahan logic bisa di sini
+    }
   }
 
   function renderNav() {
