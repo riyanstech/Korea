@@ -580,25 +580,25 @@ function escMultiline(s = '') {
     // ✅ Tombol Submit selalu kelihatan di soal terakhir
     if (isLast) {
       els.testSubmit.classList.remove('hidden');
+      els.testSubmit.disabled = false;  // ✅ SELALU BISA DIKLIK
+
       const answeredCount = Object.keys(answers).filter(k => answers[k] != null).length;
       const totalCount = flatQuestions.length;
       const allAnswered = answeredCount === totalCount;
 
-      // Update tombol submit state
-      els.testSubmit.disabled = !allAnswered;
-      els.testSubmit.classList.toggle('opacity-50', !allAnswered);
-      els.testSubmit.classList.toggle('cursor-not-allowed', !allAnswered);
-
-      // Update label tombol
+      // Update label tombol saja (JANGAN disable)
       if (allAnswered) {
         els.testSubmit.innerHTML = `
           <i data-lucide="send" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Kirim</span>`;
+        els.testSubmit.classList.remove('opacity-60');
       } else {
         const remaining = totalCount - answeredCount;
         els.testSubmit.innerHTML = `
           <i data-lucide="alert-circle" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Sisa ${remaining} soal</span>`;
+        // Tetap boleh klik, cuma kasih hint visual
+        els.testSubmit.classList.add('opacity-60');
       }
     } else {
       els.testSubmit.classList.add('hidden');
@@ -2372,51 +2372,79 @@ function escMultiline(s = '') {
     });
   }
 
-  /* ==========================================
-     ✅ MODAL: Soal Belum Lengkap
-     ========================================== */
   function showIncompleteModal(unanswered, answered, total) {
     // Hapus modal lama kalau ada
     document.getElementById('quizIncompleteModal')?.remove();
 
+    const percent = Math.round((answered / total) * 100);
+
     const modal = document.createElement('div');
     modal.id = 'quizIncompleteModal';
     modal.className = 'fixed inset-0 z-[200] flex items-center justify-center p-4';
+    modal.style.animation = 'fadeIn 200ms ease';
+
     modal.innerHTML = `
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="document.getElementById('quizIncompleteModal')?.remove()"></div>
-      <div class="relative z-10 glass-panel-solid rounded-3xl p-6 max-w-md w-full shadow-2xl">
-        <div class="flex items-start gap-4 mb-4">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
-            <i data-lucide="alert-triangle" class="w-6 h-6 text-white"></i>
+      <div class="absolute inset-0 bg-black/70 backdrop-blur-md" onclick="document.getElementById('quizIncompleteModal')?.remove()"></div>
+      <div class="relative z-10 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden" style="background:var(--bg-elev);animation:scaleIn 250ms cubic-bezier(0.34, 1.56, 0.64, 1);">
+        
+        <!-- Header dengan gradient warning -->
+        <div style="background:linear-gradient(135deg,#f59e0b 0%,#ea580c 50%,#dc2626 100%);padding:24px;text-align:center;position:relative;overflow:hidden;">
+          <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.15);pointer-events:none;"></div>
+          <div style="position:absolute;bottom:-40px;left:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.1);pointer-events:none;"></div>
+          
+          <div style="width:64px;height:64px;border-radius:20px;background:rgba(255,255,255,0.25);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;backdrop-filter:blur(8px);">
+            <i data-lucide="alert-triangle" style="width:32px;height:32px;color:#fff;"></i>
           </div>
-          <div class="flex-1">
-            <h3 class="font-bold text-lg dark:text-white">Soal Belum Lengkap</h3>
-            <p class="text-sm text-gray-500 mt-1">Anda harus menjawab semua soal sebelum mengirim</p>
-          </div>
+          <h3 style="font-size:1.25rem;font-weight:900;color:#fff;margin-bottom:4px;">Soal Belum Lengkap!</h3>
+          <p style="font-size:0.85rem;color:rgba(255,255,255,0.9);margin:0;">Anda harus menjawab semua soal sebelum mengirim</p>
         </div>
-        <div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-4">
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Progress Jawaban</span>
-            <span class="text-sm font-bold text-amber-800 dark:text-amber-300">${answered} / ${total}</span>
+
+        <!-- Body -->
+        <div style="padding:24px;">
+          
+          <!-- Progress -->
+          <div style="background:var(--bg-subtle);border-radius:16px;padding:16px;margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <span style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Progress Jawaban</span>
+              <span style="font-size:1rem;font-weight:900;color:var(--primary);">${answered} / ${total}</span>
+            </div>
+            <div style="height:10px;background:var(--bg-muted);border-radius:99px;overflow:hidden;position:relative;">
+              <div style="height:100%;width:${percent}%;background:linear-gradient(90deg,#10b981 0%,#14b8a6 50%,#06b6d4 100%);border-radius:99px;transition:width 400ms ease;box-shadow:0 0 12px rgba(16,185,129,0.5);"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:0.7rem;font-weight:700;color:var(--text-muted);">
+              <span>✓ Terjawab: <strong style="color:#059669;">${answered}</strong></span>
+              <span>✗ Belum: <strong style="color:#dc2626;">${total - answered}</strong></span>
+            </div>
           </div>
-          <div class="h-2 bg-amber-200 dark:bg-amber-900 rounded-full overflow-hidden">
-            <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500" style="width: ${(answered / total) * 100}%"></div>
+
+          <!-- Chip list soal belum dijawab -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:10px;">
+              🎯 Soal yang Belum Dijawab — Klik untuk Lompat
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;max-height:140px;overflow-y:auto;padding-right:4px;" class="custom-scroll">
+              ${unanswered.map(n => `
+                <button class="quiz-unanswered-chip" data-qidx="${n - 1}">
+                  <i data-lucide="arrow-right" style="width:11px;height:11px;display:inline-block;vertical-align:middle;margin-right:4px;"></i>
+                  Soal ${n}
+                </button>
+              `).join('')}
+            </div>
           </div>
-        </div>
-        <div class="mb-4">
-          <div class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Soal yang Belum Dijawab</div>
-          <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scroll">
-            ${unanswered.map(n => `
-              <button class="quiz-unanswered-chip" data-qidx="${n - 1}">
-                Soal ${n}
-              </button>
-            `).join('')}
+
+          <!-- Info -->
+          <div style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(139,92,246,0.08));border:1px solid rgba(99,102,241,0.2);border-left:4px solid #6366f1;border-radius:12px;padding:12px 14px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
+            <i data-lucide="info" style="width:18px;height:18px;color:#6366f1;flex-shrink:0;margin-top:2px;"></i>
+            <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5;">
+              Klik salah satu nomor di atas untuk langsung menuju soal tersebut, lalu jawab semua soal agar bisa dikirim.
+            </div>
           </div>
-        </div>
-        <div class="flex gap-2">
-          <button id="quizIncompleteOk" class="btn-primary-gradient w-full py-3 justify-center">
-            <i data-lucide="check" class="w-4 h-4 mr-2"></i> Mengerti
+
+          <!-- Tombol -->
+          <button id="quizIncompleteOk" class="btn-primary-gradient w-full py-3 justify-center" style="font-size:0.9rem;">
+            <i data-lucide="check-circle" class="w-5 h-5 mr-2"></i> Baik, Saya Akan Lengkapi
           </button>
+
         </div>
       </div>
     `;
