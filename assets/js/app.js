@@ -1748,10 +1748,10 @@ function renderDownloads() {
         </div>
         <div style="flex:1; min-width:0;">
           <span class="chip neutral" style="margin-bottom:6px;">${item.category}</span>
-          <h4 style="font-size:1rem; font-weight:800; line-height:1.3; margin-top:4px;">{escapeHtml(item.title)}</h4>
+          <h4 style="font-size:1rem; font-weight:800; line-height:1.3; margin-top:4px;">${escapeHtml(item.title)}</h4>
         </div>
       </div>
-      <p style="font-size:0.83rem; color:var(--text-tertiary); line-height:1.55; flex:1; margin-bottom:16px;">{escapeHtml(item.desc)}</p>
+      <p style="font-size:0.83rem; color:var(--text-tertiary); line-height:1.55; flex:1; margin-bottom:16px;">${escapeHtml(item.desc)}</p>
       <a href="${escapeHtml(item.link)}" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="text-decoration:none;">
         Download <i data-lucide="download-cloud"></i>
       </a>
