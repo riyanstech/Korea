@@ -701,6 +701,16 @@ KR.ai = (function () {
   }
 
   function resetChat() {
+    // ✅ TAMBAHKAN: hentikan voice recording kalau sedang jalan
+    if (isRecording && recognition) {
+      try { recognition.stop(); } catch {}
+      isRecording = false;
+      const btn = els.actionBtn;
+      if (btn) {
+        btn.classList.remove('chat-recording');
+        btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+      }
+    }
     chatHistory = [];
     const mode = document.getElementById('chat-mode-select')?.value || 'tutor';
     const cfg = getAIConfig();
@@ -787,6 +797,28 @@ KR.ai = (function () {
     }
 
     addTypingIndicator();
+     
+    // ✅ TAMBAHKAN: Batasi history + bersihkan gambar lama
+    if (chatHistory.length > 20) {
+      chatHistory = chatHistory.slice(-20);
+      // Pastikan pesan pertama adalah user (Gemini & Anthropic butuh ini)
+      while (chatHistory.length > 0 && chatHistory[0].role !== 'user') {
+        chatHistory.shift();
+      }
+    }
+    // Hapus gambar dari pesan lama (agar tidak dikirim terus-menerus)
+    chatHistory.forEach((msg, idx) => {
+      if (typeof msg.content === 'object' && msg.content.imageBase64) {
+        // Simpan 1 gambar terakhir saja, sisanya ganti dengan placeholder
+        const isLatestImage = idx === chatHistory.length - 1;
+        if (!isLatestImage) {
+          msg.content = {
+            text: (msg.content.text || '') + ' [gambar sebelumnya]',
+            imageBase64: null,
+          };
+        }
+      }
+    });
 
     const userMsg = {
       role: 'user',
@@ -837,10 +869,17 @@ KR.ai = (function () {
   async function callGemini(endpoint, apiKey, systemPrompt, messages) {
     const contents = messages.map(m => {
       const role = m.role === 'assistant' ? 'model' : 'user';
+      // ✅ GANTI: cek imageBase64 valid
       if (typeof m.content === 'object' && m.content.imageBase64) {
         const base64 = m.content.imageBase64.split(',')[1];
         return { role, parts: [{ text: m.content.text || '' }, { inlineData: { mimeType: 'image/jpeg', data: base64 } }] };
       }
+      // ✅ TAMBAHKAN: kalau imageBase64 null, kirim text saja
+      if (typeof m.content === 'object') {
+        return { role, parts: [{ text: m.content.text || '' }] };
+      }
+      return { role, parts: [{ text: String(m.content) }] };
+    });
       return { role, parts: [{ text: String(m.content) }] };
     });
 
@@ -866,7 +905,9 @@ KR.ai = (function () {
   }
 
   async function callOpenAICompatible(endpoint, apiKey, model, systemPrompt, messages) {
+
     const converted = messages.map(m => {
+      // ✅ GANTI: cek imageBase64 valid
       if (typeof m.content === 'object' && m.content.imageBase64) {
         return {
           role: m.role,
@@ -875,6 +916,10 @@ KR.ai = (function () {
             { type: 'image_url', image_url: { url: m.content.imageBase64 } },
           ],
         };
+      }
+      // ✅ TAMBAHKAN:
+      if (typeof m.content === 'object') {
+        return { role: m.role, content: String(m.content.text || '') };
       }
       return { role: m.role, content: String(m.content) };
     });
@@ -889,7 +934,8 @@ KR.ai = (function () {
 
     let res;
     try {
-      res = await fetch(endpoint, {
+      // ✅ GANTI INI:
+      res = await fetchWithTimeout(endpoint, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -898,7 +944,7 @@ KR.ai = (function () {
           temperature: 0.7,
           max_tokens: 2048,
         }),
-      });
+      }, 30000);  // ← 30 detik timeout
     } catch (networkErr) {
       console.error('[Network Error - OpenAI-compat]', networkErr);
       throw new Error('Tidak bisa menghubungi server. Cek: (1) koneksi internet, (2) API Key, (3) provider diblokir ISP/region.');
@@ -911,6 +957,7 @@ KR.ai = (function () {
 
   async function callAnthropic(endpoint, apiKey, model, systemPrompt, messages) {
     const converted = messages.map(m => {
+      // ✅ GANTI: cek imageBase64 valid
       if (typeof m.content === 'object' && m.content.imageBase64) {
         const base64 = m.content.imageBase64.split(',')[1];
         return {
@@ -921,12 +968,17 @@ KR.ai = (function () {
           ],
         };
       }
+      // ✅ TAMBAHKAN:
+      if (typeof m.content === 'object') {
+        return { role: m.role, content: [{ type: 'text', text: String(m.content.text || '') }] };
+      }
       return { role: m.role, content: [{ type: 'text', text: String(m.content) }] };
     });
 
     let res;
     try {
-      res = await fetch(endpoint, {
+      // ✅ GANTI INI:
+      res = await fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -935,7 +987,7 @@ KR.ai = (function () {
           'anthropic-dangerous-direct-browser-access': 'true',
         },
         body: JSON.stringify({ model, max_tokens: 2048, system: systemPrompt, messages: converted }),
-      });
+      }, 30000);
     } catch (networkErr) {
       console.error('[Network Error - Anthropic]', networkErr);
       throw new Error('Tidak bisa menghubungi Anthropic. Cek: (1) koneksi internet, (2) API Key, (3) provider diblokir ISP/region.');
@@ -980,6 +1032,14 @@ KR.ai = (function () {
         btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
         if (window.lucide) lucide.createIcons();
       };
+      // ✅ TAMBAHKAN INI:
+      recognition.onend = () => {
+        isRecording = false;
+        btn.classList.remove('chat-recording');
+        btn.innerHTML = '<i data-lucide="mic" class="w-5 h-5"></i>';
+        if (window.lucide) lucide.createIcons();
+      };
+       
       recognition.start();
     }
     if (window.lucide) lucide.createIcons();
@@ -1237,7 +1297,7 @@ async function callAIDirect(cfg, systemPrompt, messages) {
   if (provider.format === 'anthropic') {
     let res;
     try {
-      res = await fetch(endpoint, {
+      res = await fetchWithTimeout(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1270,7 +1330,7 @@ async function callAIDirect(cfg, systemPrompt, messages) {
   }
   let res;
   try {
-    res = await fetch(endpoint, {
+    res = await fetchWithTimeout(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify({
