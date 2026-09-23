@@ -51,61 +51,6 @@
                     </div>
                 </div>
             </div>
-            <!-- Drawer Backdrop -->
-            <div id="mobile-menu-backdrop" class="mobile-menu-backdrop" onclick="toggleMenu()"></div>
-            
-            <!-- Mobile Drawer (dari kiri) -->
-            <div id="mobile-menu" class="mobile-drawer">
-                <div class="mobile-drawer-header">
-                    <div class="flex items-center gap-3">
-                        <div class="logo-box" style="width:40px;height:40px;">
-                            <i data-lucide="book-open" class="w-5 h-5 text-white"></i>
-                        </div>
-                        <div class="leading-tight">
-                            <h1 class="brand-title" style="font-size:1.1rem;">KR-Dict</h1>
-                            <p class="brand-sub" style="font-size:0.55rem;">STUDY HUB</p>
-                        </div>
-                    </div>
-                    <button onclick="toggleMenu()" class="mobile-drawer-close" aria-label="Tutup menu">
-                        <i data-lucide="x"></i>
-                    </button>
-                </div>
-                <nav class="mobile-drawer-nav">
-                    <div class="mobile-drawer-section-label">Menu Utama</div>
-                    <button class="nav-link-mobile active" onclick="showTab('vocab-container', this)">
-                        <i data-lucide="book-open-text"></i>
-                        <div><span>Kosakata</span><small>Textbook 2024</small></div>
-                    </button>
-                    <button class="nav-link-mobile" onclick="showTab('hangeul', this)">
-                        <i data-lucide="scan"></i>
-                        <div><span>Hangeul</span><small>Pelafalan & huruf</small></div>
-                    </button>
-                    <button class="nav-link-mobile" onclick="showTab('grammar', this)">
-                        <i data-lucide="sparkles"></i>
-                        <div><span>Tata Bahasa</span><small>Pola & contoh</small></div>
-                    </button>
-                    <button class="nav-link-mobile" onclick="showTab('culture', this)">
-                        <i data-lucide="globe-2"></i>
-                        <div><span>Budaya & Info</span><small>Korea sehari-hari</small></div>
-                    </button>
-                    <div class="mobile-drawer-section-label">Pembelajaran</div>
-                    <button class="nav-link-mobile" onclick="showTab('downloads', this)">
-                        <i data-lucide="cloud-download"></i>
-                        <div><span>Pustaka Materi</span><small>PDF & audio</small></div>
-                    </button>
-                    <button class="nav-link-mobile" onclick="showTab('quiz-hub', this)">
-                        <i data-lucide="pencil-ruler"></i>
-                        <div><span>Latihan Soal</span><small>Reading & Listening</small></div>
-                    </button>
-                    <button class="nav-link-mobile ai-mobile" onclick="showTab('chat-ai', this)">
-                        <i data-lucide="bot"></i>
-                        <div><span>AI Tutor</span><small>Chat praktik Korea</small></div>
-                    </button>
-                </nav>
-                <div class="mobile-drawer-footer">
-                    <div class="mobile-drawer-version">KR-Dict · v1.0</div>
-                </div>
-            </div>
         </header>
         <!-- ⬇️ DRAWER DIPINDAH KE SINI — DI LUAR <header> ⬇️ -->
         <div id="mobile-menu-backdrop" class="mobile-menu-backdrop" onclick="toggleMenu()"></div>
