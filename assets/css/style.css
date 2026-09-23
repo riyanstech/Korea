@@ -137,6 +137,7 @@ h1, h2, h3, h4, h5 { font-weight: 700; line-height: 1.2; margin: 0; color: var(-
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  isolation: isolate; /* ⬅️ TAMBAHKAN: cegah stacking context bocor */
 }
 .dark .app-header {
   background: rgba(11, 18, 32, 0.72);
