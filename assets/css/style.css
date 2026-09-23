@@ -3078,8 +3078,34 @@ select.chat-settings-input {
 }
 
 /* ============================================================
-   END OF FILE
+   MOBILE DRAWER — FIXED (paksa full screen)
    ============================================================ */
+.mobile-menu-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9998 !important;
+}
+
+.mobile-drawer {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: 0 !important;
+  width: 300px !important;
+  max-width: 84vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+}
+
+@media (min-width: 768px) {
+  .mobile-drawer, .mobile-menu-backdrop { display: none !important; }
+}
 
 /* ============================================================
    END OF FILE
