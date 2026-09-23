@@ -905,9 +905,7 @@ KR.ai = (function () {
   }
 
   async function callOpenAICompatible(endpoint, apiKey, model, systemPrompt, messages) {
-
     const converted = messages.map(m => {
-      // ✅ GANTI: cek imageBase64 valid
       if (typeof m.content === 'object' && m.content.imageBase64) {
         return {
           role: m.role,
@@ -916,10 +914,6 @@ KR.ai = (function () {
             { type: 'image_url', image_url: { url: m.content.imageBase64 } },
           ],
         };
-      }
-      // ✅ TAMBAHKAN:
-      if (typeof m.content === 'object') {
-        return { role: m.role, content: String(m.content.text || '') };
       }
       return { role: m.role, content: String(m.content) };
     });
