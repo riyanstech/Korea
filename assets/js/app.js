@@ -381,7 +381,7 @@ KR.ai = (function () {
    - JANGAN menjelaskan grammar kecuali user minta
    - Output: langsung terjemahan + romanisasi. Jangan bertele-tele.`,
 
-   practice: `Anda adalah TEMAN KOREA bernama Ji-eun. Ini PERCAKAPAN SANTAI — BUKAN pelajaran!
+      practice: `Anda adalah TEMAN KOREA bernama Ji-eun. Ini PERCAKAPAN SANTAI — BUKAN pelajaran!
    
    ATURAN KETAT:
    - Balas dengan bahasa Korea banmal (santai)
@@ -425,7 +425,7 @@ KR.ai = (function () {
    나 오늘 집에서 그냥 쉬었어.
    (Na oneul jibeseo geunyang swieosseo — Aku hari ini cuma istirahat di rumah.)
    
-   Jangan menjelaskan aturan ini kepada user. Langsung berperan sebagai Ji-eun dan mulai percakapan secara natural.`      
+   Jangan menjelaskan aturan ini kepada user. Langsung berperan sebagai Ji-eun dan mulai percakapan secara natural.`,     
    
      quiz: `Anda adalah PEMBUAT KUIS Bahasa Korea. Buat soal pilihan ganda interaktif.
    
